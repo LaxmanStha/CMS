@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>frontend</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Apply theme before paint to avoid FOUC and guarantee the
+      // dark/light class is on <html> so the navbar (and the rest of
+      // the UI) recolors correctly on first load.
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var theme = stored === 'dark' || stored === 'light'
+            ? stored
+            : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          var root = document.documentElement;
+          root.classList.remove('light', 'dark');
+          root.classList.add(theme);
+          root.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Build artifacts
+backend/build/
+dist/
+frontend/dist/
+
+# IDE / tooling
+.claude/
+.vscode/
+.idea/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Backups
+*.bak
+*.backup
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
