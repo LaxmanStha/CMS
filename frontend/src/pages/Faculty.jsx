@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -19,7 +19,7 @@ const columns = [
   { key: 'id', header: 'Faculty ID', width: '100px', render: (val) => val != null ? `FAC${String(val).padStart(3, '0')}` : '-' },
   { key: 'name', header: 'Name', render: (val, row) => (
     <div className="flex items-center gap-3">
-      <div className="avatar avatar-sm bg-secondary/10 text-secondary">{getInitials(row.name || '?')}</div>
+      <div className="avatar avatar-sm bg-primary/10 text-primary">{getInitials(row.name || '?')}</div>
       <div>
         <p className="font-medium text-text-primary">{row.name}</p>
         <p className="text-xs text-text-secondary">{row.email}</p>
@@ -27,7 +27,7 @@ const columns = [
     </div>
   )},
   { key: 'department', header: 'Department', width: '150px', render: (val) => val || '-' },
-  { key: 'title', header: 'Title', width: '160px', render: (val) => val || '-' },
+  { key: 'phone', header: 'Phone', width: '140px', render: (val) => val || '-' },
   { key: 'status', header: 'Status', width: '120px', render: (val) => {
     const status = val || 'active';
     return (
@@ -36,7 +36,7 @@ const columns = [
       </Badge>
     );
   }},
-  { key: 'courses', header: 'Courses', width: '80px', align: 'center', render: (val) => val ?? 0 },
+  { key: 'password', header: 'Password', width: '120px', render: (val) => val || '-' },
   { key: 'hireDate', header: 'Hired', width: '120px', render: (val) => formatDate(val) },
 ];
 
@@ -53,7 +53,7 @@ const Faculty = () => {
   const [editingFaculty, setEditingFaculty] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', department: '', title: '', status: 'active', hireDate: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', department: '', status: 'active', hireDate: '', password: '' });
 
   const fetchFaculty = async () => {
     try {
@@ -92,13 +92,13 @@ const Faculty = () => {
         email: f.email || '',
         phone: f.phone || '',
         department: f.department || '',
-        title: f.title || '',
         status: f.status || 'active',
         hireDate: f.hireDate || '',
+        password: '', // never pre-fill password for security
       });
     } else {
       setEditingFaculty(null);
-      setFormData({ name: '', email: '', phone: '', department: '', title: '', status: 'active', hireDate: '' });
+      setFormData({ name: '', email: '', phone: '', department: '', status: 'active', hireDate: '', password: '' });
     }
     setShowModal(true);
   };
@@ -112,7 +112,6 @@ const Faculty = () => {
         email: formData.email,
         phone: formData.phone,
         department: formData.department,
-        title: formData.title,
         status: formData.status,
         hireDate: formData.hireDate,
       };
@@ -120,6 +119,7 @@ const Faculty = () => {
         await api.put(`/faculty/${editingFaculty.id}`, payload);
         success('Faculty updated successfully');
       } else {
+        payload.password = formData.password;
         await api.post('/faculty', payload);
         success('Faculty added successfully');
       }
@@ -197,12 +197,9 @@ const Faculty = () => {
             pageSize={10}
             loading={loading}
             rowActions={isAdmin ? [
-              { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: handleOpenModal, variant: 'primary' },
               { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: handleOpenModal, variant: 'ghost' },
               { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: handleDelete, variant: 'danger' },
-            ] : [
-              { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: handleOpenModal, variant: 'primary' },
-            ]}
+            ] : []}
             emptyMessage={'No faculty members found'}
           />
         </Card.Content>
@@ -215,8 +212,9 @@ const Faculty = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input label="Full Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="Dr. John Smith" required />
             <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="prof@college.edu" required />
+            <Input label="Password" type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="Set initial password" />
             <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="+1-555-0000" />
-            <select className="input" value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} required>
+            <select className="select-themed" value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} required>
               <option value="">Select Department</option>
               {departments.map(d => <option key={d} value={d}>{d}</option>)}
               <option value="Computer Science">Computer Science</option>
@@ -226,8 +224,7 @@ const Faculty = () => {
               <option value="Physics">Physics</option>
               <option value="Psychology">Psychology</option>
             </select>
-            <Input label="Title" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} placeholder="Professor" required />
-            <select className="input" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
+            <select className="select-themed" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
               {STATUSES.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
             </select>
             <Input label="Hire Date" type="date" value={formData.hireDate} onChange={(e) => setFormData({...formData, hireDate: e.target.value})} />
@@ -245,3 +242,4 @@ const Faculty = () => {
 };
 
 export default Faculty;
+

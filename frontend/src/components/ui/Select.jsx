@@ -102,17 +102,17 @@ const Select = ({
                   return option && (
                     <span key={v} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-primary/10 text-primary text-xs">
                       {option.label}
-                      <button
-                        type="button"
+                      <span
+                        role="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleSelect(option);
                         }}
-                        className="p-0.5 rounded hover:bg-primary/20"
+                        className="p-0.5 rounded hover:bg-primary/20 cursor-pointer"
                         tabIndex={-1}
                       >
                         <X className="w-3 h-3" />
-                      </button>
+                      </span>
                     </span>
                   );
                 })}
@@ -135,14 +135,14 @@ const Select = ({
                 />
               )}
               {clearable && value && (
-                <button
-                  type="button"
+                <span
+                  role="button"
                   onClick={handleClear}
-                  className="p-1 rounded-lg hover:bg-hover text-text-secondary transition-colors"
+                  className="p-1 rounded-lg hover:bg-hover text-text-secondary transition-colors cursor-pointer"
                   tabIndex={-1}
                 >
                   <X className="w-4 h-4" />
-                </button>
+                </span>
               )}
               {isOpen ? (
                 <ChevronUp className="w-5 h-5 text-text-secondary transition-transform" />

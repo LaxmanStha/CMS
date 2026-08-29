@@ -38,7 +38,7 @@ const AccountantInvoices = () => {
 
   const statusColors = {
     Paid: 'bg-success',
-    Pending: 'bg-warning text-dark',
+    Pending: 'bg-warning',
     Overdue: 'bg-danger',
     Cancelled: 'bg-secondary'
   };

@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/AuthContext';
 import { Navigate, Outlet } from 'react-router-dom';
+import { ROLE_HOME } from '@/config/navigation';
 
 export function PrivateRoute({ allowedRoles }) {
   const { user, loading } = useAuth();
@@ -20,7 +21,7 @@ export function PrivateRoute({ allowedRoles }) {
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={ROLE_HOME[user.role] || '/dashboard'} replace />;
   }
 
   return <Outlet />;

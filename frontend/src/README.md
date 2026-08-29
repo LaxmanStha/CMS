@@ -5,7 +5,8 @@ This is the React frontend for the College Management System.
 ## Features
 - Role-based authentication (Student, Faculty, Admin, Accountant)
 - Protected routes based on user role
-- Dashboard pages that fetch data from the backend API (with fallback to mock data for development)
+- Dashboard pages that fetch live data from the backend API via React Query (TanStack Query), with loading skeletons and error/retry states
+- Data fetching via React Query with caching, loading and error states
 - Bootstrap styling
 - Axios for HTTP requests
 
@@ -16,7 +17,7 @@ This is the React frontend for the College Management System.
 
 ## API Integration
 The frontend communicates with a C++ backend running on `http://localhost:8080/api`.
-If the backend is not available, the frontend will fall back to mock data to allow development to continue.
+If the backend is unavailable, dashboards show a real error state with a Retry button — they do NOT fall back to mock data.
 
 ## Project Structure
 - `src/components/layout/Navbar.jsx` - Role-based navigation bar
@@ -31,5 +32,5 @@ If the backend is not available, the frontend will fall back to mock data to all
 
 ## Notes
 - The login form accepts any credentials; the backend should validate them.
-- In development, if the backend is not running, mock data is used.
+- In development, if the backend is not running, dashboards show an error state with a Retry action instead of mock data.
 - To use real data, ensure the backend server is running on `http://localhost:8080`.

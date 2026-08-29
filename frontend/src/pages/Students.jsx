@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
-  Search, UserPlus, Edit, Trash2, Eye,
+  Search, UserPlus, Edit, Trash2,
   Loader2, RefreshCw
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
@@ -13,34 +13,10 @@ import { cn, formatDate, getInitials } from '@/lib/utils';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
-import { useApiData } from '@/hooks/useApiData';
+import StatusDropdown from '@/components/ui/StatusDropdown';
+import Dropdown from '@/components/ui/Dropdown';
 
-const STATUSES = ['active', 'inactive', 'pending'];
-
-const columns = [
-  { key: 'id', header: 'Student ID', width: '100px', render: (val) => val != null ? `STU${String(val).padStart(3, '0')}` : '-' },
-  { key: 'name', header: 'Name', render: (val, row) => (
-    <div className="flex items-center gap-3">
-      <div className="avatar avatar-sm bg-primary/10 text-primary">{getInitials(row.name || '?')}</div>
-      <div>
-        <p className="font-medium text-text-primary">{row.name}</p>
-        <p className="text-xs text-text-secondary">{row.email}</p>
-      </div>
-    </div>
-  )},
-  { key: 'program', header: 'Program', width: '180px', render: (val) => val || '-' },
-  { key: 'year', header: 'Year', width: '80px', render: (val) => val ? `Year ${val}` : '-' },
-  { key: 'status', header: 'Status', width: '120px', render: (val) => {
-    const status = val || 'active';
-    return (
-      <Badge variant={status === 'active' ? 'success' : status === 'pending' ? 'warning' : 'default'}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-    );
-  }},
-  { key: 'gpa', header: 'GPA', width: '80px', render: (val) => (val != null && val > 0) ? Number(val).toFixed(1) : 'N/A' },
-  { key: 'enrollment', header: 'Enrolled', width: '130px', render: (val) => formatDate(val) },
-];
+const STATUSES = ['active', 'inactive', 'pending', 'graduated'];
 
 const Students = () => {
   const { success, error: showError } = useToast();
@@ -49,6 +25,56 @@ const Students = () => {
   const showErrorRef = useRef(showError);
   showErrorRef.current = showError;
   const [students, setStudents] = useState([]);
+  const [revealed, setRevealed] = useState({});
+
+  const toggleReveal = (id) => setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const baseColumns = [
+    { key: 'id', header: 'Student ID', width: '100px', render: (val) => val != null ? `STU${String(val).padStart(3, '0')}` : '-' },
+    { key: 'name', header: 'Name', render: (val, row) => (
+      <div className="flex items-center gap-3">
+        <div className="avatar avatar-sm bg-primary/10 text-primary">{getInitials(row.name || '?')}</div>
+        <div>
+          <p className="font-medium text-text-primary">{row.name}</p>
+          <p className="text-xs text-text-secondary">{row.email}</p>
+        </div>
+      </div>
+    )},
+    { key: 'program', header: 'Department', width: '180px', render: (val) => val || '-' },
+    { key: 'phone', header: 'Phone', width: '140px', render: (val) => val || '-' },
+    { key: 'classroom', header: 'Classroom', width: '120px', render: (val, row) => (val || row?.section || '-') },
+    { key: 'year', header: 'Semester', width: '80px', render: (val) => val ? `Semester ${val}` : '-' },
+    { key: 'status', header: 'Status', width: '120px', render: (val) => {
+      const status = val || 'active';
+      return (
+        <Badge variant={status === 'active' ? 'success' : status === 'graduated' ? 'info' : status === 'pending' ? 'warning' : 'default'}>
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </Badge>
+      );
+    }},
+  ];
+
+  const passwordColumn = {
+    key: 'password',
+    header: 'Password',
+    width: '160px',
+    render: (val, row) => (
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-sm">{revealed[row.id] ? (row.password || '—') : '••••••'}</span>
+        {row.password && (
+          <button
+            type="button"
+            className="text-xs text-primary hover:underline"
+            onClick={() => toggleReveal(row.id)}
+          >
+            {revealed[row.id] ? 'Hide' : 'Show'}
+          </button>
+        )}
+      </div>
+    ),
+  };
+
+  const columns = isAdmin ? [...baseColumns, passwordColumn] : baseColumns;
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,8 +84,7 @@ const Students = () => {
   const [editingStudent, setEditingStudent] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', program: '', year: 1, status: 'active', gpa: 0, cgpa: 0, advisor: '' });
-  const { data: faculty } = useApiData('/faculty');
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '', program: '', section: '', classroom: '', year: 1, status: 'active' });
 
   const fetchStudents = useCallback(async () => {
     try {
@@ -99,17 +124,17 @@ const Students = () => {
       setFormData({
         name: student.name || '',
         email: student.email || '',
+        password: '', // never pre-fill password for security
         phone: student.phone || '',
         program: student.program || '',
+        section: student.section || '',
+        classroom: student.classroom || '',
         year: student.year || 1,
         status: student.status || 'active',
-        gpa: student.gpa || 0,
-        cgpa: student.cgpa || 0,
-        advisor: student.advisor || '',
       });
     } else {
       setEditingStudent(null);
-      setFormData({ name: '', email: '', phone: '', program: '', year: 1, status: 'active', gpa: 0, cgpa: 0, advisor: '' });
+      setFormData({ name: '', email: '', password: '', phone: '', program: '', section: '', classroom: '', year: 1, status: 'active' });
     }
     setShowModal(true);
   };
@@ -121,13 +146,13 @@ const Students = () => {
       const payload = {
         name: formData.name,
         email: formData.email,
+        password: formData.password, // send even if empty; backend handles fallback
         phone: formData.phone,
         program: formData.program,
+        section: formData.classroom,
+        classroom: formData.classroom,
         year: Number(formData.year),
         status: formData.status,
-        gpa: Number(formData.gpa),
-        cgpa: Number(formData.cgpa),
-        advisor: formData.advisor || null,
       };
       if (editingStudent) {
         await api.put(`/students/${editingStudent.id}`, payload);
@@ -191,22 +216,8 @@ const Students = () => {
                 className="input pl-10"
               />
             </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="input w-auto min-w-[150px]"
-            >
-              <option value="">All Status</option>
-              {STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-            </select>
-            <select
-              value={programFilter}
-              onChange={(e) => setProgramFilter(e.target.value)}
-              className="input w-auto min-w-[180px]"
-            >
-              <option value="">All Programs</option>
-              {programs.map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
+            <StatusDropdown value={statusFilter} onChange={setStatusFilter} options={STATUSES} />
+            <Dropdown value={programFilter} onChange={setProgramFilter} options={programs} placeholder="All Programs" />
           </div>
           <div className="flex items-center gap-2">
           </div>
@@ -235,11 +246,9 @@ const Students = () => {
             paginated
             pageSize={10}
             rowActions={isAdmin ? [
-              { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: (row) => handleOpenModal(row), variant: 'primary' },
               { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: (row) => handleOpenModal(row), variant: 'ghost' },
               { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: handleDelete, variant: 'danger' },
             ] : [
-              { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: (row) => handleOpenModal(row), variant: 'primary' },
             ]}
             emptyMessage="No students found matching your criteria"
           />
@@ -265,34 +274,26 @@ const Students = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input label="Full Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
             <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} required />
+            <Input label="Password" type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="Login password (optional)" />
             <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
             <select
               value={formData.program}
               onChange={(e) => setFormData({...formData, program: e.target.value})}
-              className="input"
+              className="select-themed"
               required
             >
-              <option value="">Select Program</option>
+              <option value="">Select Department</option>
               {programs.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
-            <Input label="Year" type="number" value={formData.year} onChange={(e) => setFormData({...formData, year: parseInt(e.target.value) || 1})} min={1} max={5} required />
+            <Input label="Semester" type="number" value={formData.year} onChange={(e) => setFormData({...formData, year: parseInt(e.target.value) || 1})} min={1} max={5} required />
+            <Input label="Classroom (Room No)" value={formData.classroom} onChange={(e) => setFormData({...formData, classroom: e.target.value})} placeholder="e.g. CR-201" />
             <select
               value={formData.status}
               onChange={(e) => setFormData({...formData, status: e.target.value})}
-              className="input"
+              className="select-themed"
               required
             >
               {STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-            </select>
-            <Input label="GPA" type="number" step="0.1" value={formData.gpa} onChange={(e) => setFormData({...formData, gpa: e.target.value})} />
-            <Input label="CGPA" type="number" step="0.1" value={formData.cgpa} onChange={(e) => setFormData({...formData, cgpa: e.target.value})} />
-            <select
-              value={formData.advisor}
-              onChange={(e) => setFormData({...formData, advisor: e.target.value})}
-              className="input"
-            >
-              <option value="">Select Faculty Advisor</option>
-              {faculty.map(f => <option key={f.id} value={f.name}>{f.name} ({f.department || 'Faculty'})</option>)}
             </select>
           </div>
         </form>

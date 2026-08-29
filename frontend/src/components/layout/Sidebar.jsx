@@ -1,178 +1,152 @@
-import { useState, useEffect } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+﻿import { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Users, UserCheck, BookOpen, Calendar, Clock, 
-  FileText, DollarSign, BarChart3, Settings, LogOut, GraduationCap,
-  Grid, X
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  CalendarCheck,
+  FileText,
+  CalendarDays,
+  Building2,
+  School,
+  Wallet,
+  BarChart3,
+  Settings,
+  ClipboardEdit,
+  LogOut,
+  X,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
+import { ROLE_NAV } from '@/config/navigation';
+import { cn } from '@/lib/utils';
 
-const menuItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/students', label: 'Students', icon: Users },
-  { to: '/faculty-list', label: 'Faculty', icon: UserCheck },
-  { to: '/courses', label: 'Courses', icon: BookOpen },
-  { to: '/enrollment', label: 'Enrollment', icon: Calendar },
-  { to: '/attendance', label: 'Attendance', icon: Clock },
-  { to: '/exams', label: 'Exams', icon: FileText },
-  { to: '/timetable', label: 'Timetable', icon: Grid },
-  { to: '/fees', label: 'Fees', icon: DollarSign },
-  { to: '/reports', label: 'Reports', icon: BarChart3 },
-  { to: '/settings', label: 'Settings', icon: Settings },
-];
+const LABEL_ICONS = {
+  Dashboard: LayoutDashboard,
+  Students: Users,
+  Faculty: GraduationCap,
+  Attendance: CalendarCheck,
+  Exams: FileText,
+  Timetable: CalendarDays,
+  Departments: Building2,
+  Courses: Building2,
+  Classrooms: School,
+  Fees: Wallet,
+  Reports: BarChart3,
+  Settings: Settings,
+  Grading: ClipboardEdit,
+  Schedule: CalendarDays,
+};
 
-const Sidebar = ({ 
-  collapsed = false, 
-  onHover,
-  className,
-  mobileOpen = false,
-  onCloseMobile,
-}) => {
-  const location = useLocation();
-  const { logout } = useAuth();
-  const [hoveredItem, setHoveredItem] = useState(null);
-
-  const handleKeyDown = (e, to) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      if (onCloseMobile) onCloseMobile();
-    }
-  };
-
+const Sidebar = ({ open = false, onClose }) => {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const items = ROLE_NAV[user?.role] || [];
+  // On desktop the rail expands on hover and collapses on mouse leave.
+  const [hovered, setHovered] = useState(false);
+
   const handleLogout = () => {
-    onCloseMobile?.();
     logout();
     navigate('/login');
   };
 
   return (
     <>
-      {mobileOpen && (
+      {/* Mobile overlay */}
+      {open && (
         <div
-          className="sidebar-overlay fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={onCloseMobile}
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          onClick={onClose}
           aria-hidden="true"
         />
       )}
 
       <aside
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         className={cn(
-          'sidebar fixed top-0 left-0 h-full bg-sidebar z-50 transition-all duration-300 ease-out flex flex-col',
-          collapsed ? 'w-18 lg:w-18' : 'w-70 lg:w-70',
-          mobileOpen && 'lg:hidden translate-x-0',
-          !mobileOpen && 'hidden lg:block',
-          className
+          'fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0F172A] text-slate-300 transition-[width,transform] duration-300 lg:sticky lg:top-0 lg:bottom-auto lg:h-screen lg:self-start lg:translate-x-0',
+          'w-[280px]',
+          hovered ? 'lg:!w-[280px]' : 'lg:w-[80px]',
+          open ? 'translate-x-0' : '-translate-x-full'
         )}
-        role="navigation"
-        aria-label="Main navigation"
-        onMouseEnter={() => onHover?.(true)}
-        onMouseLeave={() => onHover?.(false)}
       >
-        <div className={cn(
-          'flex items-center h-18 px-4 border-b border-white/10 gap-2',
-          collapsed ? 'flex-col justify-center' : 'justify-between'
-        )}>
-          <div className={cn('flex items-center gap-3 transition-all duration-300', collapsed && 'justify-center')}>
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
-              <GraduationCap className="w-6 h-6 text-white" />
+        {/* Logo */}
+        <div
+          className={cn(
+            'flex h-[72px] flex-shrink-0 items-center justify-between gap-3 border-b border-white/10 px-6',
+            !hovered && 'lg:justify-center'
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary">
+              <GraduationCap className="h-5 w-5 text-white" />
             </div>
-            {!collapsed && (
-              <span className="font-bold text-lg text-text-primary whitespace-nowrap">RapidStack</span>
-            )}
+            <span className={cn('font-display text-lg font-bold text-white', !hovered && 'lg:hidden')}>
+              RapidStrik
+            </span>
           </div>
-
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"
+            aria-label="Close navigation"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Sidebar navigation">
-          {menuItems.map((item, index) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.to || 
-              (item.to !== '/dashboard' && location.pathname.startsWith(item.to));
-            
+        {/* Navigation */}
+        <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-5">
+          <p
+            className={cn(
+              'px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500',
+              !hovered && 'lg:hidden'
+            )}
+          >
+            Menu
+          </p>
+          {items.map((item) => {
+            const Icon = LABEL_ICONS[item.label] || LayoutDashboard;
             return (
               <NavLink
                 key={item.to}
                 to={item.to}
-                onMouseEnter={() => setHoveredItem(item.to)}
-                onMouseLeave={() => setHoveredItem(null)}
-                onKeyDown={(e) => handleKeyDown(e, item.to)}
-                className={({ isActive: active }) => cn(
-                  'sidebar-link relative group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-sidebar',
-                  active 
-                    ? 'sidebar-link-active shadow-lg shadow-primary/30' 
-                    : 'hover:bg-accent-blue-soft hover:text-accent-blue',
-                  collapsed && 'justify-center px-3'
-                )}
-                style={{ 
-                  transitionDelay: `${index * 30}ms`,
-                  animation: 'slideUp 0.4s ease-out forwards',
-                  opacity: 0
-                }}
-                aria-current={isActive ? 'page' : undefined}
-                title={collapsed ? item.label : undefined}
+                onClick={onClose}
+                title={!hovered ? item.label : undefined}
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                    !hovered && 'lg:justify-center lg:px-0',
+                    isActive
+                      ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                  )
+                }
               >
-                <span 
-                  className={cn(
-                    'sidebar-link-icon w-5 h-5 flex-shrink-0 transition-all duration-200',
-                    isActive && 'text-accent-blue',
-                    hoveredItem === item.to && 'animate-pulse'
-                  )}
-                >
-                  <Icon className="w-5 h-5" />
-                </span>
-                {!collapsed && (
-                  <span className="font-medium whitespace-nowrap transition-opacity duration-200">
-                    {item.label}
-                  </span>
-                )}
-                {isActive && !collapsed && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
-                )}
+                <Icon className="h-5 w-5 flex-shrink-0" />
+                <span className={cn('truncate', !hovered && 'lg:hidden')}>{item.label}</span>
               </NavLink>
             );
           })}
         </nav>
 
-        <div className="p-3 border-t border-white/10">
+        {/* Logout */}
+        <div className="flex-shrink-0 border-t border-white/10 p-4">
           <button
-            type="button"
             onClick={handleLogout}
+            title={!hovered ? 'Logout' : undefined}
             className={cn(
-              'w-full sidebar-link relative group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
-              'text-text-secondary hover:bg-danger/20 hover:text-danger',
-              collapsed && 'justify-center px-3'
+              'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-white/5 hover:text-white',
+              !hovered && 'lg:justify-center lg:px-0'
             )}
-            title={collapsed ? 'Logout' : undefined}
           >
-            <span className="sidebar-link-icon w-5 h-5 flex-shrink-0">
-              <LogOut className="w-5 h-5" />
-            </span>
-            {!collapsed && <span className="font-medium whitespace-nowrap">Logout</span>}
+            <LogOut className="h-5 w-5 flex-shrink-0" />
+            <span className={cn(!hovered && 'lg:hidden')}>Logout</span>
           </button>
         </div>
-
-        {!collapsed && (
-          <div className="p-4 mt-auto">
-            <div className="glass rounded-xl p-4">
-              <p className="text-xs text-text-secondary/70 uppercase tracking-wider mb-2">Version</p>
-              <p className="font-semibold text-text-primary">2.1.0</p>
-              <p className="text-xs text-text-secondary/70 mt-1">RapidStrik University</p>
-            </div>
-          </div>
-        )}
       </aside>
-
-      <style>{`
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </>
   );
 };
 
 export default Sidebar;
+

@@ -1,20 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 
 const EMPTY_FORM = {
   name: '',
   email: '',
   department: '',
+  phone: '',
   status: 'active',
+  password: '',
 };
 
 const AdminFaculty = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const [faculty, setFaculty] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
+  const [revealed, setRevealed] = useState({});
+
+  const toggleReveal = (id) =>
+    setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const revealAll = () => {
+    const next = {};
+    if (faculty.some((f) => !revealed[f.id])) faculty.forEach((f) => (next[f.id] = true));
+    setRevealed(next);
+  };
 
   const load = async () => {
     try {
@@ -30,6 +45,17 @@ const AdminFaculty = () => {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showModal]);
 
   const openModal = () => {
     setForm(EMPTY_FORM);
@@ -50,6 +76,7 @@ const AdminFaculty = () => {
     if (!form.name.trim()) next.name = 'Name is required.';
     if (!form.email.trim()) next.email = 'Email is required.';
     if (!form.department.trim()) next.department = 'Department is required.';
+    if (!form.password || form.password.length < 6) next.password = 'Password must be at least 6 characters.';
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -78,7 +105,14 @@ const AdminFaculty = () => {
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Manage Faculty</h2>
-        <button className="btn btn-primary" onClick={openModal}>Add Faculty</button>
+        <div>
+          <button className="btn btn-primary me-2" onClick={openModal}>Add Faculty</button>
+          {isAdmin && (
+            <button className="btn btn-outline-secondary" onClick={revealAll}>
+              {faculty.some((f) => !revealed[f.id]) ? 'Show All Passwords' : 'Hide All Passwords'}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="card">
@@ -94,14 +128,16 @@ const AdminFaculty = () => {
                   <th>Name</th>
                   <th>Email</th>
                   <th>Department</th>
+                  <th>Phone</th>
                   <th>Status</th>
+                  {isAdmin && <th>Password</th>}
                   <th>Actions</th>
-                </tr>
+                  </tr>
               </thead>
               <tbody>
                 {faculty.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center text-muted">
+                    <td colSpan={isAdmin ? 8 : 7} className="text-center text-muted">
                       {loading ? 'Loading...' : 'No faculty found.'}
                     </td>
                   </tr>
@@ -112,12 +148,25 @@ const AdminFaculty = () => {
                       <td>{f.name}</td>
                       <td>{f.email}</td>
                       <td>{f.department}</td>
-                      <td><span className={`badge bg-${f.status === 'active' ? 'success' : 'warning text-dark'}`}>{f.status}</span></td>
+                      <td>{f.phone}</td>
+                      <td><span className={`badge bg-${f.status === 'active' ? 'success' : 'warning'}`}>{f.status}</span></td>
+                      {isAdmin && (
+                        <td>
+                          <span className="me-1 font-monospace">{revealed[f.id] ? (f.password || '-') : '******'}</span>
+                          <button
+                            className="btn btn-sm btn-outline-secondary"
+                            onClick={() => toggleReveal(f.id)}
+                            disabled={!f.password}
+                          >
+                            {revealed[f.id] ? 'Hide' : 'Show'}
+                          </button>
+                        </td>
+                      )}
                       <td>
                         <button className="btn btn-sm btn-outline-primary me-1">Edit</button>
                         <button className="btn btn-sm btn-outline-danger">Delete</button>
                       </td>
-                    </tr>
+                  </tr>
                   ))
                 )}
               </tbody>
@@ -127,9 +176,9 @@ const AdminFaculty = () => {
       </div>
 
       {showModal && (
-        <div className="modal d-block" tabIndex={-1} style={{ background: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content bg-card">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4" tabIndex={-1}>
+          <div className="w-full max-w-lg">
+            <div className="modal-content bg-card max-h-[calc(100vh-2rem)] overflow-y-auto">
               <div className="modal-header">
                 <h5 className="modal-title">Add Faculty</h5>
                 <button type="button" className="btn-close" onClick={closeModal} aria-label="Close"></button>
@@ -176,6 +225,29 @@ const AdminFaculty = () => {
                     {errors.department && <div className="invalid-feedback">{errors.department}</div>}
                   </div>
                   <div className="mb-3">
+                    <label className="form-label">Phone</label>
+                    <input
+                      type="text"
+                      name="phone"
+                      className="form-control"
+                      value={form.phone}
+                      onChange={handleChange}
+                      placeholder="e.g. 555-1234"
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Password</label>
+                    <input
+                      type="password"
+                      name="password"
+                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                      value={form.password}
+                      onChange={handleChange}
+                      placeholder="Set initial password"
+                    />
+                    {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+                  </div>
+                  <div className="mb-3">
                     <label className="form-label">Status</label>
                     <select
                       name="status"
@@ -204,3 +276,4 @@ const AdminFaculty = () => {
 };
 
 export default AdminFaculty;
+

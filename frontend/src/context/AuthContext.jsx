@@ -17,7 +17,18 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        if (parsedUser && parsedUser.role && parsedUser.email) {
+          setUser(parsedUser);
+        } else {
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+        }
+      } catch {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
     }
     setLoading(false);
   }, []);
@@ -47,7 +58,7 @@ export function AuthProvider({ children }) {
       throw new Error(data?.message || 'Invalid email or password');
     } catch (err) {
       // Network/backend unavailable: fall back to local temporary records.
-      if (err.response && err.response.status && err.response.status !== 401) {
+      if (!err.response || (err.response.status && err.response.status !== 401)) {
         const userData = MOCK_USERS[role] || MOCK_USERS.student;
         if (normalizedEmail !== userData.email || password !== 'password123') {
           throw new Error('Invalid email or password');

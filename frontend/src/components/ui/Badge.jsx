@@ -9,11 +9,11 @@ const Badge = ({
   ...props 
 }) => {
   const variants = {
-    default: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+    default: 'bg-hover text-text-secondary',
     primary: 'bg-badge-blue text-primary dark:bg-primary/20 dark:text-primary-light',
     secondary: 'bg-badge-green text-secondary dark:bg-secondary/20 dark:text-secondary-light',
     success: 'bg-badge-green text-success dark:bg-success/20 dark:text-success-light',
-    warning: 'bg-badge-yellow text-accent dark:bg-accent/20 dark:text-accent-light',
+    warning: 'bg-badge-yellow text-warning dark:bg-accent/20 dark:text-accent-light',
     danger: 'bg-badge-red text-danger dark:bg-danger/20 dark:text-danger-light',
     info: 'bg-info/10 text-info dark:bg-info/20',
     outline: 'border border-border bg-transparent',

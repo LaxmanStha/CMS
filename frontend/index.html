@@ -4,24 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>RapidStrik — Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div id="root"></div>
     <script>
-      // Apply theme before paint to avoid FOUC and guarantee the
-      // dark/light class is on <html> so the navbar (and the rest of
-      // the UI) recolors correctly on first load.
+      // Apply the light theme before paint so the UI renders consistently
+      // on first load. Dark mode has been removed from the system.
       (function () {
         try {
-          var stored = localStorage.getItem('theme');
-          var theme = stored === 'dark' || stored === 'light'
-            ? stored
-            : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
           var root = document.documentElement;
           root.classList.remove('light', 'dark');
-          root.classList.add(theme);
-          root.setAttribute('data-theme', theme);
+          root.classList.add('light');
+          root.setAttribute('data-theme', 'light');
         } catch (e) {}
       })();
     </script>

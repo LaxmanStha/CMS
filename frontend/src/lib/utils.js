@@ -49,6 +49,21 @@ export function formatDateTime(date) {
   }).format(d);
 }
 
+export function relativeTime(timestamp) {
+  const diff = Date.now() - new Date(timestamp).getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 5) return 'just now';
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min} min ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} hour${hr > 1 ? 's' : ''} ago`;
+  const day = Math.floor(hr / 24);
+  if (day < 7) return `${day} day${day > 1 ? 's' : ''} ago`;
+  const wk = Math.floor(day / 7);
+  return `${wk} week${wk > 1 ? 's' : ''} ago`;
+}
+
 export function getInitials(name) {
   return name
     .split(' ')

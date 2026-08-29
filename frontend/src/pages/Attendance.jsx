@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Calendar, CheckCircle, XCircle, Clock, Plus, Search, Filter, Edit, Trash2, Eye, FileText, BarChart3, AlertTriangle, Info, Loader2 } from 'lucide-react';
+import { Calendar, CheckCircle, XCircle, Clock, Plus, Search, Filter, Edit, Trash2, FileText, BarChart3, AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -11,6 +11,8 @@ import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 import { useApiData } from '@/hooks/useApiData';
+import StatusDropdown from '@/components/ui/StatusDropdown';
+import Dropdown from '@/components/ui/Dropdown';
 
 const statusColors = { present: 'success', absent: 'danger', late: 'warning', excused: 'info' };
 
@@ -125,7 +127,6 @@ const Attendance = () => {
           <p className="text-text-secondary mt-1">Track and manage student attendance</p>
         </div>
         <div className="flex items-center gap-3">
-          <Input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-auto" />
           {isAdmin ? (
             <Button onClick={() => setShowModal(true)}><Plus className="w-4 h-4 mr-1" /> Mark Attendance</Button>
           ) : (
@@ -146,8 +147,8 @@ const Attendance = () => {
         <Card.Header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-col sm:flex-row gap-3 flex-1 flex-wrap">
             <div className="relative flex-1 min-w-[200px] max-w-xs"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" /><input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="input pl-10" /></div>
-            <select value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)} className="input w-auto min-w-[140px]"><option value="">All Courses</option>{courses.map(c => <option key={c} value={c}>{c}</option>)}</select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="input w-auto min-w-[140px]"><option value="">All Status</option>{statuses.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}</select>
+            <Dropdown value={courseFilter} onChange={setCourseFilter} options={courses} placeholder="All Courses" />
+            <StatusDropdown value={statusFilter} onChange={setStatusFilter} options={statuses} />
             <Input type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} className="w-auto min-w-[160px]" />
           </div>
         </Card.Header>
@@ -162,11 +163,9 @@ const Attendance = () => {
           ) : (
           <Table columns={columns} data={filteredAttendance} keyField="id" searchable={false} filterable={false} paginated pageSize={10}
             rowActions={isAdmin ? [
-              { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: (r) => { handleOpenModal(r); }, variant: 'primary' },
               { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: (r) => { handleOpenModal(r); }, variant: 'ghost' },
               { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: (r) => setDeleteConfirm(r), variant: 'danger' },
             ] : [
-              { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: (r) => { handleOpenModal(r); }, variant: 'primary' },
             ]}
             emptyMessage="No attendance records found"
           />
@@ -179,10 +178,10 @@ const Attendance = () => {
       >
         <form className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <select className="input" value={formData.studentId} onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}><option value="">Select Student</option>{attendanceRecords.map(a => <option key={a.studentId} value={a.studentId}>{a.student} ({a.studentId})</option>)}</select>
-            <select className="input" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })}><option value="">Select Course</option>{courses.map(c => <option key={c} value={c}>{c}</option>)}</select>
+            <select className="select-themed" value={formData.studentId} onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}><option value="">Select Student</option>{attendanceRecords.map(a => <option key={a.studentId} value={a.studentId}>{a.student} ({a.studentId})</option>)}</select>
+            <select className="select-themed" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })}><option value="">Select Course</option>{courses.map(c => <option key={c} value={c}>{c}</option>)}</select>
             <Input type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
-            <select className="input" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}><option value="">Status</option>{statuses.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}</select>
+            <select className="select-themed" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}><option value="">Status</option>{statuses.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}</select>
           </div>
           <Input label="Time" type="time" value={formData.time} onChange={(e) => setFormData({ ...formData, time: e.target.value })} />
           <Input label="Notes" value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Optional notes..." />

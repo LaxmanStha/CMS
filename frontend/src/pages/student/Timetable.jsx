@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '@/services/api';
+import Dropdown from '@/components/ui/Dropdown';
 
 const StudentTimetable = () => {
   const { user } = useAuth();

@@ -58,10 +58,10 @@ export default {
         background: 'rgb(var(--color-background) / <alpha-value>)',
         card: 'rgb(var(--color-card) / <alpha-value>)',
         surface: 'var(--surface)',
-        sidebar: 'rgb(var(--color-sidebar) / <alpha-value>)',
         navbar: 'rgb(var(--color-navbar) / <alpha-value>)',
         'text-primary': 'rgb(var(--color-text-primary) / <alpha-value>)',
         'text-secondary': 'rgb(var(--color-text-secondary) / <alpha-value>)',
+        'text-tertiary': 'rgb(var(--color-text-tertiary) / <alpha-value>)',
         border: 'rgb(var(--color-border) / <alpha-value>)',
         hover: 'rgb(var(--color-hover) / <alpha-value>)',
         input: 'rgb(var(--color-input) / <alpha-value>)',
@@ -73,9 +73,12 @@ export default {
           red: 'rgb(var(--brand-danger) / 0.15)',
         },
       },
+        // Be Vietnam Pro is set once on <body> in index.css; dashboards inherit
+        // it from the root. Keep font-sans/display as no-op `inherit` fallbacks
+        // so existing `font-sans`/`font-display` classes don't override it.
         fontFamily: {
-          sans: ['Inter', 'system-ui', 'sans-serif'],
-          display: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+          sans: ['Inter', 'sans-serif'],
+          display: ['Sora', 'sans-serif'],
         },
       fontWeight: {
         heading: '700',
@@ -91,10 +94,10 @@ export default {
         '3': '3px',
       },
       boxShadow: {
-        card: '0 10px 30px rgba(0,0,0,.08)',
-        'card-hover': '0 20px 40px rgba(0,0,0,.12)',
-        'sidebar': '0 0 30px rgba(0,0,0,.3)',
-        'glass': '0 8px 32px rgba(0,0,0,.08)',
+        card: '0 4px 20px rgba(15, 23, 42, 0.04)',
+        'card-hover': '0 10px 30px rgba(15, 23, 42, 0.08)',
+        'sidebar': '0 0 30px rgba(15, 23, 42, 0.12)',
+        'glass': '0 8px 32px rgba(15, 23, 42, 0.06)',
       },
       spacing: {
         '18': '72px',

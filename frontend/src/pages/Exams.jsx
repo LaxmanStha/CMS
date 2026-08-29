@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { FileText, Calendar, Clock, Award, Plus, Search, Filter, Edit, Trash2, Eye, AlertTriangle, CheckCircle, XCircle, BarChart3, Users, Loader2 } from 'lucide-react';
+import { FileText, Calendar, Clock, Award, Plus, Search, Filter, Edit, Trash2, AlertTriangle, CheckCircle, XCircle, BarChart3, Users, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -11,6 +11,8 @@ import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 import { useApiData } from '@/hooks/useApiData';
+import StatusDropdown from '@/components/ui/StatusDropdown';
+import Dropdown from '@/components/ui/Dropdown';
 
 const typeColors = { midterm: 'primary', final: 'danger', quiz: 'secondary' };
 const statusColors = { scheduled: 'warning', completed: 'success', draft: 'default' };
@@ -144,8 +146,8 @@ const Exams = () => {
         <Card.Header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-col sm:flex-row gap-3 flex-1 flex-wrap">
             <div className="relative flex-1 min-w-[200px] max-w-xs"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" /><input type="text" placeholder="Search exams..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="input pl-10" /></div>
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="input w-auto min-w-[140px]"><option value="">All Types</option>{types.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}</select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="input w-auto min-w-[140px]"><option value="">All Status</option>{statuses.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}</select>
+            <Dropdown value={typeFilter} onChange={setTypeFilter} options={types} placeholder="All Types" />
+            <StatusDropdown value={statusFilter} onChange={setStatusFilter} options={statuses} />
           </div>
           <div className="flex items-center gap-2">
           </div>
@@ -161,12 +163,10 @@ const Exams = () => {
           ) : (
           <Table columns={columns} data={filteredExams} keyField="id" searchable={false} filterable={false} paginated pageSize={10}
             rowActions={isAdmin ? [
-              { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: (r) => { handleOpenModal(r); }, variant: 'primary' },
               { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: (r) => { handleOpenModal(r); }, variant: 'ghost', condition: (r) => r.status !== 'completed' },
               { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: (r) => setDeleteConfirm(r), variant: 'danger', condition: (r) => r.status === 'draft' },
               { label: 'Results', icon: <BarChart3 className="w-4 h-4" />, onClick: (r) => { setSelectedExam(r); setShowResults(true); }, variant: 'secondary' },
             ] : [
-              { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: (r) => { handleOpenModal(r); }, variant: 'primary' },
               { label: 'Results', icon: <BarChart3 className="w-4 h-4" />, onClick: (r) => { setSelectedExam(r); setShowResults(true); }, variant: 'secondary' },
             ]}
             emptyMessage="No exams found"
@@ -181,8 +181,8 @@ const Exams = () => {
         <form className="space-y-4">
           <Input label="Exam Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Midterm Exam - CS101" required />
           <div className="grid grid-cols-2 gap-4">
-            <select className="input" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option><option value="CS101">CS101</option><option value="CS201">CS201</option></select>
-            <select className="input" value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })} required><option value="">Type</option>{types.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}</select>
+            <select className="select-themed" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option><option value="CS101">CS101</option><option value="CS201">CS201</option></select>
+            <select className="select-themed" value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })} required><option value="">Type</option>{types.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}</select>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <Input type="date" label="Date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} required />

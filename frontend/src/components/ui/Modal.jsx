@@ -15,6 +15,7 @@ const Modal = ({
   className,
   footer,
   variant = 'default',
+  anchor = 'center',
 }) => {
   const modalRef = useRef(null);
   const previousActiveElement = useRef(null);
@@ -85,30 +86,44 @@ const Modal = ({
     success: 'bg-card border-success',
   };
 
+  const isTopRight = anchor === 'top-right';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div className="fixed inset-0 z-[1000] animate-fade-in">
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
-        onClick={closeOnOverlayClick ? () => onCloseRef.current() : undefined}
         aria-hidden="true"
       />
       <div
-        ref={modalRef}
-        tabIndex={-1}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={title ? 'modal-title' : undefined}
-        aria-describedby={description ? 'modal-description' : undefined}
         className={cn(
-          'relative w-full rounded-2xl shadow-xl animate-modal',
-          sizes[size],
-          variants[variant],
-          'border border-border',
-          className
+          'absolute inset-0 p-4',
+          isTopRight ? 'flex items-start justify-end' : 'flex items-center justify-center'
         )}
+        onClick={closeOnOverlayClick ? () => onCloseRef.current() : undefined}
       >
+        <div
+          ref={modalRef}
+          tabIndex={-1}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={title ? 'modal-title' : undefined}
+          aria-describedby={description ? 'modal-description' : undefined}
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            'relative w-full my-4 max-h-[calc(100vh-2rem)] rounded-2xl shadow-xl flex flex-col overflow-hidden',
+            isTopRight ? 'animate-toast' : 'animate-modal',
+            sizes[size],
+            variants[variant],
+            'border border-border',
+            className
+          )}
+        >
         {(title || showClose) && (
-          <div className="flex items-start justify-between p-6 border-b border-border">
+          <div
+            className={cn(
+              'flex flex-shrink-0 items-start justify-between p-6 border-b border-border'
+            )}
+          >
             <div>
               {title && (
                 <h2 id="modal-title" className="text-xl font-semibold text-text-primary">
@@ -132,14 +147,15 @@ const Modal = ({
             )}
           </div>
         )}
-        <div className="p-6">
+        <div className="flex-1 min-h-0 overflow-y-auto p-6">
           {children}
         </div>
         {footer && (
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-border">
+          <div className="flex flex-shrink-0 items-center justify-end gap-3 p-6 border-t border-border">
             {footer}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

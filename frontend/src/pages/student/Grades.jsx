@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '@/services/api';
+import Dropdown from '@/components/ui/Dropdown';
 
 const StudentGrades = () => {
   const { user } = useAuth();
@@ -44,11 +45,7 @@ const StudentGrades = () => {
         <h2>My Grades</h2>
         <div>
           <label className="me-2">Semester:</label>
-          <select className="form-select form-select-sm d-inline-block w-auto" value={semester} onChange={e => setSemester(e.target.value)}>
-            <option value="Fall 2025">Fall 2025</option>
-            <option value="Spring 2025">Spring 2025</option>
-            <option value="Fall 2024">Fall 2024</option>
-          </select>
+          <Dropdown value={semester} onChange={setSemester} options={['Fall 2025', 'Spring 2025', 'Fall 2024']} />
         </div>
       </div>
       <div className="row mb-4">

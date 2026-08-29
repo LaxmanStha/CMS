@@ -12,19 +12,10 @@ const StudentAttendance = () => {
     const fetchAttendance = async () => {
       try {
         const response = await api.get(`/students/${user.id}/attendance`);
-        setAttendance(response.data);
+        setAttendance(response.data || { overall: 0, courses: [] });
       } catch (err) {
         console.error('Error fetching attendance:', err);
-        setAttendance({
-          overall: 87,
-          courses: [
-            { name: 'Mathematics 101', code: 'MATH101', attended: 42, total: 45, percentage: 93 },
-            { course: 'Physics 101', code: 'PHYS101', attended: 35, total: 40, percentage: 88 },
-            { course: 'Chemistry 101', code: 'CHEM101', attended: 38, total: 42, percentage: 90 },
-            { course: 'English Literature', code: 'ENG101', attended: 30, total: 36, percentage: 83 },
-            { course: 'World History', code: 'HIST101', attended: 28, total: 34, percentage: 82 },
-          ]
-        });
+        setAttendance({ overall: 0, courses: [] });
       } finally {
         setLoading(false);
       }
@@ -32,9 +23,11 @@ const StudentAttendance = () => {
     fetchAttendance();
   }, [user]);
 
+  const courseList = Array.isArray(attendance?.courses) ? attendance.courses : [];
+
   const getPercentageClass = (percentage) => {
     if (percentage >= 90) return 'bg-success';
-    if (percentage >= 75) return 'bg-warning text-dark';
+    if (percentage >= 75) return 'bg-warning';
     return 'bg-danger';
   };
 
@@ -50,9 +43,9 @@ const StudentAttendance = () => {
           <div className="card">
             <div className="card-body text-center">
               <h5 className="card-title">Overall Attendance</h5>
-              <div className="display-1 text-primary">{attendance.overall}%</div>
+              <div className="display-1 text-primary">{attendance.overall || 0}%</div>
               <div className="progress mt-2" style={{ height: '20px' }}>
-                <div className="progress-bar" role="progressbar" style={{ width: `${attendance.overall}%` }} aria-valuenow={attendance.overall} aria-valuemin="0" aria-valuemax="100"></div>
+                <div className="progress-bar" role="progressbar" style={{ width: `${attendance.overall || 0}%` }} aria-valuenow={attendance.overall || 0} aria-valuemin="0" aria-valuemax="100"></div>
               </div>
             </div>
           </div>
@@ -61,7 +54,7 @@ const StudentAttendance = () => {
           <div className="card">
             <div className="card-body text-center">
               <h5 className="card-title">Classes Attended</h5>
-              <div className="display-1 text-success">{attendance.courses.reduce((sum, c) => sum + c.attended, 0)}</div>
+              <div className="display-1 text-success">{courseList.reduce((sum, c) => sum + (Number(c.attended) || 0), 0)}</div>
             </div>
           </div>
         </div>
@@ -69,7 +62,7 @@ const StudentAttendance = () => {
           <div className="card">
             <div className="card-body text-center">
               <h5 className="card-title">Total Classes</h5>
-              <div className="display-1 text-info">{attendance.courses.reduce((sum, c) => sum + c.total, 0)}</div>
+              <div className="display-1 text-info">{courseList.reduce((sum, c) => sum + (Number(c.total) || 0), 0)}</div>
             </div>
           </div>
         </div>
@@ -79,39 +72,43 @@ const StudentAttendance = () => {
           <h5 className="card-title mb-0">Course-wise Attendance</h5>
         </div>
         <div className="card-body">
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>Course</th>
-                  <th>Code</th>
-                  <th>Attended</th>
-                  <th>Total</th>
-                  <th>Percentage</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {attendance.courses.map((course, index) => (
-                  <tr key={index}>
-                    <td>{course.name}</td>
-                    <td>{course.code}</td>
-                    <td>{course.attended}</td>
-                    <td>{course.total}</td>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <div className="progress flex-grow-1 me-2" style={{ height: '15px' }}>
-                          <div className="progress-bar" role="progressbar" style={{ width: `${course.percentage}%` }} aria-valuenow={course.percentage} aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                        <span>{course.percentage}%</span>
-                      </div>
-                    </td>
-                    <td><span className={`badge ${getPercentageClass(course.percentage)}`}>{course.percentage >= 75 ? 'Good' : 'Low'}</span></td>
+          {courseList.length === 0 ? (
+            <div className="text-center text-muted py-4">No attendance records available yet.</div>
+          ) : (
+            <div className="table-responsive">
+              <table className="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Course</th>
+                    <th>Code</th>
+                    <th>Attended</th>
+                    <th>Total</th>
+                    <th>Percentage</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {courseList.map((course, index) => (
+                    <tr key={index}>
+                      <td>{course.name || course.course || "�"}</td>
+                      <td>{course.code || "�"}</td>
+                      <td>{course.attended}</td>
+                      <td>{course.total}</td>
+                      <td>
+                        <div className="d-flex align-items-center">
+                          <div className="progress flex-grow-1 me-2" style={{ height: '15px' }}>
+                            <div className="progress-bar" role="progressbar" style={{ width: `${course.percentage}%` }} aria-valuenow={course.percentage} aria-valuemin="0" aria-valuemax="100"></div>
+                          </div>
+                          <span>{course.percentage}%</span>
+                        </div>
+                      </td>
+                      <td><span className={`badge ${getPercentageClass(course.percentage)}`}>{course.percentage >= 75 ? 'Good' : 'Low'}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>

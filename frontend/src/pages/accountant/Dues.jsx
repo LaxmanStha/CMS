@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '@/services/api';
+import Dropdown from '@/components/ui/Dropdown';
 
 const AccountantDues = () => {
   const { user } = useAuth();
@@ -48,7 +49,7 @@ const AccountantDues = () => {
 
   const statusColors = {
     Paid: 'bg-success',
-    Partial: 'bg-warning text-dark',
+    Partial: 'bg-warning',
     Unpaid: 'bg-danger'
   };
 
@@ -104,12 +105,7 @@ const AccountantDues = () => {
           />
         </div>
         <div className="col-md-3">
-          <select className="form-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-            <option value="all">All Status</option>
-            <option value="Paid">Paid</option>
-            <option value="Partial">Partial</option>
-            <option value="Unpaid">Unpaid</option>
-          </select>
+          <Dropdown value={filterStatus} onChange={setFilterStatus} options={[{ value: 'all', label: 'All Status' }, 'Paid', 'Partial', 'Unpaid']} />
         </div>
       </div>
       <div className="card">

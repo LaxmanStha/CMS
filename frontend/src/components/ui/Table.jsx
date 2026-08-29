@@ -137,7 +137,7 @@ const Table = ({
   return (
     <div className={cn('w-full', className)}>
       {(searchable || filterable) && (
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-background/50 rounded-xl border border-border">
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-transparent rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
           {searchable && (
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" />
@@ -149,7 +149,7 @@ const Table = ({
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-input border border-border text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-input border border-border rounded-xl text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
               />
             </div>
           )}
@@ -175,7 +175,7 @@ const Table = ({
                         placeholder={`Filter ${col.header}...`}
                         value={filters[col.key] || ''}
                         onChange={(e) => setFilters(prev => ({ ...prev, [col.key]: e.target.value }))}
-                        className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg mx-2 mb-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                         className="w-full px-3 py-2 text-sm bg-input border border-border rounded-xl mx-2 mb-2 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
                         autoFocus
                       />
                       {col.filterOptions?.map(opt => (
@@ -241,7 +241,7 @@ const Table = ({
                     {sortable && column.sortable !== false && (
                       <button
                         onClick={() => handleSort(column.key)}
-                        className="p-1 rounded-lg hover:bg-primary/10 text-text-secondary hover:text-primary transition-colors"
+                        className="p-1 rounded-full hover:bg-primary/10 text-text-secondary hover:text-primary transition-colors"
                         aria-label={`Sort by ${column.header}`}
                       >
                         {getSortIcon(column.key)}
@@ -363,7 +363,7 @@ const Table = ({
                               action.onClick(row);
                             }}
                             className={cn(
-                              'p-2 rounded-xl transition-colors',
+                              'p-2 rounded-full transition-colors',
                               action.variant === 'danger' ? 'text-danger hover:bg-danger/10' :
                               action.variant === 'primary' ? 'text-primary hover:bg-primary/10' :
                               'text-text-secondary hover:bg-hover'
@@ -380,7 +380,7 @@ const Table = ({
                               e.stopPropagation();
                               actions.onClick(row);
                             }}
-                            className="p-2 rounded-xl text-text-secondary hover:bg-hover hover:text-text-primary transition-colors"
+                            className="p-2 rounded-full text-text-secondary hover:bg-hover hover:text-text-primary transition-colors"
                             aria-label="More actions"
                           >
                             <MoreHorizontal className="w-5 h-5" />
@@ -397,7 +397,7 @@ const Table = ({
       </div>
 
       {paginated && totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 p-4 bg-background/50 rounded-xl border border-border">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 p-4 bg-transparent rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
           <div className="flex items-center gap-3">
             <span className="text-sm text-text-secondary">
               Showing <span className="font-semibold">{((currentPage - 1) * pageSizeState) + 1}</span> to{' '}
@@ -442,7 +442,7 @@ const Table = ({
                     className={cn(
                       'w-10 h-10 rounded-xl font-medium transition-all',
                       currentPage === pageNum
-                        ? 'bg-primary text-white shadow-md'
+                         ? 'bg-primary text-white shadow-md'
                         : 'text-text-secondary hover:bg-hover hover:text-text-primary'
                     )}
                     aria-label={`Page ${pageNum}`}
@@ -466,7 +466,7 @@ const Table = ({
       )}
 
       {footer && (
-        <div className="mt-4 p-4 bg-background/50 rounded-xl border border-border">
+        <div className="mt-4 p-4 bg-transparent rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
           {footer}
         </div>
       )}

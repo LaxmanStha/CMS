@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '@/services/api';
+import Dropdown from '@/components/ui/Dropdown';
 
 const AccountantPayments = () => {
   const { user } = useAuth();
@@ -50,7 +51,7 @@ const AccountantPayments = () => {
     'Online': 'bg-primary',
     'Card': 'bg-info',
     'Cash': 'bg-success',
-    'Bank Transfer': 'bg-warning text-dark',
+    'Bank Transfer': 'bg-warning',
     '-': 'bg-secondary'
   };
 
@@ -118,13 +119,7 @@ const AccountantPayments = () => {
           />
         </div>
         <div className="col-md-3">
-          <select className="form-select" value={filterMethod} onChange={e => setFilterMethod(e.target.value)}>
-            <option value="all">All Methods</option>
-            <option value="Online">Online</option>
-            <option value="Card">Card</option>
-            <option value="Cash">Cash</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-          </select>
+          <Dropdown value={filterMethod} onChange={setFilterMethod} options={[{ value: 'all', label: 'All Methods' }, 'Online', 'Card', 'Cash', 'Bank Transfer']} />
         </div>
       </div>
       <div className="card">
@@ -162,7 +157,7 @@ const AccountantPayments = () => {
                     <td>{payment.date}</td>
                     <td>
                       {payment.status === 'Completed' && <span className="badge bg-success">Completed</span>}
-                      {payment.status === 'Partial' && <span className="badge bg-warning text-dark">Partial</span>}
+                      {payment.status === 'Partial' && <span className="badge bg-warning">Partial</span>}
                       {payment.status === 'Pending' && <span className="badge bg-secondary">Pending</span>}
                     </td>
                     <td>

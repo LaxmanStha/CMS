@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { DollarSign, CreditCard, AlertTriangle, CheckCircle, Clock, Plus, Search, Filter, Edit, Trash2, Eye, FileText, Receipt, Loader2 } from 'lucide-react';
+import { DollarSign, CreditCard, AlertTriangle, CheckCircle, Clock, Plus, Search, Filter, Edit, Trash2, FileText, Receipt, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -11,6 +11,8 @@ import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 import { useApiData } from '@/hooks/useApiData';
+import StatusDropdown from '@/components/ui/StatusDropdown';
+import Dropdown from '@/components/ui/Dropdown';
 
 const statusColors = { paid: 'success', partial: 'warning', pending: 'info', overdue: 'danger' };
 const statusLabels = { paid: 'Paid', partial: 'Partial', pending: 'Pending', overdue: 'Overdue' };
@@ -146,8 +148,8 @@ const Fees = () => {
         <Card.Header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-col sm:flex-row gap-3 flex-1 flex-wrap">
             <div className="relative flex-1 min-w-[200px] max-w-xs"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" /><input type="text" placeholder="Search invoices..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="input pl-10" /></div>
-            <select value={semFilter} onChange={(e) => setSemFilter(e.target.value)} className="input w-auto min-w-[150px]"><option value="">All Semesters</option>{semesters.map(s => <option key={s} value={s}>{s}</option>)}</select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="input w-auto min-w-[150px]"><option value="">All Status</option>{statuses.map(s => <option key={s} value={s}>{statusLabels[s]}</option>)}</select>
+            <Dropdown value={semFilter} onChange={setSemFilter} options={semesters} placeholder="All Semesters" />
+            <StatusDropdown value={statusFilter} onChange={setStatusFilter} options={statuses.map((s) => ({ value: s, label: statusLabels[s] }))} />
           </div>
         </Card.Header>
         <Card.Content>
@@ -161,12 +163,10 @@ const Fees = () => {
           ) : (
           <Table columns={columns} data={filteredFees} keyField="id" searchable={false} filterable={false} paginated pageSize={10}
             rowActions={isAdmin ? [
-              { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: (r) => { setEditingFee(null); setSelectedInvoice(r); setShowModal(true); }, variant: 'primary' },
               { label: 'Payment', icon: <CreditCard className="w-4 h-4" />, onClick: (r) => success(`Payment processed for ${r.student}`), variant: 'success', condition: (r) => r.status !== 'paid' },
               { label: 'Receipt', icon: <Receipt className="w-4 h-4" />, onClick: (r) => success('Receipt generated'), variant: 'ghost', condition: (r) => r.paid > 0 },
               { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: (r) => setDeleteConfirm(r), variant: 'danger', condition: (r) => r.status === 'pending' },
             ] : [
-              { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: (r) => { setEditingFee(null); setSelectedInvoice(r); setShowModal(true); }, variant: 'primary' },
             ]}
             emptyMessage="No invoices found"
           />
@@ -187,15 +187,15 @@ const Fees = () => {
         {editingFee ? (
           <form className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <select className="input" value={formData.studentId} onChange={(e) => {
+              <select className="select-themed" value={formData.studentId} onChange={(e) => {
                 const opt = fees.find(f => f.studentId === e.target.value);
                 setFormData({ ...formData, studentId: e.target.value, student: opt ? opt.student : '' });
               }} required><option value="">Select Student</option>{fees.map(f => <option key={f.studentId} value={f.studentId}>{f.student} ({f.studentId})</option>)}</select>
-              <select className="input" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option>{['CS101','CS201','MATH101'].map(c => <option key={c} value={c}>{c}</option>)}</select>
+              <select className="select-themed" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option>{['CS101','CS201','MATH101'].map(c => <option key={c} value={c}>{c}</option>)}</select>
               <Input type="number" label="Amount" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required />
-              <select className="input" value={formData.semester} onChange={(e) => setFormData({ ...formData, semester: e.target.value })} required><option value="">Semester</option>{semesters.map(s => <option key={s} value={s}>{s}</option>)}</select>
+              <select className="select-themed" value={formData.semester} onChange={(e) => setFormData({ ...formData, semester: e.target.value })} required><option value="">Semester</option>{semesters.map(s => <option key={s} value={s}>{s}</option>)}</select>
               <Input type="date" label="Due Date" value={formData.dueDate} onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })} required />
-              <select className="input" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}><option value="">Status</option>{statuses.map(s => <option key={s} value={s}>{statusLabels[s]}</option>)}</select>
+              <select className="select-themed" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}><option value="">Status</option>{statuses.map(s => <option key={s} value={s}>{statusLabels[s]}</option>)}</select>
             </div>
           </form>
         ) : selectedInvoice ? (
@@ -219,15 +219,15 @@ const Fees = () => {
               </div>
             )}
             <Input type="number" label="Payment Amount" placeholder={`Max: ${formatCurrency(selectedInvoice.amount - selectedInvoice.paid)}`} />
-            <select className="input"><option value="">Payment Method</option><option value="cash">Cash</option><option value="card">Card</option><option value="bank">Bank Transfer</option><option value="online">Online</option></select>
+            <select className="select-themed"><option value="">Payment Method</option><option value="cash">Cash</option><option value="card">Card</option><option value="bank">Bank Transfer</option><option value="online">Online</option></select>
           </div>
         ) : (
           <form className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <select className="input" value={formData.studentId} onChange={(e) => setFormData({ ...formData, studentId: e.target.value })} required><option value="">Select Student</option>{fees.map(f => <option key={f.studentId} value={f.studentId}>{f.student} ({f.studentId})</option>)}</select>
-              <select className="input" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option>{['CS101','CS201','MATH101'].map(c => <option key={c} value={c}>{c}</option>)}</select>
+              <select className="select-themed" value={formData.studentId} onChange={(e) => setFormData({ ...formData, studentId: e.target.value })} required><option value="">Select Student</option>{fees.map(f => <option key={f.studentId} value={f.studentId}>{f.student} ({f.studentId})</option>)}</select>
+              <select className="select-themed" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option>{['CS101','CS201','MATH101'].map(c => <option key={c} value={c}>{c}</option>)}</select>
               <Input type="number" label="Amount" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} placeholder="2500" required />
-              <select className="input" value={formData.semester} onChange={(e) => setFormData({ ...formData, semester: e.target.value })} required><option value="">Semester</option>{semesters.map(s => <option key={s} value={s}>{s}</option>)}</select>
+              <select className="select-themed" value={formData.semester} onChange={(e) => setFormData({ ...formData, semester: e.target.value })} required><option value="">Semester</option>{semesters.map(s => <option key={s} value={s}>{s}</option>)}</select>
               <Input type="date" label="Due Date" value={formData.dueDate} onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })} required />
             </div>
           </form>
