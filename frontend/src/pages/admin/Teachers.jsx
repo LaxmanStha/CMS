@@ -1,12 +1,13 @@
-import { useState, useEffect, useMemo } from "react";
-import { Plus, Users, UserCheck, UserCog } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { Plus, Edit, Trash2, Users, UserCheck, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Select } from "@/components/ui/Select";
-import { Modal } from "@/components/ui/Modal";
 import { SearchInput } from "@/components/ui";
-import { formatDate } from "@/lib/utils";
+import { Select } from "@/components/ui/Select";
+import { Table } from "@/components/ui/Table";
+import { Modal } from "@/components/ui/Modal";
+import { formatDate, getInitials } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/services/api";
@@ -15,7 +16,7 @@ const STATUSES = ["active", "on_leave", "inactive"];
 
 const statusLabel = (s) => s.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
 
-const Teachers = () => {
+const AdminTeachers = () => {
   const { success, error: showError } = useToast();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
@@ -31,24 +32,31 @@ const Teachers = () => {
   const [editingTeacher, setEditingTeacher] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "", department: "", assignedCourse: "", assignedClassroom: "", status: "active", hireDate: "", password: "" });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    department: "",
+    assignedCourse: "",
+    status: "active",
+    hireDate: "",
+    password: "",
+  });
 
-  const fetchTeachers = async () => {
+  const fetchTeachers = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get("/teachers");
       setTeachers(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
+    } catch {
       showError("Failed to load teachers");
       setTeachers([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [showError]);
 
-  useEffect(() => {
-    fetchTeachers();
-  }, []);
+  useEffect(() => { fetchTeachers(); }, [fetchTeachers]);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,23 +81,15 @@ const Teachers = () => {
     return () => { cancelled = true; };
   }, []);
 
-  const departmentOptions = useMemo(() => {
-    if (!Array.isArray(departments)) return [];
-    return departments.map((d) => {
-      const label = typeof d === 'string' ? d : (d.name || d);
-      const value = typeof d === 'string' ? d : (d.name || d);
-      return { value, label };
-    });
-  }, [departments]);
+  const departmentOptions = useMemo(
+    () => departments.map((d) => ({ value: d, label: d })),
+    [departments]
+  );
 
-  const courseOptions = useMemo(() => {
-    if (!Array.isArray(courses)) return [];
-    return courses.map((c) => {
-      const label = typeof c === 'string' ? c : (c.name || c.code || c);
-      const value = typeof c === 'string' ? c : (c.name || c.code || c);
-      return { value, label };
-    });
-  }, [courses]);
+  const courseOptions = useMemo(
+    () => courses.map((c) => ({ value: c, label: c })),
+    [courses]
+  );
 
   const filteredTeachers = useMemo(() => teachers.filter((t) => {
     const matchesSearch = !searchTerm ||
@@ -108,7 +108,7 @@ const Teachers = () => {
     onLeave: teachers.filter(t => t.status === 'on_leave').length,
   }), [teachers]);
 
-  const handleOpenModal = (t = null) => {
+  const handleOpenModal = useCallback((t = null) => {
     if (t) {
       setEditingTeacher(t);
       setFormData({
@@ -117,17 +117,25 @@ const Teachers = () => {
         phone: t.phone || "",
         department: t.department || "",
         assignedCourse: t.assignedCourse || "",
-        assignedClassroom: t.assignedClassroom || "",
         status: t.status || "active",
         hireDate: t.hireDate || "",
         password: "",
       });
     } else {
       setEditingTeacher(null);
-      setFormData({ name: "", email: "", phone: "", department: "", assignedCourse: "", assignedClassroom: "", status: "active", hireDate: "", password: "" });
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        department: "",
+        assignedCourse: "",
+        status: "active",
+        hireDate: "",
+        password: "",
+      });
     }
     setShowModal(true);
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -139,14 +147,19 @@ const Teachers = () => {
         phone: formData.phone,
         department: formData.department,
         assignedCourse: formData.assignedCourse,
-        assignedClassroom: formData.assignedClassroom,
         status: formData.status,
         hireDate: formData.hireDate,
       };
+      if (formData.password) payload.password = formData.password;
       if (editingTeacher) {
         await api.put(`/teachers/${editingTeacher.id}`, payload);
         success("Teacher updated successfully");
       } else {
+        if (!formData.password) {
+          showError("Password is required for new teachers");
+          setSaving(false);
+          return;
+        }
         payload.password = formData.password;
         await api.post("/teachers", payload);
         success("Teacher added successfully");
@@ -174,8 +187,34 @@ const Teachers = () => {
     }
   };
 
+  const columns = [
+    { key: "id", header: "Teacher ID", width: "100px", render: (val) => val != null ? `TCH${String(val).padStart(3, "0")}` : "-" },
+    { key: "name", header: "Name", render: (val, row) => (
+      <div className="flex items-center gap-3">
+        <div className="avatar avatar-sm bg-primary/10 text-primary">{getInitials(row.name || "?")}</div>
+        <div>
+          <p className="font-medium text-text-primary">{row.name}</p>
+          <p className="text-xs text-text-secondary">{row.email}</p>
+        </div>
+      </div>
+    )},
+    { key: "department", header: "Department", width: "150px", render: (val) => <Badge variant="default">{val || "?"}</Badge> },
+    { key: "assignedCourse", header: "Course", width: "150px", render: (val) => <Badge variant="default">{val || "?"}</Badge> },
+    { key: "phone", header: "Phone", width: "140px", render: (val) => val || "-" },
+    { key: "status", header: "Status", width: "120px", render: (val) => {
+      const status = val || "active";
+      return (
+        <Badge variant={status === "active" ? "success" : status === "on_leave" ? "warning" : "default"}>
+          {statusLabel(status)}
+        </Badge>
+      );
+    }},
+    { key: "hireDate", header: "Hired", width: "120px", render: (val) => formatDate(val) },
+  ];
+
   return (
     <div className="container-fluid p-4">
+      
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="text-text-primary">Manage Teachers</h2>
         <div>
@@ -187,7 +226,7 @@ const Teachers = () => {
       <div className="row g-3 mb-4">
         <div className="col">
           <div className="card bg-primary/10">
-            <div className="card-body d-flex align-items-center gap-2">
+            <div className="card-body d-flex align-items-center gap-3">
               <div className="d-flex align-items-center justify-content-center rounded bg-blue-500/10 text-blue-500" style={{ width: 44, height: 44 }}>
                 <Users className="h-5 w-5" />
               </div>
@@ -200,7 +239,7 @@ const Teachers = () => {
         </div>
         <div className="col">
           <div className="card bg-success/10">
-            <div className="card-body d-flex align-items-center gap-2">
+            <div className="card-body d-flex align-items-center gap-3">
               <div className="d-flex align-items-center justify-content-center rounded bg-emerald-500/10 text-emerald-500" style={{ width: 44, height: 44 }}>
                 <UserCheck className="h-5 w-5" />
               </div>
@@ -213,7 +252,7 @@ const Teachers = () => {
         </div>
         <div className="col">
           <div className="card bg-warning/10">
-            <div className="card-body d-flex align-items-center gap-2">
+            <div className="card-body d-flex align-items-center gap-3">
               <div className="d-flex align-items-center justify-content-center rounded bg-amber-500/10 text-amber-500" style={{ width: 44, height: 44 }}>
                 <UserCog className="h-5 w-5" />
               </div>
@@ -229,6 +268,7 @@ const Teachers = () => {
       <div className="card">
         <div className="card-header">
           <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 className="card-title mb-0">Teacher List</h5>
             <div className="d-flex gap-2 flex-wrap">
               <SearchInput
                 value={searchTerm}
@@ -266,55 +306,21 @@ const Teachers = () => {
         </div>
         <div className="card-body">
           <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Department</th>
-                  <th>Course</th>
-                  <th>Classroom</th>
-                  <th>Phone</th>
-                  <th>Status</th>
-                  <th>Hired</th>
-                  {isAdmin && <th>Actions</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTeachers.length === 0 ? (
-                  <tr>
-                    <td colSpan={isAdmin ? 10 : 9} className="text-center text-muted">
-                      {loading ? 'Loading...' : 'No teachers found.'}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredTeachers.map((t) => (
-                    <tr key={t.id}>
-                      <td>TCH{String(t.id).padStart(3, "0")}</td>
-                      <td>{t.name || '-'}</td>
-                      <td>{t.email || '-'}</td>
-                      <td>{t.department || '-'}</td>
-                      <td>{t.assignedCourse || '-'}</td>
-                      <td>{t.assignedClassroom || '-'}</td>
-                      <td>{t.phone || '-'}</td>
-                      <td>
-                        <Badge variant={t.status === "active" ? "success" : t.status === "on_leave" ? "warning" : "default"}>
-                          {statusLabel(t.status || "active")}
-                        </Badge>
-                      </td>
-                      <td>{formatDate(t.hireDate)}</td>
-                      {isAdmin && (
-                        <td>
-                          <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(t)}>Edit</button>
-                          <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(t)}>Delete</button>
-                        </td>
-                      )}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+            <Table
+              columns={columns}
+              data={filteredTeachers}
+              keyField="id"
+              searchable={false}
+              filterable={false}
+              paginated
+              pageSize={10}
+              loading={loading}
+              rowActions={isAdmin ? [
+                { label: "Edit", icon: <Edit className="w-4 h-4" />, onClick: handleOpenModal, variant: "ghost" },
+                { label: "Delete", icon: <Trash2 className="w-4 h-4" />, onClick: handleDelete, variant: "danger" },
+              ] : []}
+              emptyMessage={"No teachers found"}
+            />
           </div>
         </div>
       </div>
@@ -326,17 +332,16 @@ const Teachers = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input label="Full Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="Dr. John Smith" required />
             <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="prof@college.edu" required />
-            <Input label="Password" type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="Set initial password" />
+            <Input label="Password" type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder={editingTeacher ? "Leave blank to keep" : "Set initial password"} />
             <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="+1-555-0000" />
             <select className="select-themed" value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} required>
               <option value="">Select Department</option>
-              {departmentOptions.map((d) => <option key={String(d.value)} value={d.value}>{d.label}</option>)}
+              {departmentOptions.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
             </select>
             <select className="select-themed" value={formData.assignedCourse} onChange={(e) => setFormData({...formData, assignedCourse: e.target.value})}>
               <option value="">Select Course</option>
-              {courseOptions.map((c) => <option key={String(c.value)} value={c.value}>{c.label}</option>)}
+              {courseOptions.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
-            <Input label="Assigned Classroom" value={formData.assignedClassroom} onChange={(e) => setFormData({...formData, assignedClassroom: e.target.value})} placeholder="e.g. A101" />
             <select className="select-themed" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
               {STATUSES.map((s) => <option key={s} value={s}>{statusLabel(s)}</option>)}
             </select>
@@ -354,8 +359,7 @@ const Teachers = () => {
   );
 };
 
-export default Teachers;
-
+export default AdminTeachers;
 
 
 

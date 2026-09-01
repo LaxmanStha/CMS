@@ -8,6 +8,7 @@ const Select = ({
   onChange, 
   placeholder = 'Select...', 
   className,
+  containerClassName = 'w-full',
   disabled = false,
   searchable = false,
   multiple = false,
@@ -33,8 +34,8 @@ const Select = ({
   }, []);
 
   const filteredOptions = options.filter(option => 
-    option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (option.value && option.value.toString().toLowerCase().includes(searchTerm.toLowerCase()))
+    String(option.label || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (option.value && String(option.value).toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleSelect = (option) => {
@@ -67,7 +68,7 @@ const Select = ({
     : options.find(o => o.value === value)?.label || '';
 
   return (
-    <div className="w-full" ref={selectRef}>
+    <div className={containerClassName} ref={selectRef}>
       {label && (
         <label className="block text-sm font-medium text-text-primary mb-1.5">
           {label}
