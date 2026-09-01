@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { BookOpen, CalendarCheck, ClipboardList, Calendar } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import { Card } from '@/components/ui/Card';
+import PageHeader from '@/components/ui/PageHeader';
 import { useMe, useFacultyDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/context/AuthContext';
 
@@ -18,10 +19,14 @@ const FacultyDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-text-primary">Faculty Dashboard</h1>
-        <p className="mt-1 text-text-secondary">Your teaching overview at a glance</p>
-      </div>
+      <PageHeader
+        title="Faculty Dashboard"
+        subtitle="Your teaching overview at a glance"
+        breadcrumbs={[
+          { label: 'Home', to: '/dashboard' },
+          { label: 'Faculty Dashboard' },
+        ]}
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
@@ -54,7 +59,7 @@ const FacultyDashboard = () => {
         <StatCard
           title="Grading"
           icon={ClipboardList}
-          iconClass="bg-[#7C3AED]/10 text-[#7C3AED]"
+          iconClass="bg-primary/10 text-primary"
           description="Enter grades for assignments and exams."
           action={
             <Link to="/faculty/grading" className="btn btn-primary btn-sm">

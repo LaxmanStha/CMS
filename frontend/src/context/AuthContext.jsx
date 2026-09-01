@@ -5,7 +5,7 @@ const AuthContext = createContext(null);
 
 const MOCK_USERS = {
   admin: { id: '1', email: 'admin@college.edu', role: 'admin', name: 'Dr. Sarah Mitchell', avatar: null },
-  faculty: { id: '2', email: 'faculty@college.edu', role: 'faculty', name: 'Prof. James Anderson', avatar: null },
+  teacher: { id: '2', email: 'faculty@college.edu', role: 'teacher', name: 'Prof. James Anderson', avatar: null },
   student: { id: '3', email: 'student@college.edu', role: 'student', name: 'Alex Johnson', avatar: null },
   accountant: { id: '4', email: 'accountant@college.edu', role: 'accountant', name: 'Maria Rodriguez', avatar: null },
 };

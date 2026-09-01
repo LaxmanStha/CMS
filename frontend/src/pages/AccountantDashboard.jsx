@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Wallet, Clock, FileText, CheckCircle2 } from 'lucide-react';
 import api from '@/services/api';
 import { useAccountDashboard } from '@/hooks/useDashboard';
@@ -11,6 +11,7 @@ import {
   AreaChartBox,
   CHART_PALETTE,
 } from '@/components/charts/Charts';
+import PageHeader from '@/components/ui/PageHeader';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -54,15 +55,21 @@ const AccountantDashboard = () => {
   const totalInvoices = data?.totalInvoices ?? fees.length;
   const paidInvoices = data?.paidInvoices ?? fees.filter((f) => f.status === 'paid').length;
 
-  const fmt = (n) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+  const fmt = useCallback(
+    (n) =>
+      new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n),
+    []
+  );
 
-  const cards = [
-    { title: 'Fee Collection', value: collected, format: fmt, icon: Wallet, iconClass: 'bg-primary/10 text-primary' },
-    { title: 'Pending Fees', value: pending, format: fmt, icon: Clock, iconClass: 'bg-warning/10 text-warning' },
-    { title: 'Total Invoices', value: totalInvoices, icon: FileText, iconClass: 'bg-[#7C3AED]/10 text-[#7C3AED]' },
-    { title: 'Paid Invoices', value: paidInvoices, icon: CheckCircle2, iconClass: 'bg-success/10 text-success' },
-  ];
+  const cards = useMemo(
+    () => [
+      { title: 'Fee Collection', value: collected, format: fmt, icon: Wallet, iconClass: 'bg-primary/10 text-primary' },
+      { title: 'Pending Fees', value: pending, format: fmt, icon: Clock, iconClass: 'bg-warning/10 text-warning' },
+      { title: 'Total Invoices', value: totalInvoices, icon: FileText, iconClass: 'bg-primary/10 text-primary' },
+      { title: 'Paid Invoices', value: paidInvoices, icon: CheckCircle2, iconClass: 'bg-success/10 text-success' },
+    ],
+    [collected, pending, totalInvoices, paidInvoices, fmt]
+  );
 
   const collectionByMonth = useMemo(() => {
     const buckets = {};
@@ -94,10 +101,14 @@ const AccountantDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-text-primary">Accountant Dashboard</h1>
-        <p className="mt-1 text-text-secondary">Financial overview and receivables</p>
-      </div>
+      <PageHeader
+        title="Accountant Dashboard"
+        subtitle="Financial overview and receivables"
+        breadcrumbs={[
+          { label: 'Home', to: '/dashboard' },
+          { label: 'Accountant Dashboard' },
+        ]}
+      />
       {isError && (
         <div className="alert alert-danger">
           Couldn't load dashboard data.{' '}

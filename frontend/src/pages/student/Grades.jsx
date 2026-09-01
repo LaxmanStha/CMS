@@ -42,7 +42,7 @@ const StudentGrades = () => {
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>My Grades</h2>
+        <h2 className="text-text-primary">My Grades</h2>
         <div>
           <label className="me-2">Semester:</label>
           <Dropdown value={semester} onChange={setSemester} options={['Fall 2025', 'Spring 2025', 'Fall 2024']} />

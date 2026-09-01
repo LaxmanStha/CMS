@@ -56,7 +56,6 @@ const AdminStudents = () => {
       showError(msg || 'Failed to delete student.');
     }
   };
-  const [classrooms, setClassrooms] = useState([]);
   const [classFilter, setClassFilter] = useState('');
 
   const toggleReveal = (id) =>
@@ -78,18 +77,8 @@ const AdminStudents = () => {
     }
   };
 
-  const loadClassrooms = async () => {
-    try {
-      const res = await api.get('/classrooms');
-      setClassrooms(Array.isArray(res.data) ? res.data : []);
-    } catch {
-      setClassrooms([]);
-    }
-  };
-
   useEffect(() => {
     loadStudents();
-    loadClassrooms();
   }, []);
 
   const openModal = () => {
@@ -136,11 +125,6 @@ const AdminStudents = () => {
     }
   };
 
-  const modalClassroomOptions = classrooms.map((c) => ({
-    value: c.roomNumber || c.sectionName || '',
-    label: c.roomNumber ? `${c.roomNumber}${c.sectionName ? ` - ${c.sectionName}` : ''}` : (c.sectionName || ''),
-  }));
-
   const tableClassroomOptions = React.useMemo(() => {
     const unique = new Set();
     students.forEach((s) => {
@@ -158,7 +142,7 @@ const AdminStudents = () => {
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Manage Students</h2>
+        <h2 className="text-text-primary">Manage Students</h2>
         <div>
           <button className="btn btn-primary me-2" onClick={openModal}>Add Student</button>
           {isAdmin && (
@@ -246,14 +230,8 @@ const AdminStudents = () => {
           <Input label="Full Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Full name" required />
           <Input label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@example.com" required />
           <Input label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="e.g. 555-1234" />
-          <Input label="Program" value={form.program} onChange={(e) => setForm({ ...form, program: e.target.value })} placeholder="e.g. Computer Science" required />
-          <Select
-            label="Classroom"
-            value={form.classroom}
-            onChange={(value) => setForm({ ...form, classroom: value })}
-            options={modalClassroomOptions}
-            placeholder="Select classroom"
-          />
+          <Input label="Program" value={form.program} onChange={(e) => setForm({ ...form, program: e.target.value })} placeholder="e.g. BIM" required />
+          <Input label="Classroom" value={form.classroom} onChange={(e) => setForm({ ...form, classroom: e.target.value })} placeholder="e.g. CS-A" />
           <Input label="Year" type="number" value={form.year} onChange={(e) => setForm({ ...form, year: parseInt(e.target.value) || 1 })} min={1} max={5} />
           <select
             value={form.status}

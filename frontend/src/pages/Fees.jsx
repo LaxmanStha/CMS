@@ -23,7 +23,7 @@ const columns = [
   { key: 'course', header: 'Course', width: '120px' },
   { key: 'semester', header: 'Semester', width: '120px' },
   { key: 'amount', header: 'Amount', width: '120px', align: 'right', render: (v) => formatCurrency(v) },
-  { key: 'paid', header: 'Paid', width: '120px', align: 'right', render: (v, row) => <span className="font-mono">{formatCurrency(v)} / {formatCurrency(row.amount)}</span> },
+  { key: 'paid', header: 'Paid', width: '120px', align: 'right', render: (v, row) => <span className="font-mono text-xs">{formatCurrency(v)} / {formatCurrency(row.amount)}</span> },
   { key: 'dueDate', header: 'Due Date', width: '120px', render: (v) => formatDate(v) },
   { key: 'status', header: 'Status', width: '100px', render: (v) => <Badge variant={statusColors[v]}>{statusLabels[v]}</Badge> },
 ];
@@ -125,54 +125,105 @@ const Fees = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Fees & Invoices</h1>
-          <p className="text-text-secondary mt-1">Manage student fees and payments</p>
+      {/* Premium Page Header */}
+      <div className="page-header">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="page-header-title">Fees & Invoices</h1>
+            <p className="page-header-subtitle">Manage student fees and payments</p>
+          </div>
+          {isAdmin ? (
+            <Button onClick={() => handleOpenModal()}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Invoice
+            </Button>
+          ) : (
+            <span className="text-sm text-text-secondary bg-white/[0.03] px-3 py-1.5 rounded-lg">Read-only (admin only)</span>
+          )}
         </div>
-        {isAdmin ? (
-          <Button onClick={() => handleOpenModal()}><Plus className="w-4 h-4 mr-1" /> Create Invoice</Button>
-        ) : (
-          <span className="text-sm text-text-secondary">Read-only (admin only)</span>
-        )}
       </div>
 
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card><div className="flex items-center gap-3"><div className="p-3 rounded-xl bg-primary/10 text-primary"><DollarSign className="w-6 h-6" /></div><div><p className="text-2xl font-bold text-text-primary">{formatCurrency(totals.total)}</p><p className="text-sm text-text-secondary">Total Invoiced</p></div></div></Card>
-        <Card><div className="flex items-center gap-3"><div className="p-3 rounded-xl bg-success/10 text-success"><CheckCircle className="w-6 h-6" /></div><div><p className="text-2xl font-bold text-success">{formatCurrency(totals.collected)}</p><p className="text-sm text-text-secondary">Collected</p></div></div></Card>
-        <Card><div className="flex items-center gap-3"><div className="p-3 rounded-xl bg-warning/10 text-warning"><Clock className="w-6 h-6" /></div><div><p className="text-2xl font-bold text-warning">{formatCurrency(totals.pending)}</p><p className="text-sm text-text-secondary">Pending</p></div></div></Card>
-        <Card><div className="flex items-center gap-3"><div className="p-3 rounded-xl bg-danger/10 text-danger"><AlertTriangle className="w-6 h-6" /></div><div><p className="text-2xl font-bold text-danger">{formatCurrency(totals.overdue)}</p><p className="text-sm text-text-secondary">Overdue</p></div></div></Card>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+            <DollarSign className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-lg font-bold text-text-primary">{formatCurrency(totals.total)}</p>
+            <p className="text-[11px] text-text-tertiary">Total Invoiced</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+            <CheckCircle className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-lg font-bold text-text-primary">{formatCurrency(totals.collected)}</p>
+            <p className="text-[11px] text-text-tertiary">Collected</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+            <Clock className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-lg font-bold text-text-primary">{formatCurrency(totals.pending)}</p>
+            <p className="text-[11px] text-text-tertiary">Pending</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
+            <AlertTriangle className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-lg font-bold text-text-primary">{formatCurrency(totals.overdue)}</p>
+            <p className="text-[11px] text-text-tertiary">Overdue</p>
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <Card.Header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex flex-col sm:flex-row gap-3 flex-1 flex-wrap">
-            <div className="relative flex-1 min-w-[200px] max-w-xs"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" /><input type="text" placeholder="Search invoices..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="input pl-10" /></div>
+      {/* Table Card */}
+      <div className="rounded-2xl bg-[#151C2C] border border-white/[0.06] shadow-[0_4px_20px_rgba(0,0,0,0.35)] overflow-hidden">
+        <div className="p-5 border-b border-white/[0.06]">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
+              <input
+                type="text"
+                placeholder="Search invoices..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full h-10 pl-10 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 transition-all duration-200"
+              />
+            </div>
             <Dropdown value={semFilter} onChange={setSemFilter} options={semesters} placeholder="All Semesters" />
             <StatusDropdown value={statusFilter} onChange={setStatusFilter} options={statuses.map((s) => ({ value: s, label: statusLabels[s] }))} />
           </div>
-        </Card.Header>
-        <Card.Content>
+        </div>
+        <div className="p-5 pt-0">
           {error && (
-            <div className="mb-4 p-3 rounded-xl border border-border bg-background/50 text-sm text-text-secondary">
+            <div className="mt-4 p-3 rounded-xl border border-border bg-background/50 text-sm text-text-secondary">
               {error}
             </div>
           )}
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-12 text-text-secondary"><Loader2 className="w-5 h-5 animate-spin" /> Loading invoices...</div>
+            <div className="flex items-center justify-center gap-2 py-16 text-text-secondary">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="text-sm">Loading invoices...</span>
+            </div>
           ) : (
-          <Table columns={columns} data={filteredFees} keyField="id" searchable={false} filterable={false} paginated pageSize={10}
-            rowActions={isAdmin ? [
-              { label: 'Payment', icon: <CreditCard className="w-4 h-4" />, onClick: (r) => success(`Payment processed for ${r.student}`), variant: 'success', condition: (r) => r.status !== 'paid' },
-              { label: 'Receipt', icon: <Receipt className="w-4 h-4" />, onClick: (r) => success('Receipt generated'), variant: 'ghost', condition: (r) => r.paid > 0 },
-              { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: (r) => setDeleteConfirm(r), variant: 'danger', condition: (r) => r.status === 'pending' },
-            ] : [
-            ]}
-            emptyMessage="No invoices found"
-          />
+            <Table columns={columns} data={filteredFees} keyField="id" searchable={false} filterable={false} paginated pageSize={10}
+              rowActions={isAdmin ? [
+                { label: 'Payment', icon: <CreditCard className="w-4 h-4" />, onClick: (r) => success(`Payment processed for ${r.student}`), variant: 'success', condition: (r) => r.status !== 'paid' },
+                { label: 'Receipt', icon: <Receipt className="w-4 h-4" />, onClick: (r) => success('Receipt generated'), variant: 'ghost', condition: (r) => r.paid > 0 },
+                { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: (r) => setDeleteConfirm(r), variant: 'danger', condition: (r) => r.status === 'pending' },
+              ] : []}
+              emptyMessage="No invoices found"
+            />
           )}
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setEditingFee(null); setSelectedInvoice(null); }} title={editingFee ? 'Edit Invoice' : selectedInvoice ? `Invoice ${selectedInvoice.id}` : 'Create Invoice'} size="lg"
         footer={
@@ -191,7 +242,7 @@ const Fees = () => {
                 const opt = fees.find(f => f.studentId === e.target.value);
                 setFormData({ ...formData, studentId: e.target.value, student: opt ? opt.student : '' });
               }} required><option value="">Select Student</option>{fees.map(f => <option key={f.studentId} value={f.studentId}>{f.student} ({f.studentId})</option>)}</select>
-              <select className="select-themed" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option>{['CS101','CS201','MATH101'].map(c => <option key={c} value={c}>{c}</option>)}</select>
+              <select className="select-themed" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option>{['CS101','MATH201','PHYS101','ENG110','OOP','CPROG','MICRO','DBMS','OS','CN','MATH101','MATH102','STAT','FM','BM','ECO','CHEM101','BIO101','IT','WEB'].map(c => <option key={c} value={c}>{c}</option>)}</select>
               <Input type="number" label="Amount" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required />
               <select className="select-themed" value={formData.semester} onChange={(e) => setFormData({ ...formData, semester: e.target.value })} required><option value="">Semester</option>{semesters.map(s => <option key={s} value={s}>{s}</option>)}</select>
               <Input type="date" label="Due Date" value={formData.dueDate} onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })} required />
@@ -210,7 +261,7 @@ const Fees = () => {
               <div className="col-span-2"><p className="text-sm text-text-secondary">Status</p><Badge variant={statusColors[selectedInvoice.status]} className="text-lg">{statusLabels[selectedInvoice.status]}</Badge></div>
             </div>
             {selectedInvoice.paid > 0 && (
-              <div className="p-4 bg-background/50 rounded-xl">
+              <div className="p-4 bg-white/[0.02] rounded-xl border border-white/[0.06]">
                 <p className="font-medium mb-2">Payment History</p>
                 <div className="flex items-center justify-between text-sm">
                   <span>{formatDate(selectedInvoice.paidDate)}</span>
@@ -225,7 +276,7 @@ const Fees = () => {
           <form className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <select className="select-themed" value={formData.studentId} onChange={(e) => setFormData({ ...formData, studentId: e.target.value })} required><option value="">Select Student</option>{fees.map(f => <option key={f.studentId} value={f.studentId}>{f.student} ({f.studentId})</option>)}</select>
-              <select className="select-themed" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option>{['CS101','CS201','MATH101'].map(c => <option key={c} value={c}>{c}</option>)}</select>
+              <select className="select-themed" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option>{['CS101','MATH201','PHYS101','ENG110','OOP','CPROG','MICRO','DBMS','OS','CN','MATH101','MATH102','STAT','FM','BM','ECO','CHEM101','BIO101','IT','WEB'].map(c => <option key={c} value={c}>{c}</option>)}</select>
               <Input type="number" label="Amount" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} placeholder="2500" required />
               <select className="select-themed" value={formData.semester} onChange={(e) => setFormData({ ...formData, semester: e.target.value })} required><option value="">Semester</option>{semesters.map(s => <option key={s} value={s}>{s}</option>)}</select>
               <Input type="date" label="Due Date" value={formData.dueDate} onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })} required />

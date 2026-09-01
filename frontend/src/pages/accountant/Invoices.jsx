@@ -48,7 +48,7 @@ const AccountantInvoices = () => {
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Invoices</h2>
+        <h2 className="text-text-primary">Invoices</h2>
         <button className="btn btn-primary">Generate Invoice</button>
       </div>
       <div className="row mb-4">

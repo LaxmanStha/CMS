@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { FileText, Calendar, Clock, Award, Plus, Search, Filter, Edit, Trash2, AlertTriangle, CheckCircle, XCircle, BarChart3, Users, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -19,7 +19,7 @@ const statusColors = { scheduled: 'warning', completed: 'success', draft: 'defau
 
 const columns = [
   { key: 'id', header: 'Exam ID', width: '100px' },
-  { key: 'name', header: 'Exam Name', render: (v, row) => <div><p className="font-medium">{v}</p><p className="text-xs text-text-secondary">{row.course} • {row.students} students</p></div> },
+  { key: 'name', header: 'Exam Name', render: (v, row) => <div><p className="font-medium">{v}</p><p className="text-xs text-text-secondary">{row.course} � {row.students} students</p></div> },
   { key: 'type', header: 'Type', width: '100px', render: (v) => <Badge variant={typeColors[v]} size="sm">{v.charAt(0).toUpperCase() + v.slice(1)}</Badge> },
   { key: 'date', header: 'Date', width: '130px', render: (v) => formatDate(v) },
   { key: 'startTime', header: 'Time', width: '140px', render: (v, row) => `${v} - ${row.endTime}` },
@@ -123,57 +123,107 @@ const Exams = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Exams</h1>
-          <p className="text-text-secondary mt-1">Manage examinations and assessments</p>
+      {/* Premium Page Header */}
+      <div className="page-header">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="page-header-title">Examinations</h1>
+            <p className="page-header-subtitle">Manage examinations and assessments</p>
+          </div>
+          {isAdmin ? (
+            <Button onClick={() => setShowModal(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Schedule Exam
+            </Button>
+          ) : (
+            <span className="text-sm text-text-secondary bg-white/[0.03] px-3 py-1.5 rounded-lg">Read-only (admin only)</span>
+          )}
         </div>
-        {isAdmin ? (
-          <Button onClick={() => setShowModal(true)}><Plus className="w-4 h-4 mr-1" /> Schedule Exam</Button>
-        ) : (
-          <span className="text-sm text-text-secondary">Read-only (admin only)</span>
-        )}
       </div>
 
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card><div className="flex items-center gap-3"><div className="p-3 rounded-xl bg-primary/10 text-primary"><FileText className="w-6 h-6" /></div><div><p className="text-2xl font-bold text-text-primary">{stats.total}</p><p className="text-sm text-text-secondary">Total Exams</p></div></div></Card>
-        <Card><div className="flex items-center gap-3"><div className="p-3 rounded-xl bg-warning/10 text-warning"><Calendar className="w-6 h-6" /></div><div><p className="text-2xl font-bold text-warning">{stats.scheduled}</p><p className="text-sm text-text-secondary">Scheduled</p></div></div></Card>
-        <Card><div className="flex items-center gap-3"><div className="p-3 rounded-xl bg-success/10 text-success"><CheckCircle className="w-6 h-6" /></div><div><p className="text-2xl font-bold text-success">{stats.completed}</p><p className="text-sm text-text-secondary">Completed</p></div></div></Card>
-        <Card><div className="flex items-center gap-3"><div className="p-3 rounded-xl bg-gray/10 text-gray"><XCircle className="w-6 h-6" /></div><div><p className="text-2xl font-bold text-text-secondary">{stats.draft}</p><p className="text-sm text-text-secondary">Draft</p></div></div></Card>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+            <FileText className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xl font-bold text-text-primary">{stats.total}</p>
+            <p className="text-[11px] text-text-tertiary">Total Exams</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+            <Calendar className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xl font-bold text-text-primary">{stats.scheduled}</p>
+            <p className="text-[11px] text-text-tertiary">Scheduled</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+            <CheckCircle className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xl font-bold text-text-primary">{stats.completed}</p>
+            <p className="text-[11px] text-text-tertiary">Completed</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-500/10 text-slate-400">
+            <XCircle className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xl font-bold text-text-primary">{stats.draft}</p>
+            <p className="text-[11px] text-text-tertiary">Draft</p>
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <Card.Header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex flex-col sm:flex-row gap-3 flex-1 flex-wrap">
-            <div className="relative flex-1 min-w-[200px] max-w-xs"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" /><input type="text" placeholder="Search exams..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="input pl-10" /></div>
+      {/* Table Card */}
+      <div className="rounded-2xl bg-[#151C2C] border border-white/[0.06] shadow-[0_4px_20px_rgba(0,0,0,0.35)] overflow-hidden">
+        <div className="p-5 border-b border-white/[0.06]">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
+              <input 
+                type="text" 
+                placeholder="Search exams..." 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)} 
+                className="w-full h-10 pl-10 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 transition-all duration-200"
+              />
+            </div>
             <Dropdown value={typeFilter} onChange={setTypeFilter} options={types} placeholder="All Types" />
             <StatusDropdown value={statusFilter} onChange={setStatusFilter} options={statuses} />
           </div>
-          <div className="flex items-center gap-2">
-          </div>
-        </Card.Header>
-        <Card.Content>
+        </div>
+        <div className="p-5 pt-0">
           {error && (
-            <div className="mb-4 p-3 rounded-xl border border-border bg-background/50 text-sm text-text-secondary">
+            <div className="mt-4 p-3 rounded-xl border border-border bg-background/50 text-sm text-text-secondary">
               {error}
             </div>
           )}
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-12 text-text-secondary"><Loader2 className="w-5 h-5 animate-spin" /> Loading exams...</div>
+            <div className="flex items-center justify-center gap-2 py-16 text-text-secondary">
+              <Loader2 className="w-5 h-5 animate-spin" /> 
+              <span className="text-sm">Loading exams...</span>
+            </div>
           ) : (
-          <Table columns={columns} data={filteredExams} keyField="id" searchable={false} filterable={false} paginated pageSize={10}
-            rowActions={isAdmin ? [
-              { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: (r) => { handleOpenModal(r); }, variant: 'ghost', condition: (r) => r.status !== 'completed' },
-              { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: (r) => setDeleteConfirm(r), variant: 'danger', condition: (r) => r.status === 'draft' },
-              { label: 'Results', icon: <BarChart3 className="w-4 h-4" />, onClick: (r) => { setSelectedExam(r); setShowResults(true); }, variant: 'secondary' },
-            ] : [
-              { label: 'Results', icon: <BarChart3 className="w-4 h-4" />, onClick: (r) => { setSelectedExam(r); setShowResults(true); }, variant: 'secondary' },
-            ]}
-            emptyMessage="No exams found"
-          />
+            <Table columns={columns} data={filteredExams} keyField="id" searchable={false} filterable={false} paginated pageSize={10}
+              rowActions={isAdmin ? [
+                { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: (r) => { handleOpenModal(r); }, variant: 'ghost', condition: (r) => r.status !== 'completed' },
+                { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: (r) => setDeleteConfirm(r), variant: 'danger', condition: (r) => r.status === 'draft' },
+                { label: 'Results', icon: <BarChart3 className="w-4 h-4" />, onClick: (r) => { setSelectedExam(r); setShowResults(true); }, variant: 'secondary' },
+              ] : [
+                { label: 'Results', icon: <BarChart3 className="w-4 h-4" />, onClick: (r) => { setSelectedExam(r); setShowResults(true); }, variant: 'secondary' },
+              ]}
+              emptyMessage="No exams found"
+            />
           )}
-        </Card.Content>
-      </Card>
+        </div>
+      </div>
 
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setEditingExam(null); }} title={editingExam ? 'Edit Exam' : 'Schedule Exam'} size="lg"
         footer={<><Button variant="ghost" onClick={() => { setShowModal(false); setEditingExam(null); }}>Cancel</Button>{isAdmin && <Button onClick={handleSubmit}>{editingExam ? 'Update' : 'Create'}</Button>}</>}
@@ -181,7 +231,7 @@ const Exams = () => {
         <form className="space-y-4">
           <Input label="Exam Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Midterm Exam - CS101" required />
           <div className="grid grid-cols-2 gap-4">
-            <select className="select-themed" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option><option value="CS101">CS101</option><option value="CS201">CS201</option></select>
+            <select className="select-themed" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option><option value="CS101">CS101</option><option value="MATH201">MATH201</option><option value="PHYS101">PHYS101</option><option value="ENG110">ENG110</option><option value="OOP">OOP</option><option value="CPROG">CPROG</option><option value="MICRO">MICRO</option><option value="DBMS">DBMS</option><option value="OS">OS</option><option value="CN">CN</option><option value="MATH101">MATH101</option><option value="MATH102">MATH102</option><option value="STAT">STAT</option><option value="FM">FM</option><option value="BM">BM</option><option value="ECO">ECO</option><option value="CHEM101">CHEM101</option><option value="BIO101">BIO101</option><option value="IT">IT</option><option value="WEB">WEB</option></select>
             <select className="select-themed" value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })} required><option value="">Type</option>{types.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}</select>
           </div>
           <div className="grid grid-cols-3 gap-4">
@@ -201,14 +251,16 @@ const Exams = () => {
       >
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-4">
-            <Card className="bg-success/10"><p className="text-sm text-text-secondary">Average Score</p><p className="text-3xl font-bold text-success">-</p></Card>
-            <Card className="bg-primary/10"><p className="text-sm text-text-secondary">Highest</p><p className="text-3xl font-bold text-primary">-</p></Card>
-            <Card className="bg-warning/10"><p className="text-sm text-text-secondary">Lowest</p><p className="text-3xl font-bold text-warning">-</p></Card>
-            <Card className="bg-info/10"><p className="text-sm text-text-secondary">Pass Rate</p><p className="text-3xl font-bold text-info">-</p></Card>
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20"><p className="text-xs text-text-secondary">Average Score</p><p className="text-2xl font-bold text-emerald-500">-</p></div>
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20"><p className="text-xs text-text-secondary">Highest</p><p className="text-2xl font-bold text-amber-500">-</p></div>
+            <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20"><p className="text-xs text-text-secondary">Lowest</p><p className="text-2xl font-bold text-orange-500">-</p></div>
+            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20"><p className="text-xs text-text-secondary">Pass Rate</p><p className="text-2xl font-bold text-blue-500">-</p></div>
           </div>
-          <Card>
-            <Card.Title>Student Results</Card.Title>
-            <Card.Content>
+          <div className="rounded-2xl bg-[#151C2C] border border-white/[0.06] overflow-hidden">
+            <div className="p-5 border-b border-white/[0.06]">
+              <h3 className="font-display text-base font-semibold text-text-primary">Student Results</h3>
+            </div>
+            <div className="p-5">
               {selectedExam?.students ? (
                 <Table
                   columns={[
@@ -224,10 +276,10 @@ const Exams = () => {
                   pageSize={5}
                 />
               ) : (
-                <p className="text-sm text-text-secondary">No results available for this exam yet.</p>
+                <p className="text-sm text-text-secondary text-center py-8">No results available for this exam yet.</p>
               )}
-            </Card.Content>
-          </Card>
+            </div>
+          </div>
         </div>
       </Modal>
 

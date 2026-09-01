@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS Person (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL,
   contactInfo TEXT NOT NULL DEFAULT '',
-  discriminator TEXT NOT NULL CHECK (discriminator IN ('Student', 'Faculty', 'Accountant')),
+  discriminator TEXT NOT NULL CHECK (discriminator IN ('Student', 'Teacher', 'Accountant')),
   tempId TEXT
 );
 
@@ -19,15 +19,16 @@ CREATE TABLE IF NOT EXISTS Student (
   FOREIGN KEY (id) REFERENCES Person(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Faculty (
+CREATE TABLE IF NOT EXISTS Teacher (
   id INTEGER PRIMARY KEY,
   department TEXT,
-  title TEXT,
+  phone TEXT,
   email TEXT,
   hireDate TEXT,
   status TEXT DEFAULT 'active',
-  phone TEXT NOT NULL DEFAULT '',
-  FOREIGN KEY (id) REFERENCES Person(id) ON DELETE CASCADE
+  assignedClassroom TEXT DEFAULT '',
+  assignedCourse TEXT DEFAULT '',
+  FOREIGN KEY(id) REFERENCES Person(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Course (
@@ -40,7 +41,7 @@ CREATE TABLE IF NOT EXISTS Course (
   instructorId INTEGER,
   semester TEXT,
   status TEXT DEFAULT 'active',
-  FOREIGN KEY (instructorId) REFERENCES Faculty(id) ON DELETE SET NULL
+  FOREIGN KEY (instructorId) REFERENCES Teacher(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS Department (
@@ -131,7 +132,7 @@ CREATE TABLE IF NOT EXISTS Sections (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   course_id INTEGER NOT NULL,
   section_label TEXT NOT NULL DEFAULT 'A',
-  teacher_id INTEGER REFERENCES Faculty(id) ON DELETE SET NULL,
+  teacher_id INTEGER REFERENCES Teacher(id) ON DELETE SET NULL,
   student_count INTEGER NOT NULL DEFAULT 0,
   UNIQUE(course_id, section_label)
 );
@@ -182,14 +183,11 @@ INSERT OR IGNORE INTO Room (name, capacity, is_lab) VALUES
 ('Room 105', 60, 0), ('Lab A', 30, 1), ('Lab B', 30, 1), ('Lab C', 30, 1);
 
 
--- Default academic departments (idempotent: INSERT OR IGNORE, safe on every boot)
+DELETE FROM Department;
 INSERT OR IGNORE INTO Department (id, name) VALUES
-  (1, 'Computer Science'),
-  (2, 'Physics'),
-  (3, 'Mathematics'),
-  (4, 'English'),
-  (5, 'Chemistry'),
-  (6, 'Biology');
+  (1, 'BIM'),
+  (2, 'CSIT'),
+  (3, 'BCA');
 
 CREATE TABLE IF NOT EXISTS Users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -197,4 +195,25 @@ CREATE TABLE IF NOT EXISTS Users (
   password TEXT NOT NULL,
   role TEXT NOT NULL,
   name TEXT NOT NULL
+);
+
+-- Classroom table: links teachers and students to a physical classroom
+CREATE TABLE IF NOT EXISTS Classroom (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  room_number TEXT NOT NULL,
+  section_name TEXT NOT NULL,
+  capacity INTEGER NOT NULL DEFAULT 0 CHECK (capacity >= 0),
+  teacher_id INTEGER REFERENCES Teacher(id) ON DELETE SET NULL,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'maintenance')),
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Classroom-Student junction table (many-to-many)
+CREATE TABLE IF NOT EXISTS ClassroomStudent (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  classroom_id INTEGER NOT NULL REFERENCES Classroom(id) ON DELETE CASCADE,
+  student_id INTEGER NOT NULL REFERENCES Student(id) ON DELETE CASCADE,
+  enrolled_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(classroom_id, student_id)
 );

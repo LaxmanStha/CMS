@@ -1,9 +1,10 @@
+import { memo } from 'react';
 import { ChevronUp, ChevronDown, Search, Filter, MoreHorizontal, ChevronLeft, ChevronRight, Check, Minus } from 'lucide-react';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { cn, formatNumber } from '@/lib/utils';
 import { Badge } from './Badge';
 
-const Table = ({
+const Table = memo(({
   columns = [],
   data = [],
   keyField = 'id',
@@ -472,7 +473,8 @@ const Table = ({
       )}
     </div>
   );
-};
+});
+Table.displayName = 'Table';
 
 export default Table;
 export { Table };

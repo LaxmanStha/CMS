@@ -1,22 +1,24 @@
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
 
-const Badge = ({ 
-  children, 
-  variant = 'default', 
-  size = 'md', 
-  className, 
+const Badge = memo(({
+  children,
+  variant = 'default',
+  size = 'md',
+  className,
   dot = false,
-  ...props 
+  ...props
 }) => {
   const variants = {
-    default: 'bg-hover text-text-secondary',
-    primary: 'bg-badge-blue text-primary dark:bg-primary/20 dark:text-primary-light',
-    secondary: 'bg-badge-green text-secondary dark:bg-secondary/20 dark:text-secondary-light',
-    success: 'bg-badge-green text-success dark:bg-success/20 dark:text-success-light',
-    warning: 'bg-badge-yellow text-warning dark:bg-accent/20 dark:text-accent-light',
-    danger: 'bg-badge-red text-danger dark:bg-danger/20 dark:text-danger-light',
-    info: 'bg-info/10 text-info dark:bg-info/20',
-    outline: 'border border-border bg-transparent',
+    default: 'bg-white/[0.06] text-text-secondary border-white/[0.08]',
+    primary: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+    secondary: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    success: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+    warning: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+    danger: 'bg-red-500/10 text-red-500 border-red-500/20',
+    info: 'bg-sky-500/10 text-sky-500 border-sky-500/20',
+    outline: 'border border-white/[0.1] bg-transparent text-text-secondary',
+    glass: 'bg-white/[0.05] backdrop-blur-sm text-text-primary border-white/[0.1]',
   };
 
   const sizes = {
@@ -28,19 +30,20 @@ const Badge = ({
 
   const dotColors = {
     default: 'bg-gray-400',
-    primary: 'bg-primary',
-    secondary: 'bg-secondary',
-    success: 'bg-success',
-    warning: 'bg-accent',
-    danger: 'bg-danger',
-    info: 'bg-info',
+    primary: 'bg-amber-500',
+    secondary: 'bg-blue-500',
+    success: 'bg-emerald-500',
+    warning: 'bg-amber-500',
+    danger: 'bg-red-500',
+    info: 'bg-sky-500',
     outline: 'bg-text-secondary',
+    glass: 'bg-primary',
   };
 
   return (
     <span
       className={cn(
-        'inline-flex items-center font-medium rounded-full transition-colors',
+        'inline-flex items-center font-medium rounded-full transition-colors border',
         variants[variant],
         sizes[size],
         className
@@ -48,10 +51,11 @@ const Badge = ({
       {...props}
     >
       {dot && <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', dotColors[variant])} />}
-      {children}
+{children}
     </span>
   );
-};
+});
+Badge.displayName = 'Badge';
 
 export default Badge;
 export { Badge };

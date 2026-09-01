@@ -1,3 +1,4 @@
+import './styles/theme.css'
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -13,7 +14,10 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 30000,
+      refetchOnReconnect: 'always',
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
+      refetchInterval: false,
     },
   },
 });

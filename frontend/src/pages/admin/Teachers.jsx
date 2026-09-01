@@ -81,15 +81,23 @@ const AdminTeachers = () => {
     return () => { cancelled = true; };
   }, []);
 
-  const departmentOptions = useMemo(
-    () => departments.map((d) => ({ value: d, label: d })),
-    [departments]
-  );
+  const departmentOptions = useMemo(() => {
+    if (!Array.isArray(departments)) return [];
+    return departments.map((d) => {
+      const label = typeof d === 'string' ? d : (d.name || d);
+      const value = typeof d === 'string' ? d : (d.name || d);
+      return { value, label };
+    });
+  }, [departments]);
 
-  const courseOptions = useMemo(
-    () => courses.map((c) => ({ value: c, label: c })),
-    [courses]
-  );
+  const courseOptions = useMemo(() => {
+    if (!Array.isArray(courses)) return [];
+    return courses.map((c) => {
+      const label = typeof c === 'string' ? c : (c.name || c.code || c);
+      const value = typeof c === 'string' ? c : (c.name || c.code || c);
+      return { value, label };
+    });
+  }, [courses]);
 
   const filteredTeachers = useMemo(() => teachers.filter((t) => {
     const matchesSearch = !searchTerm ||

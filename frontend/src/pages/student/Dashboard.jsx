@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { CalendarCheck, Award, Wallet } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import { Card } from '@/components/ui/Card';
+import PageHeader from '@/components/ui/PageHeader';
 import { useMe, useStudentDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
@@ -16,35 +17,53 @@ const StudentDashboard = () => {
   const [feesLoading, setFeesLoading] = React.useState(true);
 
   React.useEffect(() => {
+    let cancelled = false;
     const loadFees = async () => {
       if (!personId) return;
       try {
         const res = await api.get(`/students/${personId}/fees`);
-        setFees(res.data || []);
+        if (!cancelled) setFees(res.data || []);
       } catch {
-        setFees([]);
+        if (!cancelled) setFees([]);
       } finally {
-        setFeesLoading(false);
+        if (!cancelled) setFeesLoading(false);
       }
     };
     loadFees();
+    return () => {
+      cancelled = true;
+    };
   }, [personId]);
 
-  const pendingFees = fees
-    .filter((f) => f.status === 'pending' || f.status === 'partial' || f.status === 'overdue')
-    .reduce((sum, f) => sum + Math.max(0, (Number(f.amount) || 0) - (Number(f.paid) || 0)), 0);
+  const pendingFees = React.useMemo(
+    () =>
+      fees
+        .filter((f) => f.status === 'pending' || f.status === 'partial' || f.status === 'overdue')
+        .reduce((sum, f) => sum + Math.max(0, (Number(f.amount) || 0) - (Number(f.paid) || 0)), 0),
+    [fees]
+  );
 
   const attendancePct = dashboardData?.attendancePercentage ?? 0;
-  const upcomingExams = dashboardData?.upcomingExams || [];
-  const recentGrades = dashboardData?.recentGrades || [];
-  const enrolledCourses = dashboardData?.enrolledCourses || [];
+  const upcomingExams = Array.isArray(dashboardData?.upcomingExams) ? dashboardData.upcomingExams : [];
+  const recentGrades = Array.isArray(dashboardData?.recentGrades) ? dashboardData.recentGrades : [];
+  const enrolledCourses = Array.isArray(dashboardData?.enrolledCourses) ? dashboardData.enrolledCourses : 
+                          (dashboardData?.enrolledCourses && typeof dashboardData.enrolledCourses === 'object' 
+                            ? Object.values(dashboardData.enrolledCourses) 
+                            : []);
+
+  const formatPercent = React.useCallback((v) => `${v}%`, []);
+  const formatCurrency = React.useCallback((v) => `$${v.toFixed(2)}`, []);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-text-primary">Student Dashboard</h1>
-        <p className="mt-1 text-text-secondary">Your academic summary at a glance</p>
-      </div>
+      <PageHeader
+        title="Student Dashboard"
+        subtitle="Your academic summary at a glance"
+        breadcrumbs={[
+          { label: 'Home', to: '/dashboard' },
+          { label: 'Student Dashboard' },
+        ]}
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
@@ -59,12 +78,12 @@ const StudentDashboard = () => {
           }
           loading={dashLoading}
           value={attendancePct > 0 ? Math.round(attendancePct) : undefined}
-          format={(v) => `${v}%`}
+          format={formatPercent}
         />
         <StatCard
           title="Grades"
           icon={Award}
-          iconClass="bg-[#7C3AED]/10 text-[#7C3AED]"
+          iconClass="bg-primary/10 text-primary"
           description={recentGrades.length > 0 ? `You have ${recentGrades.length} grade record(s).` : 'No grades recorded yet.'}
           action={
             <Link to="/student/grades" className="btn btn-primary btn-sm">
@@ -86,7 +105,7 @@ const StudentDashboard = () => {
           }
           loading={feesLoading}
           value={pendingFees}
-          format={(v) => `$${v.toFixed(2)}`}
+          format={formatCurrency}
         />
       </div>
 

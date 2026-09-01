@@ -1,115 +1,120 @@
-﻿import { Routes, Route, Navigate } from 'react-router-dom';
+import { Suspense, lazy, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import Layout from '@/components/layout/Layout';
 import Login from '@/pages/Login';
-import AdminDashboard from '@/pages/AdminDashboard';
-import StudentDashboard from '@/pages/student/Dashboard';
-import FacultyDashboard from '@/pages/faculty/Dashboard';
-import AccountantDashboard from '@/pages/AccountantDashboard';
-import Students from '@/pages/Students';
-import Faculty from '@/pages/Faculty';
-import Attendance from '@/pages/Attendance';
-import Exams from '@/pages/Exams';
-import Timetable from '@/pages/Timetable';
-import Teachers from '@/pages/Teachers';
-import Fees from '@/pages/Fees';
-import Reports from '@/pages/Reports';
-import Settings from '@/pages/Settings';
-import Logout from '@/pages/Logout';
-import Profile from '@/pages/Profile';
+import LoadingState from '@/components/ui/LoadingState';
 import { PrivateRoute } from '@/components/PrivateRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { NotificationsProvider } from '@/context/NotificationsContext';
-import Notifications from '@/pages/Notifications';
-import AdminStudents from '@/pages/admin/Students';
-import AdminFaculty from '@/pages/admin/Faculty';
-import AdminDepartments from '@/pages/admin/Departments';
-import StudentAttendance from '@/pages/student/Attendance';
-import StudentGrades from '@/pages/student/Grades';
-import StudentTimetable from '@/pages/student/Timetable';
-import FacultyAttendance from '@/pages/faculty/Attendance';
-import FacultyGrading from '@/pages/faculty/Grading';
-import AccountantDues from '@/pages/accountant/Dues';
-import AccountantInvoices from '@/pages/accountant/Invoices';
-import AccountantPayments from '@/pages/accountant/Payments';
 import { ROLE_HOME } from '@/config/navigation';
+
+const AdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
+const StudentDashboard = lazy(() => import('@/pages/student/Dashboard'));
+const FacultyDashboard = lazy(() => import('@/pages/faculty/Dashboard'));
+const AccountantDashboard = lazy(() => import('@/pages/AccountantDashboard'));
+const Notifications = lazy(() => import('@/pages/Notifications'));
+const Profile = lazy(() => import('@/pages/Profile'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const Logout = lazy(() => import('@/pages/Logout'));
+const Timetable = lazy(() => import('@/pages/Timetable'));
+const Fees = lazy(() => import('@/pages/Fees'));
+const MyFees = lazy(() => import('@/pages/MyFees'));
+const Reports = lazy(() => import('@/pages/Reports'));
+const Teachers = lazy(() => import('@/pages/Teachers'));
+const Students = lazy(() => import('@/pages/Students'));
+const Attendance = lazy(() => import('@/pages/Attendance'));
+const Exams = lazy(() => import('@/pages/Exams'));
+const InventoryDashboard = lazy(() => import('@/pages/InventoryDashboard'));
+const StoreInventory = lazy(() => import('@/components/StoreInventory'));
+const AdminStudents = lazy(() => import('@/pages/admin/Students'));
+const AdminTeachers = lazy(() => import('@/pages/admin/Teachers'));
+const AdminClassrooms = lazy(() => import('@/pages/admin/Classrooms'));
+const StudentAttendance = lazy(() => import('@/pages/student/Attendance'));
+const StudentGrades = lazy(() => import('@/pages/student/Grades'));
+const StudentTimetable = lazy(() => import('@/pages/student/Timetable'));
+const FacultyAttendance = lazy(() => import('@/pages/faculty/Attendance'));
+const FacultyGrading = lazy(() => import('@/pages/faculty/Grading'));
+const AccountantDues = lazy(() => import('@/pages/accountant/Dues'));
+const AccountantInvoices = lazy(() => import('@/pages/accountant/Invoices'));
+const AccountantPayments = lazy(() => import('@/pages/accountant/Payments'));
 
 function RoleHome() {
   const { user } = useAuth();
-  return <Navigate to={ROLE_HOME[user?.role] || '/login'} replace />;
+  return <Navigate to={ROLE_HOME[user?.role] || "/login"} replace />;
+}
+
+function withBoundary(node) {
+  return <ErrorBoundary>{node}</ErrorBoundary>;
 }
 
 function App() {
+  useEffect(() => {
+    document.body.classList.add("dark-premium");
+    document.body.classList.remove("light");
+  }, []);
+
+  const fallback = <LoadingState label="Loading…" size="lg" />;
+
   return (
     <NotificationsProvider>
-      <Routes>
-        <Route path="/login" element={<Login />} />
+      <Suspense fallback={fallback}>
+        <Routes>
+          <Route path="/login" element={withBoundary(<Login />)} />
+          <Route path="/inventory" element={withBoundary(<InventoryDashboard />)} />
+          <Route path="/store-inventory" element={withBoundary(<StoreInventory />)} />
 
-        <Route element={<PrivateRoute />}>
-          <Route element={<Layout />}>
-            {/* Shared by all authenticated users */}
-            <Route path="/dashboard" element={<RoleHome />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/logout" element={<Logout />} />
-          <Route path="/timetable" element={<Timetable />} />
-          <Route path="/fees" element={<Fees />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/teachers" element={<Teachers />} />
+          <Route element={<PrivateRoute />}>
+            <Route element={<Layout />}>
+              <Route path="/dashboard" element={<RoleHome />} />
+              <Route path="/notifications" element={withBoundary(<Notifications />)} />
+              <Route path="/profile" element={withBoundary(<Profile />)} />
+              <Route path="/settings" element={withBoundary(<Settings />)} />
+              <Route path="/logout" element={withBoundary(<Logout />)} />
+              <Route path="/timetable" element={withBoundary(<Timetable />)} />
+              <Route path="/fees" element={withBoundary(<Fees />)} />
+              <Route path="/my-fees" element={withBoundary(<MyFees />)} />
+              <Route path="/reports" element={withBoundary(<Reports />)} />
+              <Route path="/teachers" element={withBoundary(<Teachers />)} />
 
-          {/* Admin-only management */}
-          <Route element={<PrivateRoute allowedRoles={['admin']} />}>
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/students" element={<AdminStudents />} />
-            <Route path="/admin/faculty" element={<AdminFaculty />} />
-            <Route path="/students" element={<Students />} />
-            <Route path="/faculty-list" element={<Faculty />} />
-            <Route path="/attendance" element={<Attendance />} />
-            <Route path="/exams" element={<Exams />} />
-            <Route path="/courses" element={<AdminDepartments />} />
+<Route element={<PrivateRoute allowedRoles={["admin"]} />}>
+                <Route path="/admin" element={withBoundary(<AdminDashboard />)} />
+                <Route path="/classrooms" element={withBoundary(<AdminClassrooms />)} />
+                <Route path="/admin/students" element={withBoundary(<AdminStudents />)} />
+                <Route path="/admin/teachers" element={withBoundary(<AdminTeachers />)} />
+                <Route path="/students" element={withBoundary(<Students />)} />
+                <Route path="/attendance" element={withBoundary(<Attendance />)} />
+                <Route path="/exams" element={withBoundary(<Exams />)} />
+              </Route>
+
+              <Route element={<PrivateRoute allowedRoles={["faculty", "teacher"]} />}>
+                <Route path="/faculty" element={withBoundary(<FacultyDashboard />)} />
+                <Route path="/faculty/attendance" element={withBoundary(<FacultyAttendance />)} />
+                <Route path="/faculty/grading" element={withBoundary(<FacultyGrading />)} />
+              </Route>
+
+              <Route element={<PrivateRoute allowedRoles={["student"]} />}>
+                <Route path="/student" element={withBoundary(<StudentDashboard />)} />
+                <Route path="/student/attendance" element={withBoundary(<StudentAttendance />)} />
+                <Route path="/student/grades" element={withBoundary(<StudentGrades />)} />
+                <Route path="/student/timetable" element={withBoundary(<StudentTimetable />)} />
+              </Route>
+
+              <Route element={<PrivateRoute allowedRoles={["accountant"]} />}>
+                <Route path="/accountant" element={withBoundary(<AccountantDashboard />)} />
+                <Route path="/accountant/dues" element={withBoundary(<AccountantDues />)} />
+                <Route path="/accountant/invoices" element={withBoundary(<AccountantInvoices />)} />
+                <Route path="/accountant/payments" element={withBoundary(<AccountantPayments />)} />
+              </Route>
+            </Route>
           </Route>
 
-          {/* Faculty-only */}
-          <Route element={<PrivateRoute allowedRoles={['faculty']} />}>
-            <Route path="/faculty" element={<FacultyDashboard />} />
-            <Route path="/faculty/attendance" element={<FacultyAttendance />} />
-            <Route path="/faculty/grading" element={<FacultyGrading />} />
-          </Route>
-
-          {/* Student-only */}
-          <Route element={<PrivateRoute allowedRoles={['student']} />}>
-            <Route path="/student" element={<ErrorBoundary><StudentDashboard /></ErrorBoundary>} />
-            <Route path="/student/attendance" element={<StudentAttendance />} />
-            <Route path="/student/grades" element={<StudentGrades />} />
-            <Route path="/student/timetable" element={<StudentTimetable />} />
-          </Route>
-
-          {/* Accountant-only */}
-          <Route element={<PrivateRoute allowedRoles={['accountant']} />}>
-            <Route path="/accountant" element={<AccountantDashboard />} />
-            <Route path="/accountant/dues" element={<AccountantDues />} />
-            <Route path="/accountant/invoices" element={<AccountantInvoices />} />
-            <Route path="/accountant/payments" element={<AccountantPayments />} />
-          </Route>
-        </Route>
-      </Route>
-
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
-      </NotificationsProvider>
+      </Suspense>
+    </NotificationsProvider>
   );
 }
 
 export default App;
-
-
-
-
-
-
-
-
-
-

@@ -60,7 +60,7 @@ const AccountantPayments = () => {
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Payment Records</h2>
+        <h2 className="text-text-primary">Payment Records</h2>
         <div className="d-flex gap-2">
           <button className="btn btn-primary">Record Payment</button>
         </div>

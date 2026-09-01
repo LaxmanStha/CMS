@@ -1,119 +1,158 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { CalendarCheck, BookOpen, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Table } from '@/components/ui/Table';
+import StatCard from '@/components/ui/StatCard';
 import { useAuth } from '../../context/AuthContext';
 import api from '@/services/api';
+import { useStudentDashboard } from '@/hooks/useDashboard';
+import { cn } from '@/lib/utils';
+
+const getPercentageClass = (percentage) => {
+  if (percentage >= 90) return 'bg-success/10 text-success';
+  if (percentage >= 75) return 'bg-warning/10 text-warning';
+  return 'bg-danger/10 text-danger';
+};
+
+const columns = [
+  { key: 'name', header: 'Course', render: (v, row) => row.name || row.course || 'N/A' },
+  { key: 'code', header: 'Code', render: (v, row) => row.code || row.course || 'N/A' },
+  { key: 'attended', header: 'Attended', width: '100px' },
+  { key: 'total', header: 'Total', width: '100px' },
+  { key: 'percentage', header: 'Attendance', render: (v) => (
+    <div className="flex items-center gap-2">
+      <div className="flex-1 h-2 rounded-full bg-background overflow-hidden">
+        <div className={cn('h-full rounded-full transition-all duration-500', getPercentageClass(v))} style={{ width: `${v}%` }} />
+      </div>
+      <span className="text-sm font-medium text-text-primary w-10 text-right">{v}%</span>
+    </div>
+  ), width: '200px' },
+  { key: 'status', header: 'Status', render: (v) => (
+    <Badge variant={v >= 75 ? 'success' : v >= 60 ? 'warning' : 'danger'} size="sm">
+      {v >= 75 ? 'Good' : v >= 60 ? 'Warning' : 'Low'}
+    </Badge>
+  ), width: '100px' },
+];
 
 const StudentAttendance = () => {
   const { user } = useAuth();
-  const [attendance, setAttendance] = useState({ overall: 0, courses: [] });
-  const [loading, setLoading] = useState(true);
+  const { data: dashboardData, isLoading: dashLoading } = useStudentDashboard(user?.id);
+  const [records, setRecords] = useState([]);
+  const [recordsLoading, setRecordsLoading] = useState(true);
+  const [classroom, setClassroom] = useState('');
 
   useEffect(() => {
-    if (!user) return;
-    const fetchAttendance = async () => {
+    const fetchRecords = async () => {
       try {
-        const response = await api.get(`/students/${user.id}/attendance`);
-        setAttendance(response.data || { overall: 0, courses: [] });
-      } catch (err) {
-        console.error('Error fetching attendance:', err);
-        setAttendance({ overall: 0, courses: [] });
+        const res = await api.get(`/students/${user?.id}/attendance`);
+        const data = Array.isArray(res.data) ? res.data : [];
+        setRecords(data);
+        if (data.length > 0 && data[0].classroom) {
+          setClassroom(data[0].classroom);
+        }
+      } catch {
+        setRecords([]);
       } finally {
-        setLoading(false);
+        setRecordsLoading(false);
       }
     };
-    fetchAttendance();
-  }, [user]);
+    fetchRecords();
+  }, [user?.id]);
 
-  const courseList = Array.isArray(attendance?.courses) ? attendance.courses : [];
+  const overallPercentage = dashboardData?.attendancePercentage ?? 0;
+  const totalAttended = records.filter(r => r.status === 'present').length;
+  const totalClasses = records.length;
 
-  const getPercentageClass = (percentage) => {
-    if (percentage >= 90) return 'bg-success';
-    if (percentage >= 75) return 'bg-warning';
-    return 'bg-danger';
-  };
+  const courseStats = useMemo(() => {
+    const map = new Map();
+    records.forEach(r => {
+      const key = r.course || 'Unknown';
+      if (!map.has(key)) map.set(key, { name: key, code: key, attended: 0, total: 0 });
+      const entry = map.get(key);
+      entry.total++;
+      if (r.status === 'present') entry.attended++;
+    });
+    return Array.from(map.values()).map(c => ({
+      ...c,
+      percentage: c.total > 0 ? Math.round((c.attended / c.total) * 100) : 0,
+    }));
+  }, [records]);
 
-  if (loading) return <div className="container-fluid p-4"><div className="alert alert-info">Loading attendance...</div></div>;
+  if (dashLoading || recordsLoading) return (
+    <div className="flex items-center justify-center py-12">
+      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      <span className="ml-2 text-text-secondary">Loading attendance...</span>
+    </div>
+  );
 
   return (
-    <div className="container-fluid p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>My Attendance</h2>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-text-primary">My Attendance</h1>
+        <p className="text-text-secondary mt-1">Track your class attendance and participation</p>
+        {classroom && <p className="text-sm text-text-secondary mt-1">Classroom: <span className="font-medium text-text-primary">{classroom}</span></p>}
       </div>
-      <div className="row mb-4">
-        <div className="col-md-4">
-          <div className="card">
-            <div className="card-body text-center">
-              <h5 className="card-title">Overall Attendance</h5>
-              <div className="display-1 text-primary">{attendance.overall || 0}%</div>
-              <div className="progress mt-2" style={{ height: '20px' }}>
-                <div className="progress-bar" role="progressbar" style={{ width: `${attendance.overall || 0}%` }} aria-valuenow={attendance.overall || 0} aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card">
-            <div className="card-body text-center">
-              <h5 className="card-title">Classes Attended</h5>
-              <div className="display-1 text-success">{courseList.reduce((sum, c) => sum + (Number(c.attended) || 0), 0)}</div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card">
-            <div className="card-body text-center">
-              <h5 className="card-title">Total Classes</h5>
-              <div className="display-1 text-info">{courseList.reduce((sum, c) => sum + (Number(c.total) || 0), 0)}</div>
-            </div>
-          </div>
-        </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Overall Attendance"
+          icon={CalendarCheck}
+          iconClass="bg-primary/10 text-primary"
+          loading={dashLoading}
+          value={overallPercentage > 0 ? Math.round(overallPercentage) : 0}
+          format={(v) => `${v}%`}
+        />
+        <StatCard
+          title="Classes Attended"
+          icon={CheckCircle}
+          iconClass="bg-success/10 text-success"
+          loading={recordsLoading}
+          value={totalAttended}
+        />
+        <StatCard
+          title="Total Classes"
+          icon={BookOpen}
+          iconClass="bg-info/10 text-info"
+          loading={recordsLoading}
+          value={totalClasses}
+        />
+        <StatCard
+          title="Absences"
+          icon={XCircle}
+          iconClass="bg-danger/10 text-danger"
+          loading={recordsLoading}
+          value={totalClasses - totalAttended}
+        />
       </div>
-      <div className="card">
-        <div className="card-header">
-          <h5 className="card-title mb-0">Course-wise Attendance</h5>
-        </div>
-        <div className="card-body">
-          {courseList.length === 0 ? (
-            <div className="text-center text-muted py-4">No attendance records available yet.</div>
+
+      <Card>
+        <Card.Header className="p-6">
+          <Card.Title>Course-wise Attendance</Card.Title>
+          <Card.Description>Your attendance breakdown by course</Card.Description>
+        </Card.Header>
+        <Card.Content className="p-0">
+          {courseStats.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-text-secondary">
+              <CalendarCheck className="w-12 h-12 mb-3 text-border" />
+              <p className="text-lg font-medium">No attendance records yet</p>
+              <p className="text-sm">Your course attendance will appear here once recorded.</p>
+            </div>
           ) : (
-            <div className="table-responsive">
-              <table className="table table-striped table-hover">
-                <thead>
-                  <tr>
-                    <th>Course</th>
-                    <th>Code</th>
-                    <th>Attended</th>
-                    <th>Total</th>
-                    <th>Percentage</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {courseList.map((course, index) => (
-                    <tr key={index}>
-                      <td>{course.name || course.course || "�"}</td>
-                      <td>{course.code || "�"}</td>
-                      <td>{course.attended}</td>
-                      <td>{course.total}</td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div className="progress flex-grow-1 me-2" style={{ height: '15px' }}>
-                            <div className="progress-bar" role="progressbar" style={{ width: `${course.percentage}%` }} aria-valuenow={course.percentage} aria-valuemin="0" aria-valuemax="100"></div>
-                          </div>
-                          <span>{course.percentage}%</span>
-                        </div>
-                      </td>
-                      <td><span className={`badge ${getPercentageClass(course.percentage)}`}>{course.percentage >= 75 ? 'Good' : 'Low'}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Table
+              columns={columns}
+              data={courseStats}
+              keyField="code"
+              searchable={false}
+              filterable={false}
+              paginated={false}
+              emptyMessage="No attendance records found"
+            />
           )}
-        </div>
-      </div>
+        </Card.Content>
+      </Card>
     </div>
   );
 };
 
 export default StudentAttendance;
-

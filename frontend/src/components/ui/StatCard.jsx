@@ -1,13 +1,9 @@
+import { memo } from 'react';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Card } from './Card';
 import { cn } from '@/lib/utils';
 
-/**
- * Reusable statistic card used across all dashboards.
- * White card with a colored icon container, label, large Manrope number,
- * optional trend indicator and optional action/description.
- */
-const StatCard = ({
+const StatCard = memo(({
   title,
   value,
   icon: Icon,
@@ -51,6 +47,7 @@ const StatCard = ({
       )}
     </div>
   </Card>
-);
+));
+StatCard.displayName = 'StatCard';
 
 export default StatCard;

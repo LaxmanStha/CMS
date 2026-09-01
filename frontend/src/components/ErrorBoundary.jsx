@@ -18,7 +18,7 @@ export default class ErrorBoundary extends Component {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
       return (
-        <div className="min-h-screen flex items-center justify-center bg-[#000] p-4">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--ds-bg)] p-4">
           <div className="max-w-lg w-full rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6">
             <h2 className="text-lg font-semibold text-text-primary mb-2">Something went wrong</h2>
             <p className="text-sm text-text-secondary mb-4">

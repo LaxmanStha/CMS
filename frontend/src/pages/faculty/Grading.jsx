@@ -11,7 +11,7 @@ const FacultyGrading = () => {
     if (!user) return;
     const fetchGrades = async () => {
       try {
-        const response = await api.get(`/faculty/${user.id}/grades/pending`);
+        const response = await api.get(`/teachers/${user.id}/grades/pending`);
         setGrades(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         console.error('Error fetching grades:', err);
@@ -28,7 +28,7 @@ const FacultyGrading = () => {
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Grading Center</h2>
+        <h2 className="text-text-primary">Grading Center</h2>
       </div>
       <div className="card">
         <div className="card-header">

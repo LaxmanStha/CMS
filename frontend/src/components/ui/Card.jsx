@@ -1,13 +1,14 @@
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
 
-const Card = ({ 
-  className, 
-  children, 
-  hover = false, 
+const Card = memo(({
+  className,
+  children,
+  hover = false,
   padding = 'p-6',
   border = true,
   shadow = 'card',
-  ...props 
+  ...props
 }) => {
   return (
     <div
@@ -24,37 +25,43 @@ const Card = ({
       {children}
     </div>
   );
-};
+});
+Card.displayName = 'Card';
 
-const CardHeader = ({ className, children, ...props }) => (
+const CardHeader = memo(({ className, children, ...props }) => (
   <div className={cn('mb-4', className)} {...props}>
     {children}
   </div>
-);
+));
+CardHeader.displayName = 'CardHeader';
 
-const CardTitle = ({ className, children, ...props }) => (
+const CardTitle = memo(({ className, children, ...props }) => (
   <h3 className={cn('text-xl font-semibold text-text-primary', className)} {...props}>
     {children}
   </h3>
-);
+));
+CardTitle.displayName = 'CardTitle';
 
-const CardDescription = ({ className, children, ...props }) => (
+const CardDescription = memo(({ className, children, ...props }) => (
   <p className={cn('text-text-secondary text-sm mt-1', className)} {...props}>
     {children}
   </p>
-);
+));
+CardDescription.displayName = 'CardDescription';
 
-const CardContent = ({ className, children, ...props }) => (
+const CardContent = memo(({ className, children, ...props }) => (
   <div className={cn('', className)} {...props}>
     {children}
   </div>
-);
+));
+CardContent.displayName = 'CardContent';
 
-const CardFooter = ({ className, children, ...props }) => (
+const CardFooter = memo(({ className, children, ...props }) => (
   <div className={cn('mt-4 pt-4 border-t border-border flex items-center gap-3', className)} {...props}>
     {children}
   </div>
-);
+));
+CardFooter.displayName = 'CardFooter';
 
 Card.Header = CardHeader;
 Card.Title = CardTitle;

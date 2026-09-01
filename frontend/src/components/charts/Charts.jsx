@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -18,41 +18,37 @@ import {
 } from 'recharts';
 
 export const CHART_PALETTE = [
-  '#2563EB', // blue
-  '#0EA5E9', // sky
-  '#7C3AED', // violet
-  '#F59E0B', // amber
-  '#16A34A', // green
-  '#F43F5E', // rose
-  '#06B6D4', // cyan
+  '#F59E0B', // amber (primary)
+  '#2563EB', // blue (secondary)
+  '#10B981', // emerald
+  '#38BDF8', // sky
+  '#8B5CF6', // violet
+  '#EF4444', // red
+  '#FB9F1C', // amber-alt
   '#64748B', // slate
 ];
 
-const AXIS_COLOR = 'var(--ds-grey)';
-const GRID_COLOR = 'var(--ds-border)';
+const AXIS_COLOR = '#64748B';
+const GRID_COLOR = 'rgba(30, 41, 61, 0.5)';
 
 const tooltipStyle = {
-  backgroundColor: 'var(--ds-surface)',
-  border: '1px solid var(--ds-border)',
-  borderRadius: '12px',
-  boxShadow: 'var(--ds-shadow)',
-  color: 'var(--ds-navy)',
-  fontFamily: 'inherit',
+  backgroundColor: '#111827',
+  border: '1px solid rgba(245, 158, 11, 0.15)',
+  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
+  color: '#F8FAFC',
+  fontFamily: 'Inter, sans-serif',
   fontSize: '13px',
+  borderRadius: '12px',
+  padding: '12px 16px',
 };
 
 const EmptyState = ({ dark }) => (
-  <div className="d-flex align-items-center justify-content-center h-100 text-center">
-    <div>
-      <div
-        className="mx-auto mb-2"
-        style={{ fontSize: 28, opacity: 0.5 }}
-      >
-        &#9684;
+  <div className="flex items-center justify-center h-full text-center">
+    <div className="flex flex-col items-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.03] mb-4">
+        <span className="text-2xl opacity-40">📊</span>
       </div>
-      <p className={`small mb-0 ${dark ? 'text-white/60' : 'text-muted'}`}>
-        No data available yet.
-      </p>
+      <p className="text-sm text-text-tertiary">No data available yet</p>
     </div>
   </div>
 );
@@ -64,22 +60,15 @@ export const ChartCard = ({
   dark = false,
   className = '',
 }) => (
-  <div className={`card h-100 ${dark ? 'dark-card' : ''} ${className}`}>
-    <div className="card-header d-flex flex-column gap-1">
-      <h5
-        className={`card-title ${dark ? 'text-white' : ''}`}
-        style={{ marginBottom: 0 }}
-      >
-        {title}
-      </h5>
+  <div className={`rounded-2xl bg-[#151C2C] border border-white/[0.06] shadow-[0_4px_20px_rgba(0,0,0,0.35)] overflow-hidden ${className}`}>
+    <div className="px-6 py-5 border-b border-white/[0.06]">
+      <h5 className="font-display text-base font-semibold text-text-primary">{title}</h5>
       {subtitle && (
-        <span className={`small ${dark ? 'text-white/60' : 'text-muted'}`}>
-          {subtitle}
-        </span>
+        <span className="text-xs text-text-tertiary mt-1 block">{subtitle}</span>
       )}
     </div>
-    <div className="card-body">
-      <div className="chart-container">{children}</div>
+    <div className="p-6">
+      <div className="h-[300px] w-full">{children}</div>
     </div>
   </div>
 );
@@ -115,7 +104,7 @@ export const BarChartBox = ({
           axisLine={false}
           type={layout === 'horizontal' ? 'number' : 'category'}
         />
-        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgba(37,99,235,0.06)' }} />
+        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgba(56,189,248,0.06)' }} />
         <Legend wrapperStyle={{ fontSize: 12, color: AXIS_COLOR }} />
         {bars.map((b, i) => (
           <Bar
@@ -248,7 +237,7 @@ export const PieChartBox = ({
           innerRadius={donut ? '58%' : 0}
           outerRadius="82%"
           paddingAngle={2}
-          stroke="var(--ds-surface)"
+          stroke="#151C2C"
           strokeWidth={2}
         >
           {data.map((entry, i) => (
@@ -263,8 +252,8 @@ export const PieChartBox = ({
             y="50%"
             textAnchor="middle"
             dominantBaseline="middle"
-            fill="var(--ds-navy)"
-            style={{ fontSize: 14, fontWeight: 700, fontFamily: 'inherit' }}
+            fill="#F8FAFC"
+            style={{ fontSize: 14, fontWeight: 700, fontFamily: 'Inter, sans-serif' }}
           >
             {centerLabel}
           </text>
@@ -273,3 +262,4 @@ export const PieChartBox = ({
     </ResponsiveContainer>
   );
 };
+

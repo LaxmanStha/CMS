@@ -53,7 +53,7 @@ const StudentTimetable = () => {
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>My Timetable</h2>
+        <h2 className="text-text-primary">My Timetable</h2>
         <div>
           <label className="me-2">Week:</label>
           <select className="form-select form-select-sm d-inline-block w-auto" value={week} onChange={e => setWeek(e.target.value)}>
@@ -85,7 +85,7 @@ const StudentTimetable = () => {
                       return (
                         <td key={day} className="align-middle">
                           {cls ? (
-                            <div className="p-2 bg-light border rounded">
+                            <div className="p-2 bg-[var(--bg-surface-alt)] border rounded">
                               <div className="fw-bold small">{cls.course}</div>
                               <div className="text-muted small">{cls.room}</div>
                               <div className="text-muted small">{cls.faculty}</div>
