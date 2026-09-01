@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Users, UserCheck, UserCog } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Select } from "@/components/ui/Select";
+import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
 import { SearchInput } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
@@ -37,7 +37,11 @@ const Teachers = () => {
     try {
       setLoading(true);
       const res = await api.get("/teachers");
-      setTeachers(Array.isArray(res.data) ? res.data : []);
+      setTeachers(Array.isArray(res.data) ? res.data.map(t => ({
+        ...t,
+        department: typeof t.department === 'string' ? t.department : t.department?.name || '',
+        assignedCourse: typeof t.assignedCourse === 'string' ? t.assignedCourse : t.assignedCourse?.name || '',
+      })) : []);
     } catch (err) {
       showError("Failed to load teachers");
       setTeachers([]);
@@ -175,96 +179,46 @@ const Teachers = () => {
   };
 
   return (
-    <div className="container-fluid p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="text-text-primary">Manage Teachers</h2>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          {isAdmin && <button className="btn btn-primary me-2" onClick={() => handleOpenModal()}><Plus className="w-4 h-4 me-1" />Add Teacher</button>}
-          {!isAdmin && <span className="text-sm text-text-secondary bg-white/[0.03] px-3 py-1.5 rounded-lg">Read-only (admin only)</span>}
+          <h1 className="text-2xl font-bold text-text-primary">Teachers</h1>
+          <p className="text-text-secondary mt-1">Manage teachers and their assignments</p>
         </div>
+        {isAdmin ? (
+          <Button onClick={() => handleOpenModal()}>
+            <Plus className="w-4 h-4 mr-1" />
+            Add Teacher
+          </Button>
+        ) : (
+          <span className="text-sm text-text-secondary">Read-only (admin only)</span>
+        )}
       </div>
 
-      <div className="row g-3 mb-4">
-        <div className="col">
-          <div className="card bg-primary/10">
-            <div className="card-body d-flex align-items-center gap-2">
-              <div className="d-flex align-items-center justify-content-center rounded bg-blue-500/10 text-blue-500" style={{ width: 44, height: 44 }}>
-                <Users className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="h4 mb-0 text-text-primary">{stats.total}</p>
-                <p className="text-xs text-text-tertiary mb-0">Total Faculty</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col">
-          <div className="card bg-success/10">
-            <div className="card-body d-flex align-items-center gap-2">
-              <div className="d-flex align-items-center justify-content-center rounded bg-emerald-500/10 text-emerald-500" style={{ width: 44, height: 44 }}>
-                <UserCheck className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="h4 mb-0 text-text-primary">{stats.active}</p>
-                <p className="text-xs text-text-secondary mb-0">Active</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col">
-          <div className="card bg-warning/10">
-            <div className="card-body d-flex align-items-center gap-2">
-              <div className="d-flex align-items-center justify-content-center rounded bg-amber-500/10 text-amber-500" style={{ width: 44, height: 44 }}>
-                <UserCog className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="h4 mb-0 text-text-primary">{stats.onLeave}</p>
-                <p className="text-xs text-text-tertiary mb-0">On Leave</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="card-header">
-          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div className="d-flex gap-2 flex-wrap">
-              <SearchInput
-                value={searchTerm}
-                onChange={setSearchTerm}
-                onClear={() => setSearchTerm("")}
+      <Card>
+        <Card.Header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 flex-1">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" />
+              <input
+                type="text"
                 placeholder="Search teachers..."
-                className="w-auto min-w-[200px]"
-              />
-              <Select
-                trigger="hover"
-                value={deptFilter}
-                onChange={setDeptFilter}
-                options={[{ value: "", label: "All Departments" }, ...departmentOptions]}
-                placeholder="All Departments"
-                className="w-auto min-w-[140px]"
-              />
-              <Select
-                trigger="hover"
-                value={courseFilter}
-                onChange={setCourseFilter}
-                options={[{ value: "", label: "All Courses" }, ...courseOptions]}
-                placeholder="All Courses"
-                className="w-auto min-w-[140px]"
-              />
-              <Select
-                trigger="hover"
-                value={statusFilter}
-                onChange={setStatusFilter}
-                options={[{ value: "", label: "All Status" }, ...STATUSES.map((s) => ({ value: s, label: statusLabel(s) }))]}
-                placeholder="All Status"
-                className="w-auto min-w-[140px]"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input pl-10"
               />
             </div>
+            <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)} className="input w-auto min-w-[150px]">
+              <option value="">All Departments</option>
+              {departments.map(d => <option key={String(d)} value={d}>{d}</option>)}
+            </select>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="input w-auto min-w-[150px]">
+              <option value="">All Status</option>
+              {STATUSES.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
+            </select>
           </div>
-        </div>
-        <div className="card-body">
+        </Card.Header>
+        <Card.Content>
           <div className="table-responsive">
             <table className="table table-striped table-hover">
               <thead>
@@ -316,11 +270,11 @@ const Teachers = () => {
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
+        </Card.Content>
+      </Card>
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingTeacher ? "Edit Teacher" : "Add Teacher"} size="lg"
-        footer={<><Button variant="ghost" onClick={() => setShowModal(false)} disabled={saving}>Cancel</Button>{isAdmin && <Button onClick={handleSubmit} loading={saving}>{editingTeacher ? "Update" : "Create"}</Button>}</>}
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingTeacher ? 'Edit Teacher' : 'Add Teacher'} size="lg"
+        footer={<><Button variant="ghost" onClick={() => setShowModal(false)} disabled={saving}>Cancel</Button>{isAdmin && <Button onClick={handleSubmit} loading={saving}>{editingTeacher ? 'Update' : 'Create'}</Button>}</>}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -330,15 +284,15 @@ const Teachers = () => {
             <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="+1-555-0000" />
             <select className="select-themed" value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} required>
               <option value="">Select Department</option>
-              {departmentOptions.map((d) => <option key={String(d.value)} value={d.value}>{d.label}</option>)}
+              {departments.map(d => <option key={String(d)} value={d}>{d}</option>)}
             </select>
             <select className="select-themed" value={formData.assignedCourse} onChange={(e) => setFormData({...formData, assignedCourse: e.target.value})}>
               <option value="">Select Course</option>
-              {courseOptions.map((c) => <option key={String(c.value)} value={c.value}>{c.label}</option>)}
+              {courses.map(c => <option key={String(c)} value={c}>{c}</option>)}
             </select>
             <Input label="Assigned Classroom" value={formData.assignedClassroom} onChange={(e) => setFormData({...formData, assignedClassroom: e.target.value})} placeholder="e.g. A101" />
             <select className="select-themed" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
-              {STATUSES.map((s) => <option key={s} value={s}>{statusLabel(s)}</option>)}
+              {STATUSES.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
             </select>
             <Input label="Hire Date" type="date" value={formData.hireDate} onChange={(e) => setFormData({...formData, hireDate: e.target.value})} />
           </div>
@@ -348,7 +302,7 @@ const Teachers = () => {
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Delete Teacher" variant="danger" size="sm"
         footer={<><Button variant="ghost" onClick={() => setDeleteConfirm(null)}>Cancel</Button><Button variant="danger" onClick={confirmDelete}>Delete</Button></>}
       >
-        <p className="text-text-secondary">Delete <strong>{deleteConfirm?.name}</strong> (TCH{String(deleteConfirm?.id).padStart(3, "0")})? This cannot be undone.</p>
+        <p className="text-text-secondary">Delete <strong>{deleteConfirm?.name}</strong> (TCH{String(deleteConfirm?.id).padStart(3, '0')})? This cannot be undone.</p>
       </Modal>
     </div>
   );

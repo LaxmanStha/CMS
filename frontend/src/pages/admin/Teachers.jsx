@@ -47,7 +47,11 @@ const AdminTeachers = () => {
     try {
       setLoading(true);
       const res = await api.get("/teachers");
-      setTeachers(Array.isArray(res.data) ? res.data : []);
+      setTeachers(Array.isArray(res.data) ? res.data.map(t => ({
+        ...t,
+        department: typeof t.department === 'string' ? t.department : t.department?.name || '',
+        assignedCourse: typeof t.assignedCourse === 'string' ? t.assignedCourse : t.assignedCourse?.name || '',
+      })) : []);
     } catch {
       showError("Failed to load teachers");
       setTeachers([]);
