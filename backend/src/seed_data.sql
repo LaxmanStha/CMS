@@ -162,19 +162,6 @@ INSERT OR IGNORE INTO Fee (studentId, student, course, amount, paid, dueDate, se
   VALUES (7, 'Liam Wilson', 'PHYS101', 1200, 400, '2026-08-19', 'Fall 2024', 'partial');
 INSERT OR IGNORE INTO Fee (studentId, student, course, amount, paid, dueDate, semester, status)
   VALUES (8, 'Olivia Brown', 'ENG110', 1200, 1200, '2026-01-12', 'Fall 2024', 'paid');
-
--- ============================================================
--- Attendance
--- ============================================================
-INSERT OR IGNORE INTO Attendance (studentId, student, course, date, status, time)
-  VALUES (3, 'Alex Johnson', 'CS101', date('now','-1 day'), 'present', '09:00');
-INSERT OR IGNORE INTO Attendance (studentId, student, course, date, status, time)
-  VALUES (3, 'Alex Johnson', 'MATH201', date('now','-1 day'), 'present', '11:00');
-INSERT OR IGNORE INTO Attendance (studentId, student, course, date, status, time)
-  VALUES (3, 'Alex Johnson', 'PHYS101', date('now','-2 day'), 'absent', '13:00');
-INSERT OR IGNORE INTO Attendance (studentId, student, course, date, status, time)
-  VALUES (3, 'Alex Johnson', 'CS101', date('now','-2 day'), 'present', '09:00');
-
 -- ============================================================
 -- Exams
 -- ============================================================
@@ -184,6 +171,7 @@ INSERT OR IGNORE INTO Exam (name, course, date, startTime, endTime, type, locati
   VALUES ('Quiz 2', 'MATH201', date('now','+12 days'), '11:00', '11:45', 'quiz', 'Room 102', 'scheduled', 1);
 INSERT OR IGNORE INTO Exam (name, course, date, startTime, endTime, type, location, status, students)
   VALUES ('Lab Final', 'PHYS101', date('now','+15 days'), '13:00', '15:00', 'final', 'Room 103', 'scheduled', 1);
+
 
 -- ============================================================
 -- Timetable
@@ -198,15 +186,4 @@ INSERT OR IGNORE INTO Timetable (course, day, time, room, instructor, type)
 
 -- (Classroom / ClassroomStudent removed: classroom is now a per-teacher
 -- string field on Teacher.assignedClassroom and Student.classroom.)
-
--- A few attendance rows so the roster prefill is visible (idempotent)
-INSERT INTO Attendance (studentId, student, course, date, status, time)
-  SELECT 3, 'Alex Johnson', 'CS-A', date('now'), 'present', '09:00'
-  WHERE NOT EXISTS (SELECT 1 FROM Attendance WHERE studentId='3' AND course='CS-A' AND date=date('now'));
-INSERT INTO Attendance (studentId, student, course, date, status, time)
-  SELECT 5, 'ram', 'CS-A', date('now'), 'absent', '09:00'
-  WHERE NOT EXISTS (SELECT 1 FROM Attendance WHERE studentId='5' AND course='CS-A' AND date=date('now'));
-INSERT INTO Attendance (studentId, student, course, date, status, time)
-  SELECT 6, 'Emma Davis', 'CS-A', date('now'), 'present', '09:00'
-  WHERE NOT EXISTS (SELECT 1 FROM Attendance WHERE studentId='6' AND course='CS-A' AND date=date('now'));
 

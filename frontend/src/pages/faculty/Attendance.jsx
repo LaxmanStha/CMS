@@ -22,9 +22,7 @@ const FacultyAttendance = () => {
 
   const [classrooms, setClassrooms] = useState([]);
   const [classroomsLoading, setClassroomsLoading] = useState(true);
-
-  const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState('');
+  const [classroomsError, setClassroomsError] = useState('');
 
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
@@ -39,22 +37,14 @@ const FacultyAttendance = () => {
   useEffect(() => {
     const loadMeta = async () => {
       setClassroomsLoading(true);
+      setClassroomsError('');
       try {
-        const [crRes, ttRes] = await Promise.all([
-          api.get(`/teachers/${user?.id}/classrooms`),
-          api.get(`/teachers/${user?.id}/classes/upcoming`),
-        ]);
+        const crRes = await api.get(`/teachers/${user?.id}/classrooms`);
         const crRows = Array.isArray(crRes.data) ? crRes.data : [];
         setClassrooms(crRows);
-        const rows = Array.isArray(ttRes.data) ? ttRes.data : [];
-        const seen = new Set();
-        const unique = rows
-          .filter(r => r.course && !seen.has(r.course) && (seen.add(r.course), true))
-          .map(r => ({ value: r.course, label: r.course }));
-        setCourses(unique);
       } catch {
         setClassrooms([]);
-        setCourses([]);
+        setClassroomsError('Unable to load rooms');
       } finally {
         setClassroomsLoading(false);
       }
@@ -101,11 +91,16 @@ const FacultyAttendance = () => {
   }, [selectedClassroomId, selectedDate]);
 
   const classroomOptions = useMemo(
-    () =>
-      classrooms.map(c => ({
-        value: String(c.id),
-        label: `${c.section_name || 'Class'}${c.room_number ? ` · ${c.room_number}` : ''}`,
-      })),
+    () => {
+      const seenRooms = new Set();
+      return classrooms.reduce((options, classroom) => {
+        const roomNumber = String(classroom.room_number || '').trim();
+        if (!roomNumber || seenRooms.has(roomNumber)) return options;
+        seenRooms.add(roomNumber);
+        options.push({ value: String(classroom.id), label: roomNumber });
+        return options;
+      }, []);
+    },
     [classrooms]
   );
 
@@ -114,8 +109,6 @@ const FacultyAttendance = () => {
     [classrooms, selectedClassroomId]
   );
 
-  const courseOptions = useMemo(() => courses, [courses]);
-
   const setStudentStatus = (sid, status) =>
     setRosterStatus(prev => ({ ...prev, [sid]: status }));
   const setStudentNotes = (sid, notes) =>
@@ -123,7 +116,6 @@ const FacultyAttendance = () => {
 
   const saveRoster = async () => {
     if (!selectedClassroomId) { error('Please select a classroom'); return; }
-    if (!selectedCourse) { error('Please select a course'); return; }
     setSavingRoster(true);
     try {
       const records = classroomStudents.map(s => ({
@@ -133,7 +125,7 @@ const FacultyAttendance = () => {
         notes: rosterNotes[String(s.id)] || '',
       }));
       await api.post(`/classroom/${selectedClassroomId}/attendance`, {
-        course: selectedCourse,
+        teacherId: user.id,
         date: selectedDate,
         time: new Date().toTimeString().slice(0, 5),
         records,
@@ -155,7 +147,7 @@ const FacultyAttendance = () => {
       <div>
         <h1 className="text-2xl font-bold text-text-primary">Take Attendance</h1>
         <p className="text-text-secondary mt-1">
-          Pick a classroom, course, and date, then mark each student.
+          Pick a classroom and date, then mark each student.
         </p>
       </div>
 
@@ -170,27 +162,19 @@ const FacultyAttendance = () => {
               {selectedClassroomId
                 ? `${selectedClassroom?.section_name || 'Class'} · ${selectedClassroom?.room_number || ''}`.trim()
                 : 'No classroom selected'}
-              {' '}· {formatDate(selectedDate)} · {selectedCourse || 'no course'}
+              {' '}· {formatDate(selectedDate)}
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
           <Select
             label="Classroom"
             value={selectedClassroomId}
             onChange={setSelectedClassroomId}
             options={classroomOptions}
-            placeholder={classroomsLoading ? 'Loading...' : 'Select classroom'}
-            disabled={classroomsLoading}
-          />
-          <Select
-            label="Course"
-            value={selectedCourse}
-            onChange={setSelectedCourse}
-            options={courseOptions}
-            placeholder={classroomsLoading ? 'Loading...' : 'Select course'}
-            disabled={classroomsLoading}
+            placeholder={classroomsLoading ? 'Loading rooms...' : classroomsError ? classroomsError : classroomOptions.length ? 'Select Room Number' : 'No rooms available'}
+            disabled={classroomsLoading || !!classroomsError}
           />
           <Input
             label="Date"
@@ -260,7 +244,7 @@ const FacultyAttendance = () => {
               <p className="text-xs text-text-tertiary">
                 {presentCount} of {classroomStudents.length} marked present.
               </p>
-              <Button onClick={saveRoster} disabled={savingRoster || !selectedCourse}>
+              <Button onClick={saveRoster} disabled={savingRoster}>
                 {savingRoster ? (
                   <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
                 ) : (

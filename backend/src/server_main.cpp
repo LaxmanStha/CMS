@@ -683,9 +683,10 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
                       JsonVal o;o.type=JsonVal::Arr; return send(200,o);
                   } else if (rest.substr(slash) == "/classrooms" && req.method == "GET") {
                      JsonVal rows = db.queryArray(
-                         "SELECT c.id, c.room_number, c.section_name, c.capacity, c.teacher_id, c.status, c.created_at "
-                         "FROM Classroom c WHERE c.teacher_id=" + std::to_string(id) + " ORDER BY c.id",
-                         [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"room_number",JsonVal(readText(st,1))});o.obj.push_back({"section_name",JsonVal(readText(st,2))});o.obj.push_back({"capacity",JsonVal(readInt(st,3))});o.obj.push_back({"teacher_id",JsonVal(readInt(st,4))});o.obj.push_back({"status",JsonVal(readText(st,5))});o.obj.push_back({"created_at",JsonVal(readText(st,6))});return o;});
+                         "SELECT c.id, c.room_number, c.name "
+                         "FROM Classroom c JOIN Teacher t ON t.assignedClassroom=c.room_number "
+                         "WHERE t.id=" + std::to_string(id) + " ORDER BY c.room_number",
+                         [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"room_number",JsonVal(readText(st,1))});o.obj.push_back({"name",JsonVal(readText(st,2))});return o;});
                      return send(200, rows);
                  }
             } catch (...) {}
@@ -768,6 +769,16 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
                         JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"message",JsonVal("Classroom deleted")});
                         return send(200,o);
                     }
+                } else if (rest.substr(slash) == "/students" && req.method == "GET") {
+                    JsonVal classroomRows = db.queryArray(
+                        "SELECT room_number FROM Classroom WHERE id=" + std::to_string(id),
+                        [](sqlite3_stmt* st){ JsonVal o; o.type=JsonVal::Obj; o.obj.push_back({"room_number",JsonVal(readText(st,0))}); return o; });
+                    if (classroomRows.arr.empty()) return send(404, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Classroom not found")});return v;}());
+                    string roomNumber = classroomRows.arr[0].strVal("room_number");
+                    JsonVal rows = db.queryArray(
+                        "SELECT p.id, p.name, p.contactInfo, s.classroom FROM Person p JOIN Student s ON s.id=p.id WHERE s.classroom='" + roomNumber + "' ORDER BY p.id",
+                        [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"name",JsonVal(readText(st,1))});o.obj.push_back({"email",JsonVal(readText(st,2))});o.obj.push_back({"classroom",JsonVal(readText(st,3))});return o;});
+                    return send(200, rows);
                 }
             } catch (...) {}
         }
@@ -790,7 +801,7 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
                             if (amp != string::npos) date = date.substr(0, amp);
                         }
                         string sql = "SELECT a.id, a.studentId, a.student, a.course, a.date, a.status, a.time, a.notes "
-                                     "FROM Attendance a WHERE a.studentId IN (SELECT student_id FROM ClassroomStudent WHERE classroom_id=" + std::to_string(id) + ")";
+                                     "FROM Attendance a WHERE a.studentId IN (SELECT s.id FROM Student s JOIN Classroom c ON s.classroom=c.room_number WHERE c.id=" + std::to_string(id) + ")";
                         if (!date.empty()) sql += " AND a.date='" + date + "'";
                         sql += " ORDER BY a.id";
                         JsonVal rows = db.queryArray(sql,
@@ -799,17 +810,38 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
                     }
                     if (req.method == "POST") {
                         JsonVal b = JsonParser().parse(req.body);
-                        string course = b.strVal("course");
+                        JsonVal teacherValue = b.get("teacherId");
+                        long teacherId = teacherValue.type == JsonVal::Num ? (long)teacherValue.num : 0;
+                        if (teacherValue.type == JsonVal::Str) {
+                            try { teacherId = std::stol(teacherValue.str); } catch (...) { teacherId = 0; }
+                        }
                         string date = b.strVal("date");
                         string time = b.strVal("time");
                         JsonVal records = b.get("records");
+                        if (teacherId == 0) return send(400, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Missing teacher identity")});return v;}());
                         if (records.type != JsonVal::Arr) return send(400, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Missing records array")});return v;}());
+                        JsonVal teacherRows = db.queryArray(
+                            "SELECT assignedCourse, assignedClassroom FROM Teacher WHERE id=" + std::to_string(teacherId),
+                            [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"course",JsonVal(readText(st,0))});o.obj.push_back({"room",JsonVal(readText(st,1))});return o;});
+                        if (teacherRows.arr.empty()) return send(403, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Teacher is not authorized")});return v;}());
+                        string course = teacherRows.arr[0].strVal("course");
+                        string assignedRoom = teacherRows.arr[0].strVal("room");
+                        JsonVal classroomRows = db.queryArray(
+                            "SELECT room_number FROM Classroom WHERE id=" + std::to_string(id),
+                            [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"room",JsonVal(readText(st,0))});return o;});
+                        if (classroomRows.arr.empty() || classroomRows.arr[0].strVal("room") != assignedRoom) return send(403, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Classroom is not assigned to this teacher")});return v;}());
+                        if (course.empty()) return send(400, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Teacher has no assigned course")});return v;}());
+                        JsonVal roster = db.queryArray(
+                            "SELECT p.id, p.name FROM Person p JOIN Student s ON s.id=p.id WHERE s.classroom='" + assignedRoom + "'",
+                            [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"name",JsonVal(readText(st,1))});return o;});
                         long count = 0;
                         for (auto& r : records.arr) {
                             JsonVal sv = r.get("studentId");
                             string sid = sv.type == JsonVal::Num ? std::to_string((long)sv.num) : (sv.type == JsonVal::Str ? sv.str : "");
                             if (sid.empty() || sid == "0") continue;
-                            string student = r.strVal("student");
+                            string student;
+                            for (auto& enrolled : roster.arr) if ((long)enrolled.get("id").num == std::stol(sid)) { student = enrolled.strVal("name"); break; }
+                            if (student.empty()) continue;
                             string status = r.strVal("status", "present");
                             string notes = r.strVal("notes");
                             db.execParam("DELETE FROM Attendance WHERE studentId=? AND course=? AND date=?",
