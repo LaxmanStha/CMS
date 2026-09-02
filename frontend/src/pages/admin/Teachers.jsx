@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Plus, Edit, Trash2, Users, UserCheck, UserCog } from "lucide-react";
+import { Plus, Edit, Trash2, Users, UserCheck, UserCog, Eye } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
@@ -42,6 +42,7 @@ const AdminTeachers = () => {
     hireDate: "",
     password: "",
   });
+  const [revealed, setRevealed] = useState({});
 
   const fetchTeachers = useCallback(async () => {
     try {
@@ -149,6 +150,9 @@ const AdminTeachers = () => {
     setShowModal(true);
   }, []);
 
+  const toggleReveal = (id) =>
+    setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -221,6 +225,22 @@ const AdminTeachers = () => {
         </Badge>
       );
     }},
+    { key: "password", header: "Password", width: "140px", render: (val, row) => (
+      <div className="d-flex align-items-center gap-2">
+        <span className="font-monospace text-muted small">
+          {revealed[row.id] ? (row.password || '—') : '••••••'}
+        </span>
+        {row.password && (
+          <button
+            className="btn btn-sm btn-outline-secondary p-1"
+            onClick={(e) => { e.stopPropagation(); toggleReveal(row.id); }}
+            title={revealed[row.id] ? 'Hide' : 'Show'}
+          >
+            <Eye className="w-3 h-3" />
+          </button>
+        )}
+      </div>
+    )},
     { key: "hireDate", header: "Hired", width: "120px", render: (val) => formatDate(val) },
   ];
 
