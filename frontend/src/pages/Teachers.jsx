@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
@@ -210,7 +210,7 @@ const Teachers = () => {
             </div>
             <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)} className="input w-auto min-w-[150px]">
               <option value="">All Departments</option>
-              {departments.map(d => <option key={String(d)} value={d}>{d}</option>)}
+              {departmentOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="input w-auto min-w-[150px]">
               <option value="">All Status</option>
@@ -259,9 +259,9 @@ const Teachers = () => {
                       </td>
                       <td>{formatDate(t.hireDate)}</td>
                       {isAdmin && (
-                        <td>
-                          <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleOpenModal(t)}>Edit</button>
-                          <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(t)}>Delete</button>
+                        <td className="d-flex gap-1">
+                          <button className="btn btn-sm btn-outline-primary" onClick={() => handleOpenModal(t)}><Edit className="w-4 h-4" /></button>
+                          <button className="btn btn-sm btn-danger" onClick={() => handleDelete(t)}><Trash2 className="w-4 h-4" /></button>
                         </td>
                       )}
                     </tr>
@@ -284,11 +284,11 @@ const Teachers = () => {
             <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="+1-555-0000" />
             <select className="select-themed" value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} required>
               <option value="">Select Department</option>
-              {departments.map(d => <option key={String(d)} value={d}>{d}</option>)}
+              {departmentOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
             <select className="select-themed" value={formData.assignedCourse} onChange={(e) => setFormData({...formData, assignedCourse: e.target.value})}>
               <option value="">Select Course</option>
-              {courses.map(c => <option key={String(c)} value={c}>{c}</option>)}
+              {courseOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
             <Input label="Assigned Classroom" value={formData.assignedClassroom} onChange={(e) => setFormData({...formData, assignedClassroom: e.target.value})} placeholder="e.g. A101" />
             <select className="select-themed" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>

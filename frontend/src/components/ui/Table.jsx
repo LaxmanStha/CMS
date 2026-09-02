@@ -336,7 +336,11 @@ const Table = memo(({
                         </div>
                       );
                     } else {
-                      content = <span>{value ?? '-'}</span>;
+                      const displayValue =
+                        typeof value === 'object' && value !== null
+                          ? (value.name ?? value.label ?? value.title ?? JSON.stringify(value))
+                          : (value ?? '-');
+                      content = <span>{displayValue}</span>;
                     }
 
                     return (

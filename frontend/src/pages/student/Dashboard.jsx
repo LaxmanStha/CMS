@@ -44,12 +44,40 @@ const StudentDashboard = () => {
   );
 
   const attendancePct = dashboardData?.attendancePercentage ?? 0;
-  const upcomingExams = Array.isArray(dashboardData?.upcomingExams) ? dashboardData.upcomingExams : [];
-  const recentGrades = Array.isArray(dashboardData?.recentGrades) ? dashboardData.recentGrades : [];
-  const enrolledCourses = Array.isArray(dashboardData?.enrolledCourses) ? dashboardData.enrolledCourses : 
-                          (dashboardData?.enrolledCourses && typeof dashboardData.enrolledCourses === 'object' 
-                            ? Object.values(dashboardData.enrolledCourses) 
-                            : []);
+
+  const normalizeList = React.useCallback((value) => {
+    if (Array.isArray(value)) return value;
+    if (value && typeof value === 'object') return Object.values(value);
+    return [];
+  }, []);
+
+  const upcomingExams = normalizeList(dashboardData?.upcomingExams).map((exam, index) => {
+    const item = exam && typeof exam === 'object' ? exam : { id: index, name: String(exam ?? 'Exam'), course: '', date: '' };
+    return {
+      id: item.id ?? `${item.name ?? 'exam'}-${index}`,
+      name: typeof item.name === 'string' ? item.name : (typeof item.title === 'string' ? item.title : 'Exam'),
+      course: typeof item.course === 'string' ? item.course : (typeof item.courseName === 'string' ? item.courseName : (typeof item.subject === 'string' ? item.subject : '')),
+      date: typeof item.date === 'string' ? item.date : (typeof item.examDate === 'string' ? item.examDate : (typeof item.schedule === 'string' ? item.schedule : 'TBD')),
+    };
+  });
+
+  const recentGrades = normalizeList(dashboardData?.recentGrades).map((grade, index) => {
+    const item = grade && typeof grade === 'object' ? grade : { id: index, course: '', grade: '' };
+    return {
+      id: item.id ?? `${item.course ?? 'grade'}-${index}`,
+      course: typeof item.course === 'string' ? item.course : (typeof item.subject === 'string' ? item.subject : 'Course'),
+      grade: typeof item.grade === 'string' ? item.grade : (typeof item.score === 'string' ? item.score : (typeof item.value === 'string' ? item.value : '')),
+    };
+  });
+
+  const enrolledCourses = normalizeList(dashboardData?.enrolledCourses).map((course, index) => {
+    const item = course && typeof course === 'object' ? course : { id: index, name: String(course ?? 'Course') };
+    return {
+      id: item.id ?? `${item.code ?? item.name ?? 'course'}-${index}`,
+      code: typeof item.code === 'string' ? item.code : (typeof item.courseCode === 'string' ? item.courseCode : ''),
+      name: typeof item.name === 'string' ? item.name : (typeof item.title === 'string' ? item.title : (typeof item.courseName === 'string' ? item.courseName : 'Course')),
+    };
+  });
 
   const formatPercent = React.useCallback((v) => `${v}%`, []);
   const formatCurrency = React.useCallback((v) => `$${v.toFixed(2)}`, []);
