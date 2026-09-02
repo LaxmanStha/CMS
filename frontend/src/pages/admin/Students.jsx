@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { Modal } from '@/components/ui/Modal';
@@ -23,12 +23,39 @@ const AdminStudents = () => {
   const isAdmin = user?.role === 'admin';
   const { success, error: showError } = useToast();
   const [students, setStudents] = useState([]);
+  const [classrooms, setClassrooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [revealed, setRevealed] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [classFilter, setClassFilter] = useState('');
+
+  const loadClassrooms = async () => {
+    try {
+      const res = await api.get('/classrooms');
+      setClassrooms(Array.isArray(res.data) ? res.data : []);
+    } catch {
+      setClassrooms([]);
+    }
+  };
+
+  const loadStudents = async () => {
+    try {
+      const res = await api.get('/students');
+      setStudents(res.data || []);
+    } catch (err) {
+      setStudents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadStudents();
+    loadClassrooms();
+  }, []);
 
   const openEditModal = (student) => {
     setEditing(student);
@@ -56,7 +83,6 @@ const AdminStudents = () => {
       showError(msg || 'Failed to delete student.');
     }
   };
-  const [classFilter, setClassFilter] = useState('');
 
   const toggleReveal = (id) =>
     setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -65,21 +91,6 @@ const AdminStudents = () => {
     if (students.some((s) => !revealed[s.id])) students.forEach((s) => (next[s.id] = true));
     setRevealed(next);
   };
-
-  const loadStudents = async () => {
-    try {
-      const res = await api.get('/students');
-      setStudents(res.data || []);
-    } catch (err) {
-      setStudents([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadStudents();
-  }, []);
 
   const openModal = () => {
     setEditing(null);
@@ -125,6 +136,21 @@ const AdminStudents = () => {
     }
   };
 
+  const classroomOptions = useMemo(() => {
+    const seen = new Set();
+    return classrooms
+      .filter((c) => {
+        const roomNum = c.room_number || `Room ${c.id}`;
+        if (seen.has(roomNum)) return false;
+        seen.add(roomNum);
+        return true;
+      })
+      .map((c) => ({
+        value: String(c.id),
+        label: `${c.room_number || 'Room ' + c.id} - ${c.name}`,
+      }));
+  }, [classrooms]);
+
   const tableClassroomOptions = React.useMemo(() => {
     const unique = new Set();
     students.forEach((s) => {
@@ -144,7 +170,11 @@ const AdminStudents = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="text-text-primary">Manage Students</h2>
         <div>
-          <button className="btn btn-primary me-2" onClick={openModal}>Add Student</button>
+          <button className="btn btn-primary me-2" onClick={() => {
+    setEditing(null);
+    setForm(EMPTY_FORM);
+    setShowModal(true);
+  }}>Add Student</button>
           {isAdmin && (
             <button className="btn btn-outline-secondary" onClick={revealAll}>
               {students.some((s) => !revealed[s.id]) ? 'Show All Passwords' : 'Hide All Passwords'}
@@ -180,58 +210,64 @@ const AdminStudents = () => {
                    {isAdmin && <th>Password</th>}
                    <th>Actions</th>
                  </tr>
-              </thead>
-              <tbody>
-                {filteredStudents.length === 0 ? (
-                  <tr>
-                     <td colSpan={isAdmin ? 9 : 8} className="text-center text-muted">
-                    {loading ? 'Loading...' : 'No students found.'}
-                  </td>
-                  </tr>
-                ) : (
-                  filteredStudents.map((s) => (
-                    <tr key={s.id}>
-                      <td>{s.id}</td>
-                      <td>{s.name}</td>
-                       <td>{s.email}</td>
-                       <td>{s.phone || '-'}</td>
-                       <td>{s.program}</td>
-                       <td>{s.classroom || s.section || '-'}</td>
-                      <td><span className={`badge bg-${s.status === 'active' ? 'success' : s.status === 'graduated' ? 'info' : s.status === 'pending' ? 'warning' : 'secondary'}`}>{s.status}</span></td>
-                      {isAdmin && (
+               </thead>
+               <tbody>
+                 {filteredStudents.length === 0 ? (
+                   <tr>
+                      <td colSpan={isAdmin ? 9 : 8} className="text-center text-muted">
+                     {loading ? 'Loading...' : 'No students found.'}
+                   </td>
+                   </tr>
+                 ) : (
+                   filteredStudents.map((s) => (
+                     <tr key={s.id}>
+                       <td>{s.id}</td>
+                       <td>{s.name}</td>
+                        <td>{s.email}</td>
+                        <td>{s.phone || '-'}</td>
+                        <td>{s.program}</td>
+                        <td>{s.classroom || s.section || '-'}</td>
+                       <td><span className={`badge bg-${s.status === 'active' ? 'success' : s.status === 'graduated' ? 'info' : s.status === 'pending' ? 'warning' : 'secondary'}`}>{s.status}</span></td>
+                       {isAdmin && (
+                         <td>
+                           <span className="me-1 font-monospace">{revealed[s.id] ? (s.password || '—') : '••••••'}</span>
+                           <button
+                             className="btn btn-sm btn-outline-secondary"
+                             onClick={() => toggleReveal(s.id)}
+                             disabled={!s.password}
+                           >
+                             {revealed[s.id] ? 'Hide' : 'Show'}
+                           </button>
+                         </td>
+                       )}
                         <td>
-                          <span className="me-1 font-monospace">{revealed[s.id] ? (s.password || '—') : '••••••'}</span>
-                          <button
-                            className="btn btn-sm btn-outline-secondary"
-                            onClick={() => toggleReveal(s.id)}
-                            disabled={!s.password}
-                          >
-                            {revealed[s.id] ? 'Hide' : 'Show'}
-                          </button>
+                          <button className="btn btn-sm btn-outline-primary me-1" onClick={() => openEditModal(s)}>Edit</button>
+                          <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(s)}>Delete</button>
                         </td>
-                      )}
-                       <td>
-                         <button className="btn btn-sm btn-outline-primary me-1" onClick={() => openEditModal(s)}>Edit</button>
-                         <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(s)}>Delete</button>
-                       </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+                     </tr>
+                   ))
+                 )}
+               </tbody>
+             </table>
+           </div>
+         </div>
+       </div>
 
-      <Modal isOpen={showModal} onClose={closeModal} title={editing ? 'Edit Student' : 'Add Student'} size="lg"
-        footer={<><Button variant="ghost" onClick={closeModal} disabled={saving}>Cancel</Button><Button onClick={handleSubmit} loading={saving}>Save Student</Button></>}
+      <Modal isOpen={showModal} onClose={() => { setShowModal(false); setEditing(null); }} title={editing ? 'Edit Student' : 'Add Student'} size="lg"
+        footer={<><Button variant="ghost" onClick={() => { setShowModal(false); setEditing(null); }} disabled={saving}>Cancel</Button><Button onClick={handleSubmit} loading={saving}>Save Student</Button></>}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input label="Full Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Full name" required />
           <Input label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@example.com" required />
           <Input label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="e.g. 555-1234" />
           <Input label="Program" value={form.program} onChange={(e) => setForm({ ...form, program: e.target.value })} placeholder="e.g. BIM" required />
-          <Input label="Classroom" value={form.classroom} onChange={(e) => setForm({ ...form, classroom: e.target.value })} placeholder="e.g. CS-A" />
+          <Select
+            label="Classroom"
+            value={form.classroom}
+            onChange={(e) => setForm({ ...form, classroom: e.target.value })}
+            options={classroomOptions}
+            placeholder="Select Classroom"
+          />
           <Input label="Year" type="number" value={form.year} onChange={(e) => setForm({ ...form, year: parseInt(e.target.value) || 1 })} min={1} max={5} />
           <select
             value={form.status}

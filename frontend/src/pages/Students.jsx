@@ -25,6 +25,9 @@ const Students = () => {
   const showErrorRef = useRef(showError);
   showErrorRef.current = showError;
   const [students, setStudents] = useState([]);
+  const [classrooms, setClassrooms] = useState([]);
+  const [classroomsLoading, setClassroomsLoading] = useState(true);
+  const [classroomsError, setClassroomsError] = useState('');
   const [revealed, setRevealed] = useState({});
 
   const toggleReveal = (id) => setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -104,7 +107,31 @@ const Students = () => {
     fetchStudents();
   }, [fetchStudents]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const loadClassrooms = async () => {
+      try {
+        setClassroomsLoading(true);
+        setClassroomsError('');
+        const res = await api.get('/classrooms');
+        if (!cancelled) setClassrooms(Array.isArray(res.data) ? res.data : []);
+      } catch {
+        if (!cancelled) {
+          setClassrooms([]);
+          setClassroomsError('Unable to load rooms');
+        }
+      } finally {
+        if (!cancelled) setClassroomsLoading(false);
+      }
+    };
+    loadClassrooms();
+    return () => { cancelled = true; };
+  }, []);
+
   const programs = useMemo(() => [...new Set(students.map(s => s.program).filter(Boolean))], [students]);
+  const roomNumbers = useMemo(() => (
+    [...new Set(classrooms.map((classroom) => String(classroom.room_number || '').trim()).filter(Boolean))]
+  ), [classrooms]);
 
   const filteredStudents = useMemo(() => {
     return students.filter(student => {
@@ -286,7 +313,22 @@ const Students = () => {
               {programs.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
             <Input label="Semester" type="number" value={formData.year} onChange={(e) => setFormData({...formData, year: parseInt(e.target.value) || 1})} min={1} max={5} required />
-            <Input label="Classroom (Room No)" value={formData.classroom} onChange={(e) => setFormData({...formData, classroom: e.target.value})} placeholder="e.g. CR-201" />
+            <label className="block text-sm font-medium text-text-primary">
+              Classroom (Room No)
+              <select
+                value={formData.classroom}
+                onChange={(e) => setFormData({...formData, classroom: e.target.value})}
+                className="select-themed mt-1.5 w-full"
+                disabled={classroomsLoading || !!classroomsError}
+              >
+                <option value="">
+                  {classroomsLoading ? 'Loading rooms...' : classroomsError ? classroomsError : roomNumbers.length ? 'Select Room Number' : 'No rooms available'}
+                </option>
+                {roomNumbers.map((roomNumber) => (
+                  <option key={roomNumber} value={roomNumber}>{roomNumber}</option>
+                ))}
+              </select>
+            </label>
             <select
               value={formData.status}
               onChange={(e) => setFormData({...formData, status: e.target.value})}

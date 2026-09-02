@@ -20,6 +20,9 @@ const Teachers = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const [teachers, setTeachers] = useState([]);
+  const [classrooms, setClassrooms] = useState([]);
+  const [classroomsLoading, setClassroomsLoading] = useState(true);
+  const [classroomsError, setClassroomsError] = useState('');
   const [loading, setLoading] = useState(true);
   const [departments, setDepartments] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -53,6 +56,27 @@ const Teachers = () => {
 
   useEffect(() => {
     fetchTeachers();
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadClassrooms = async () => {
+      try {
+        setClassroomsLoading(true);
+        setClassroomsError('');
+        const res = await api.get('/classrooms');
+        if (!cancelled) setClassrooms(Array.isArray(res.data) ? res.data : []);
+      } catch {
+        if (!cancelled) {
+          setClassrooms([]);
+          setClassroomsError('Unable to load rooms');
+        }
+      } finally {
+        if (!cancelled) setClassroomsLoading(false);
+      }
+    };
+    loadClassrooms();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -95,6 +119,10 @@ const Teachers = () => {
       return { value, label };
     });
   }, [courses]);
+
+  const roomNumbers = useMemo(() => (
+    [...new Set(classrooms.map((classroom) => String(classroom.room_number || '').trim()).filter(Boolean))]
+  ), [classrooms]);
 
   const filteredTeachers = useMemo(() => teachers.filter((t) => {
     const matchesSearch = !searchTerm ||
@@ -309,7 +337,22 @@ const Teachers = () => {
               <option value="">Select Course</option>
               {courseOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
-            <Input label="Assigned Classroom" value={formData.assignedClassroom} onChange={(e) => setFormData({...formData, assignedClassroom: e.target.value})} placeholder="e.g. A101" />
+            <label className="block text-sm font-medium text-text-primary">
+              Assigned Classroom (Room No)
+              <select
+                value={formData.assignedClassroom}
+                onChange={(e) => setFormData({...formData, assignedClassroom: e.target.value})}
+                className="select-themed mt-1.5 w-full"
+                disabled={classroomsLoading || !!classroomsError}
+              >
+                <option value="">
+                  {classroomsLoading ? 'Loading rooms...' : classroomsError ? classroomsError : roomNumbers.length ? 'Select Room Number' : 'No rooms available'}
+                </option>
+                {roomNumbers.map((roomNumber) => (
+                  <option key={roomNumber} value={roomNumber}>{roomNumber}</option>
+                ))}
+              </select>
+            </label>
             <select className="select-themed" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
               {STATUSES.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
             </select>

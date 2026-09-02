@@ -197,23 +197,9 @@ CREATE TABLE IF NOT EXISTS Users (
   name TEXT NOT NULL
 );
 
--- Classroom table: links teachers and students to a physical classroom
+-- Classroom table: simple classroom with only number and name
 CREATE TABLE IF NOT EXISTS Classroom (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   room_number TEXT NOT NULL,
-  section_name TEXT NOT NULL,
-  capacity INTEGER NOT NULL DEFAULT 0 CHECK (capacity >= 0),
-  teacher_id INTEGER REFERENCES Teacher(id) ON DELETE SET NULL,
-  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'maintenance')),
-  created_at TEXT DEFAULT (datetime('now')),
-  updated_at TEXT DEFAULT (datetime('now'))
-);
-
--- Classroom-Student junction table (many-to-many)
-CREATE TABLE IF NOT EXISTS ClassroomStudent (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  classroom_id INTEGER NOT NULL REFERENCES Classroom(id) ON DELETE CASCADE,
-  student_id INTEGER NOT NULL REFERENCES Student(id) ON DELETE CASCADE,
-  enrolled_at TEXT DEFAULT (datetime('now')),
-  UNIQUE(classroom_id, student_id)
+  name TEXT NOT NULL
 );

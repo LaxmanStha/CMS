@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Plus, Edit, Trash2, Users, UserCheck, UserCog, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Users, UserCheck, UserCog, Eye, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
@@ -21,6 +21,7 @@ const AdminTeachers = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const [teachers, setTeachers] = useState([]);
+  const [classrooms, setClassrooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [departments, setDepartments] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -37,6 +38,7 @@ const AdminTeachers = () => {
     email: "",
     phone: "",
     department: "",
+    classroom: "",
     assignedCourse: "",
     status: "active",
     hireDate: "",
@@ -62,6 +64,19 @@ const AdminTeachers = () => {
   }, [showError]);
 
   useEffect(() => { fetchTeachers(); }, [fetchTeachers]);
+
+  const fetchClassrooms = useCallback(async () => {
+    try {
+      const res = await api.get("/classrooms");
+      setClassrooms(Array.isArray(res.data) ? res.data : []);
+    } catch {
+      setClassrooms([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchClassrooms();
+  }, [fetchClassrooms]);
 
   useEffect(() => {
     let cancelled = false;
@@ -104,6 +119,21 @@ const AdminTeachers = () => {
     });
   }, [courses]);
 
+  const classroomOptions = useMemo(() => {
+    const seen = new Set();
+    return classrooms
+      .filter((c) => {
+        const roomNum = c.room_number || `Room ${c.id}`;
+        if (seen.has(roomNum)) return false;
+        seen.add(roomNum);
+        return true;
+      })
+      .map((c) => ({
+        value: String(c.id),
+        label: `${c.room_number || 'Room ' + c.id} - ${c.name}`,
+      }));
+  }, [classrooms]);
+
   const filteredTeachers = useMemo(() => teachers.filter((t) => {
     const matchesSearch = !searchTerm ||
       t.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -129,6 +159,7 @@ const AdminTeachers = () => {
         email: t.email || "",
         phone: t.phone || "",
         department: t.department || "",
+        classroom: t.classroom || "",
         assignedCourse: t.assignedCourse || "",
         status: t.status || "active",
         hireDate: t.hireDate || "",
@@ -141,6 +172,7 @@ const AdminTeachers = () => {
         email: "",
         phone: "",
         department: "",
+        classroom: "",
         assignedCourse: "",
         status: "active",
         hireDate: "",
@@ -162,6 +194,7 @@ const AdminTeachers = () => {
         email: formData.email,
         phone: formData.phone,
         department: formData.department,
+        classroom: formData.classroom,
         assignedCourse: formData.assignedCourse,
         status: formData.status,
         hireDate: formData.hireDate,
@@ -246,7 +279,6 @@ const AdminTeachers = () => {
 
   return (
     <div className="container-fluid p-4">
-      
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="text-text-primary">Manage Teachers</h2>
         <div>
@@ -264,7 +296,7 @@ const AdminTeachers = () => {
               </div>
               <div>
                 <p className="h4 mb-0 text-text-primary">{stats.total}</p>
-                <p className="text-xs text-text-tertiary mb-0">Total Faculty</p>
+                <p className="text-xs text-text-tertiary">Total Faculty</p>
               </div>
             </div>
           </div>
@@ -366,14 +398,28 @@ const AdminTeachers = () => {
             <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="prof@college.edu" required />
             <Input label="Password" type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder={editingTeacher ? "Leave blank to keep" : "Set initial password"} />
             <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="+1-555-0000" />
-            <select className="select-themed" value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} required>
-              <option value="">Select Department</option>
-              {departmentOptions.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
-            </select>
-            <select className="select-themed" value={formData.assignedCourse} onChange={(e) => setFormData({...formData, assignedCourse: e.target.value})}>
-              <option value="">Select Course</option>
-              {courseOptions.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-            </select>
+            <Select
+              label="Department"
+              value={formData.department}
+              onChange={(e) => setFormData({...formData, department: e.target.value})}
+              options={departmentOptions}
+              placeholder="Select Department"
+              required
+            />
+            <Select
+              label="Classroom"
+              value={formData.classroom}
+              onChange={(e) => setFormData({...formData, classroom: e.target.value})}
+              options={classroomOptions}
+              placeholder="Select Classroom"
+            />
+            <Select
+              label="Assigned Course"
+              value={formData.assignedCourse}
+              onChange={(e) => setFormData({...formData, assignedCourse: e.target.value})}
+              options={courseOptions}
+              placeholder="Select Course"
+            />
             <select className="select-themed" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
               {STATUSES.map((s) => <option key={s} value={s}>{statusLabel(s)}</option>)}
             </select>
@@ -392,7 +438,3 @@ const AdminTeachers = () => {
 };
 
 export default AdminTeachers;
-
-
-
-
