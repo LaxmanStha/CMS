@@ -657,12 +657,12 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
                         db.execParam("UPDATE Teacher SET department=?, phone=?, email=?, hireDate=?, status=?, assignedClassroom=?, assignedCourse=? WHERE id=?",
                             {{1,b.strVal("department")},{2,b.strVal("phone")},{3,b.strVal("email")},{4,b.strVal("hireDate")},{5,b.strVal("status","active")},
                              {6,b.strVal("assignedClassroom")},{7,b.strVal("assignedCourse")},{8,std::to_string(id)}});
-                        db.execParam("UPDATE Users SET email=?, name=? WHERE email=?",
-                            {{1,b.strVal("email")},{2,b.strVal("name")},{3,b.strVal("email")}});
+                        db.execParam("UPDATE Users SET email=?, name=? WHERE id=?",
+                            {{1,b.strVal("email")},{2,b.strVal("name")},{3,std::to_string(id)}});
                         string pw = b.strVal("password");
                         if (!pw.empty()) {
-                            db.execParam("UPDATE Users SET password=? WHERE email=?",
-                                {{1,pw},{2,b.strVal("email")}});
+                            db.execParam("UPDATE Users SET password=? WHERE id=?",
+                                {{1,pw},{2,std::to_string(id)}});
                         }
                         JsonVal o;o.type=JsonVal::Obj;
                         o.obj.push_back({"id",JsonVal(id)});

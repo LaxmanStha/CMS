@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
-import { SearchInput } from "@/components/ui";
-import { formatDate } from "@/lib/utils";
+import { Table } from "@/components/ui/Table";
+import { formatDate, getInitials } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/services/api";
@@ -31,6 +31,7 @@ const Teachers = () => {
   const [editingTeacher, setEditingTeacher] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [revealedPasswords, setRevealedPasswords] = useState({});
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", department: "", assignedCourse: "", assignedClassroom: "", status: "active", hireDate: "", password: "" });
 
   const fetchTeachers = async () => {
@@ -147,6 +148,7 @@ const Teachers = () => {
         status: formData.status,
         hireDate: formData.hireDate,
       };
+      if (formData.password) payload.password = formData.password;
       if (editingTeacher) {
         await api.put(`/teachers/${editingTeacher.id}`, payload);
         success("Teacher updated successfully");
@@ -177,6 +179,55 @@ const Teachers = () => {
       showError("Failed to delete teacher");
     }
   };
+
+  const togglePassword = (id) => {
+    setRevealedPasswords((previous) => ({ ...previous, [id]: !previous[id] }));
+  };
+
+  const baseColumns = [
+    { key: "id", header: "Teacher ID", width: "100px", render: (value) => value != null ? `TCH${String(value).padStart(3, "0")}` : "-" },
+    { key: "name", header: "Name", render: (value, row) => (
+      <div className="flex items-center gap-3">
+        <div className="avatar avatar-sm bg-primary/10 text-primary">{getInitials(row.name || "?")}</div>
+        <div>
+          <p className="font-medium text-text-primary">{row.name || "-"}</p>
+          <p className="text-xs text-text-secondary">{row.email || "-"}</p>
+        </div>
+      </div>
+    )},
+    { key: "department", header: "Department", width: "150px", render: (value) => <Badge variant="default">{value || "-"}</Badge> },
+    { key: "assignedCourse", header: "Course", width: "150px", render: (value) => <Badge variant="default">{value || "-"}</Badge> },
+    { key: "assignedClassroom", header: "Classroom", width: "130px", render: (value) => value || "-" },
+    { key: "phone", header: "Phone", width: "140px", render: (value) => value || "-" },
+    { key: "status", header: "Status", width: "120px", render: (value) => {
+      const status = value || "active";
+      return <Badge variant={status === "active" ? "success" : status === "on_leave" ? "warning" : "default"}>{statusLabel(status)}</Badge>;
+    }},
+    { key: "hireDate", header: "Hired", width: "120px", render: (value) => formatDate(value) },
+  ];
+
+  const columns = isAdmin ? [
+    ...baseColumns.slice(0, -1),
+    { key: "password", header: "Password", width: "150px", render: (value, row) => (
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-xs text-text-secondary">
+          {revealedPasswords[row.id] ? (value || "-") : "••••••"}
+        </span>
+        {value && (
+          <button
+            type="button"
+            className="p-1 rounded-lg text-text-secondary hover:bg-hover hover:text-text-primary transition-colors"
+            onClick={(event) => { event.stopPropagation(); togglePassword(row.id); }}
+            title={revealedPasswords[row.id] ? "Hide password" : "Show password"}
+            aria-label={revealedPasswords[row.id] ? "Hide password" : "Show password"}
+          >
+            <Eye className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+    )},
+    baseColumns[baseColumns.length - 1],
+  ] : baseColumns;
 
   return (
     <div className="space-y-6">
@@ -212,6 +263,10 @@ const Teachers = () => {
               <option value="">All Departments</option>
               {departmentOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
+            <select value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)} className="input w-auto min-w-[150px]">
+              <option value="">All Courses</option>
+              {courseOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="input w-auto min-w-[150px]">
               <option value="">All Status</option>
               {STATUSES.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
@@ -219,57 +274,21 @@ const Teachers = () => {
           </div>
         </Card.Header>
         <Card.Content>
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Department</th>
-                  <th>Course</th>
-                  <th>Classroom</th>
-                  <th>Phone</th>
-                  <th>Status</th>
-                  <th>Hired</th>
-                  {isAdmin && <th>Actions</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTeachers.length === 0 ? (
-                  <tr>
-                    <td colSpan={isAdmin ? 10 : 9} className="text-center text-muted">
-                      {loading ? 'Loading...' : 'No teachers found.'}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredTeachers.map((t) => (
-                    <tr key={t.id}>
-                      <td>TCH{String(t.id).padStart(3, "0")}</td>
-                      <td>{t.name || '-'}</td>
-                      <td>{t.email || '-'}</td>
-                      <td>{t.department || '-'}</td>
-                      <td>{t.assignedCourse || '-'}</td>
-                      <td>{t.assignedClassroom || '-'}</td>
-                      <td>{t.phone || '-'}</td>
-                      <td>
-                        <Badge variant={t.status === "active" ? "success" : t.status === "on_leave" ? "warning" : "default"}>
-                          {statusLabel(t.status || "active")}
-                        </Badge>
-                      </td>
-                      <td>{formatDate(t.hireDate)}</td>
-                      {isAdmin && (
-                        <td className="d-flex gap-1">
-                          <button className="btn btn-sm btn-outline-primary" onClick={() => handleOpenModal(t)}><Edit className="w-4 h-4" /></button>
-                          <button className="btn btn-sm btn-danger" onClick={() => handleDelete(t)}><Trash2 className="w-4 h-4" /></button>
-                        </td>
-                      )}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          <Table
+            columns={columns}
+            data={filteredTeachers}
+            keyField="id"
+            searchable={false}
+            filterable={false}
+            paginated
+            pageSize={10}
+            loading={loading}
+            rowActions={isAdmin ? [
+              { label: "Edit", icon: <Edit className="w-4 h-4" />, onClick: handleOpenModal, variant: "ghost" },
+              { label: "Delete", icon: <Trash2 className="w-4 h-4" />, onClick: handleDelete, variant: "danger" },
+            ] : []}
+            emptyMessage="No teachers found matching your criteria"
+          />
         </Card.Content>
       </Card>
 
