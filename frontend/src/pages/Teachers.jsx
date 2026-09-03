@@ -35,7 +35,7 @@ const Teachers = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [revealedPasswords, setRevealedPasswords] = useState({});
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "", department: "", assignedCourse: "", assignedClassroom: "", status: "active", hireDate: "", password: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", department: "", assignedCourse: "", assignedClassrooms: [], status: "active", hireDate: "", password: "" });
 
   const fetchTeachers = async () => {
     try {
@@ -45,6 +45,7 @@ const Teachers = () => {
         ...t,
         department: typeof t.department === 'string' ? t.department : t.department?.name || '',
         assignedCourse: typeof t.assignedCourse === 'string' ? t.assignedCourse : t.assignedCourse?.name || '',
+        assignedClassrooms: String(t.assignedClassroom || '').split(',').map(room => room.trim()).filter(Boolean),
       })) : []);
     } catch (err) {
       showError("Failed to load teachers");
@@ -150,14 +151,14 @@ const Teachers = () => {
         phone: t.phone || "",
         department: t.department || "",
         assignedCourse: t.assignedCourse || "",
-        assignedClassroom: t.assignedClassroom || "",
+        assignedClassrooms: t.assignedClassrooms || String(t.assignedClassroom || '').split(',').map(room => room.trim()).filter(Boolean),
         status: t.status || "active",
         hireDate: t.hireDate || "",
         password: "",
       });
     } else {
       setEditingTeacher(null);
-      setFormData({ name: "", email: "", phone: "", department: "", assignedCourse: "", assignedClassroom: "", status: "active", hireDate: "", password: "" });
+      setFormData({ name: "", email: "", phone: "", department: "", assignedCourse: "", assignedClassrooms: [], status: "active", hireDate: "", password: "" });
     }
     setShowModal(true);
   };
@@ -172,7 +173,7 @@ const Teachers = () => {
         phone: formData.phone,
         department: formData.department,
         assignedCourse: formData.assignedCourse,
-        assignedClassroom: formData.assignedClassroom,
+        assignedClassroom: formData.assignedClassrooms.join(', '),
         status: formData.status,
         hireDate: formData.hireDate,
       };
@@ -225,7 +226,7 @@ const Teachers = () => {
     )},
     { key: "department", header: "Department", width: "150px", render: (value) => <Badge variant="default">{value || "-"}</Badge> },
     { key: "assignedCourse", header: "Course", width: "150px", render: (value) => <Badge variant="default">{value || "-"}</Badge> },
-    { key: "assignedClassroom", header: "Classroom", width: "130px", render: (value) => value || "-" },
+    { key: "assignedClassroom", header: "Classrooms", width: "180px", render: (value, row) => (row.assignedClassrooms || String(value || '').split(',').map(room => room.trim()).filter(Boolean)).join(', ') || "-" },
     { key: "phone", header: "Phone", width: "140px", render: (value) => value || "-" },
     { key: "status", header: "Status", width: "120px", render: (value) => {
       const status = value || "active";
@@ -337,22 +338,29 @@ const Teachers = () => {
               <option value="">Select Course</option>
               {courseOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
-            <label className="block text-sm font-medium text-text-primary">
-              Assigned Classroom (Room No)
-              <select
-                value={formData.assignedClassroom}
-                onChange={(e) => setFormData({...formData, assignedClassroom: e.target.value})}
-                className="select-themed mt-1.5 w-full"
-                disabled={classroomsLoading || !!classroomsError}
-              >
-                <option value="">
-                  {classroomsLoading ? 'Loading rooms...' : classroomsError ? classroomsError : roomNumbers.length ? 'Select Room Number' : 'No rooms available'}
-                </option>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-text-primary mb-2">Assigned Classrooms</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3">
                 {roomNumbers.map((roomNumber) => (
-                  <option key={roomNumber} value={roomNumber}>{roomNumber}</option>
+                  <label key={roomNumber} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-text-secondary hover:bg-white/[0.04] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.assignedClassrooms.includes(roomNumber)}
+                      onChange={(e) => setFormData((previous) => ({
+                        ...previous,
+                        assignedClassrooms: e.target.checked
+                          ? [...previous.assignedClassrooms, roomNumber]
+                          : previous.assignedClassrooms.filter((room) => room !== roomNumber),
+                      }))}
+                      className="h-4 w-4 accent-primary"
+                      disabled={classroomsLoading || !!classroomsError}
+                    />
+                    <span>{roomNumber}</span>
+                  </label>
                 ))}
-              </select>
-            </label>
+                {!roomNumbers.length && <span className="text-sm text-text-tertiary">{classroomsLoading ? 'Loading rooms...' : classroomsError || 'No rooms available'}</span>}
+              </div>
+            </div>
             <select className="select-themed" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
               {STATUSES.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
             </select>

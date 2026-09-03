@@ -100,12 +100,12 @@ INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, a
 -- ============================================================
 -- Classrooms (linked to teachers)
 -- ============================================================
-INSERT OR IGNORE INTO Classroom (id, room_number, section_name, capacity, teacher_id, status)
-  VALUES (1, 'Room 201', 'CS-A', 30, 2, 'active');
-INSERT OR IGNORE INTO Classroom (id, room_number, section_name, capacity, teacher_id, status)
-  VALUES (2, 'Room 301', 'ENG-A', 30, 11, 'active');
-INSERT OR IGNORE INTO Classroom (id, room_number, section_name, capacity, teacher_id, status)
-  VALUES (3, 'Room 401', 'PHY-A', 40, 12, 'active');
+INSERT OR IGNORE INTO Classroom (id, room_number, name, section_name, capacity, teacher_id, status)
+  VALUES (1, 'Room 201', 'Room 201', 'CS-A', 30, 2, 'active');
+INSERT OR IGNORE INTO Classroom (id, room_number, name, section_name, capacity, teacher_id, status)
+  VALUES (2, 'Room 301', 'Room 301', 'ENG-A', 30, 11, 'active');
+INSERT OR IGNORE INTO Classroom (id, room_number, name, section_name, capacity, teacher_id, status)
+  VALUES (3, 'Room 401', 'Room 401', 'PHY-A', 40, 12, 'active');
 
 -- Link students 3, 5, 6 to teacher 2's classroom (CS-A)
 INSERT OR IGNORE INTO ClassroomStudent (classroom_id, student_id) VALUES (1, 3);

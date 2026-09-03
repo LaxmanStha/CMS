@@ -38,7 +38,7 @@ const AdminTeachers = () => {
     email: "",
     phone: "",
     department: "",
-    classroom: "",
+    assignedClassrooms: [],
     assignedCourse: "",
     status: "active",
     hireDate: "",
@@ -54,6 +54,7 @@ const AdminTeachers = () => {
         ...t,
         department: typeof t.department === 'string' ? t.department : t.department?.name || '',
         assignedCourse: typeof t.assignedCourse === 'string' ? t.assignedCourse : t.assignedCourse?.name || '',
+        assignedClassrooms: String(t.assignedClassroom || '').split(',').map(room => room.trim()).filter(Boolean),
       })) : []);
     } catch {
       showError("Failed to load teachers");
@@ -159,7 +160,7 @@ const AdminTeachers = () => {
         email: t.email || "",
         phone: t.phone || "",
         department: t.department || "",
-        classroom: t.classroom || "",
+        assignedClassrooms: t.assignedClassrooms || String(t.assignedClassroom || '').split(',').map(room => room.trim()).filter(Boolean),
         assignedCourse: t.assignedCourse || "",
         status: t.status || "active",
         hireDate: t.hireDate || "",
@@ -172,7 +173,7 @@ const AdminTeachers = () => {
         email: "",
         phone: "",
         department: "",
-        classroom: "",
+        assignedClassrooms: [],
         assignedCourse: "",
         status: "active",
         hireDate: "",
@@ -194,7 +195,7 @@ const AdminTeachers = () => {
         email: formData.email,
         phone: formData.phone,
         department: formData.department,
-        classroom: formData.classroom,
+        assignedClassroom: formData.assignedClassrooms.join(', '),
         assignedCourse: formData.assignedCourse,
         status: formData.status,
         hireDate: formData.hireDate,
@@ -249,6 +250,7 @@ const AdminTeachers = () => {
     )},
     { key: "department", header: "Department", width: "150px", render: (val) => <Badge variant="default">{val || "?"}</Badge> },
     { key: "assignedCourse", header: "Course", width: "150px", render: (val) => <Badge variant="default">{val || "?"}</Badge> },
+    { key: "assignedClassroom", header: "Classrooms", width: "180px", render: (val, row) => (row.assignedClassrooms || String(val || '').split(',').map(room => room.trim()).filter(Boolean)).join(', ') || "-" },
     { key: "phone", header: "Phone", width: "140px", render: (val) => val || "-" },
     { key: "status", header: "Status", width: "120px", render: (val) => {
       const status = val || "active";
@@ -406,13 +408,33 @@ const AdminTeachers = () => {
               placeholder="Select Department"
               required
             />
-            <Select
-              label="Classroom"
-              value={formData.classroom}
-              onChange={(e) => setFormData({...formData, classroom: e.target.value})}
-              options={classroomOptions}
-              placeholder="Select Classroom"
-            />
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-text-primary mb-2">Classrooms</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3">
+                {classroomOptions.map((option) => {
+                  const classroom = classrooms.find((item) => String(item.id) === option.value);
+                  const roomNumber = classroom?.room_number || option.label.split(' - ')[0];
+                  const assignmentNames = [roomNumber, classroom?.name, classroom?.section_name].filter(Boolean);
+                  return (
+                    <label key={option.value} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-text-secondary hover:bg-white/[0.04] cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={assignmentNames.some((name) => formData.assignedClassrooms.includes(name))}
+                        onChange={(e) => setFormData((previous) => ({
+                          ...previous,
+                          assignedClassrooms: e.target.checked
+                            ? [...previous.assignedClassrooms, roomNumber]
+                            : previous.assignedClassrooms.filter((room) => room !== roomNumber),
+                        }))}
+                        className="h-4 w-4 accent-primary"
+                      />
+                      <span>{option.label}</span>
+                    </label>
+                  );
+                })}
+                {!classroomOptions.length && <span className="text-sm text-text-tertiary">No classrooms available</span>}
+              </div>
+            </div>
             <Select
               label="Assigned Course"
               value={formData.assignedCourse}

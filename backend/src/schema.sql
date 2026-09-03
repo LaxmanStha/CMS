@@ -183,7 +183,6 @@ INSERT OR IGNORE INTO Room (name, capacity, is_lab) VALUES
 ('Room 105', 60, 0), ('Lab A', 30, 1), ('Lab B', 30, 1), ('Lab C', 30, 1);
 
 
-DELETE FROM Department;
 INSERT OR IGNORE INTO Department (id, name) VALUES
   (1, 'BIM'),
   (2, 'CSIT'),
@@ -197,9 +196,19 @@ CREATE TABLE IF NOT EXISTS Users (
   name TEXT NOT NULL
 );
 
--- Classroom table: simple classroom with only number and name
+-- Classroom assignments used by the admin and student views.
 CREATE TABLE IF NOT EXISTS Classroom (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   room_number TEXT NOT NULL,
-  name TEXT NOT NULL
+  name TEXT NOT NULL,
+  section_name TEXT NOT NULL DEFAULT '',
+  capacity INTEGER NOT NULL DEFAULT 0,
+  teacher_id INTEGER,
+  status TEXT NOT NULL DEFAULT 'active'
+);
+
+CREATE TABLE IF NOT EXISTS ClassroomStudent (
+  classroom_id INTEGER NOT NULL REFERENCES Classroom(id) ON DELETE CASCADE,
+  student_id INTEGER NOT NULL REFERENCES Student(id) ON DELETE CASCADE,
+  PRIMARY KEY (classroom_id, student_id)
 );

@@ -247,6 +247,7 @@ public:
         } else {
             execInline();
         }
+        migrate();
         seedDefaultUsers();
         std::ifstream seed("seed_data.sql");
         if (!seed) seed.open("../../src/seed_data.sql");
@@ -254,7 +255,6 @@ public:
             std::stringstream ss; ss << seed.rdbuf();
             exec(ss.str());
         }
-        migrate();
     }
     void execInline() {
         const char* sql = R"SQL(
@@ -296,11 +296,23 @@ CREATE TABLE IF NOT EXISTS Department (id INTEGER PRIMARY KEY, name TEXT NOT NUL
         alter("ALTER TABLE Teacher ADD COLUMN assignedCourse TEXT DEFAULT ''");
         alter("ALTER TABLE Student ADD COLUMN phone TEXT DEFAULT ''");
         alter("ALTER TABLE Student ADD COLUMN classroom TEXT DEFAULT ''");
-        // Classroom table - simplified to only room_number and name
+        // Keep older databases compatible with the current seed data.
         alter("CREATE TABLE IF NOT EXISTS Classroom ("
             "id INTEGER PRIMARY KEY AUTOINCREMENT, "
             "room_number TEXT NOT NULL, "
-            "name TEXT NOT NULL)");
+            "name TEXT NOT NULL, "
+            "section_name TEXT NOT NULL DEFAULT '', "
+            "capacity INTEGER NOT NULL DEFAULT 0, "
+            "teacher_id INTEGER, "
+            "status TEXT NOT NULL DEFAULT 'active')");
+        alter("ALTER TABLE Classroom ADD COLUMN section_name TEXT NOT NULL DEFAULT ''");
+        alter("ALTER TABLE Classroom ADD COLUMN capacity INTEGER NOT NULL DEFAULT 0");
+        alter("ALTER TABLE Classroom ADD COLUMN teacher_id INTEGER");
+        alter("ALTER TABLE Classroom ADD COLUMN status TEXT NOT NULL DEFAULT 'active'");
+        alter("CREATE TABLE IF NOT EXISTS ClassroomStudent ("
+            "classroom_id INTEGER NOT NULL, "
+            "student_id INTEGER NOT NULL, "
+            "PRIMARY KEY (classroom_id, student_id))");
         }
     void seedDefaultUsers() {
         struct U { string email, pw, role, name; };
@@ -684,7 +696,9 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
                   } else if (rest.substr(slash) == "/classrooms" && req.method == "GET") {
                      JsonVal rows = db.queryArray(
                          "SELECT c.id, c.room_number, c.name "
-                         "FROM Classroom c JOIN Teacher t ON t.assignedClassroom=c.room_number "
+                         "FROM Classroom c JOIN Teacher t ON (',' || replace(t.assignedClassroom, ' ', '') || ',') LIKE '%,' || replace(c.room_number, ' ', '') || ',%' "
+                         "OR (',' || replace(t.assignedClassroom, ' ', '') || ',') LIKE '%,' || replace(c.name, ' ', '') || ',%' "
+                         "OR (',' || replace(t.assignedClassroom, ' ', '') || ',') LIKE '%,' || replace(c.section_name, ' ', '') || ',%' "
                          "WHERE t.id=" + std::to_string(id) + " ORDER BY c.room_number",
                          [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"room_number",JsonVal(readText(st,1))});o.obj.push_back({"name",JsonVal(readText(st,2))});return o;});
                      return send(200, rows);
