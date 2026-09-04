@@ -228,7 +228,7 @@ export function Select({ options = [], value, onChange, placeholder = 'Select…
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="input-dark flex w-full items-center justify-between pr-3"
+        className="select-themed select-control flex w-full items-center justify-between pr-3"
       >
         <span className={selected ? 'text-white' : 'text-slate-500'}>
           {selected ? selected.label : placeholder}

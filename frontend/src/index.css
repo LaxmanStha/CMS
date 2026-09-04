@@ -1089,9 +1089,9 @@ h2 {
 .form-select:focus { outline: none; border-color: var(--ds-blue); }
 .small { font-size: 12px; }
 
-/* Themed native <select> (used on the login screen) so it matches the
-   boxed inputs and the open option list follows the design tokens. */
-.select-themed {
+/* Shared select styling for native and custom dropdown controls. */
+.select-themed,
+select.input {
   width: 100%;
   padding: 12px 40px 12px 16px;
   border-radius: 12px;
@@ -1105,6 +1105,20 @@ h2 {
   background-repeat: no-repeat;
   background-position: right 14px center;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.select-themed:focus,
+select.input:focus {
+  outline: none;
+  border-color: var(--ds-blue);
+  box-shadow: 0 0 0 3px rgba(59, 107, 245, 0.15);
+}
+.select-themed option,
+select.input option {
+  background-color: var(--ds-surface);
+  color: var(--ds-navy);
+}
+.select-control {
+  background-image: none;
 }
 .select-themed:focus {
   outline: none;

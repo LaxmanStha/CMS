@@ -42,7 +42,7 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="input w-auto min-w-[140px] flex items-center justify-between gap-2 cursor-pointer select-none"
+        className="select-themed select-control w-auto min-w-[140px] flex items-center justify-between gap-2 cursor-pointer select-none"
       >
         <span className={cn('truncate', !selected && 'text-text-secondary')}>{selected ? selected.label : placeholder}</span>
       </button>

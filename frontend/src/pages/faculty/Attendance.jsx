@@ -196,8 +196,8 @@ const FacultyAttendance = () => {
           </div>
         ) : (
           <>
-            <div className="overflow-hidden rounded-xl border border-border">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto rounded-xl border border-border">
+              <table className="w-full min-w-[720px] text-sm">
                 <thead className="bg-background/60 text-text-secondary">
                   <tr>
                     <th className="text-left font-medium px-4 py-2.5">Student</th>
@@ -214,7 +214,7 @@ const FacultyAttendance = () => {
                     </tr>
                   ) : classroomStudents.map(s => (
                     <tr key={s.id} className="border-t border-border">
-                      <td className="px-4 py-2.5">
+                      <td className="w-44 min-w-44 px-4 py-2.5">
                         <div className="font-medium text-text-primary">{s.name}</div>
                         <div className="text-xs text-text-tertiary">{s.id}</div>
                       </td>

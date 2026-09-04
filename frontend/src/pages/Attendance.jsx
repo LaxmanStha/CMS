@@ -59,7 +59,11 @@ const Attendance = () => {
   }, []);
 
   const studentOptions = useMemo(() => students.map(s => ({ value: String(s.id), label: `${s.name} (${s.id}) - ${s.section || ''}` })), [students]);
-  const courseOptions = useMemo(() => ['CS101', 'MATH201', 'PHYS101', 'ENG110', 'OOP', 'CPROG', 'MICRO', 'DBMS', 'OS', 'CN', 'MATH101', 'MATH102', 'STAT', 'FM', 'BM', 'ECO', 'CHEM101', 'BIO101', 'IT', 'WEB'].map(c => ({ value: c, label: c })), []);
+  const courseOptions = useMemo(() => {
+    const courses = ['CS101', 'MATH201', 'PHYS101', 'ENG110', 'OOP', 'CPROG', 'MICRO', 'DBMS', 'OS', 'CN', 'MATH101', 'MATH102', 'STAT', 'FM', 'BM', 'ECO', 'CHEM101', 'BIO101', 'IT', 'WEB'];
+    if (formData.course && !courses.includes(formData.course)) courses.unshift(formData.course);
+    return courses.map(course => ({ value: course, label: course }));
+  }, [formData.course]);
   const statusOptions = ['present', 'absent', 'late', 'excused'].map(s => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1) }));
 
   const stats = useMemo(() => {
@@ -289,7 +293,7 @@ selectedClassroom === room
         }
       >
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
               label="Student"
               value={formData.studentId}

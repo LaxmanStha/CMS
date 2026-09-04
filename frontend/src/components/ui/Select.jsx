@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -20,12 +21,18 @@ const Select = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [menuPosition, setMenuPosition] = useState(null);
   const selectRef = useRef(null);
   const inputRef = useRef(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (selectRef.current && !selectRef.current.contains(event.target)) {
+      if (
+        selectRef.current &&
+        !selectRef.current.contains(event.target) &&
+        !menuRef.current?.contains(event.target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -37,6 +44,32 @@ const Select = ({
     String(option.label || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (option.value && String(option.value).toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  useEffect(() => {
+    if (!isOpen || !inputRef.current) return undefined;
+
+    const updateMenuPosition = () => {
+      const rect = inputRef.current.getBoundingClientRect();
+      const menuHeight = Math.min(240, Math.max(88, filteredOptions.length * 44 + 16));
+      const spaceBelow = window.innerHeight - rect.bottom - 16;
+      const opensUp = spaceBelow < menuHeight && rect.top > menuHeight + 16;
+
+      setMenuPosition({
+        left: rect.left,
+        top: opensUp ? rect.top - menuHeight - 6 : rect.bottom + 6,
+        width: rect.width,
+        maxHeight: Math.max(88, opensUp ? rect.top - 16 : spaceBelow),
+      });
+    };
+
+    updateMenuPosition();
+    window.addEventListener('resize', updateMenuPosition);
+    window.addEventListener('scroll', updateMenuPosition, true);
+    return () => {
+      window.removeEventListener('resize', updateMenuPosition);
+      window.removeEventListener('scroll', updateMenuPosition, true);
+    };
+  }, [filteredOptions.length, isOpen]);
 
   const handleSelect = (option) => {
     if (multiple) {
@@ -68,7 +101,7 @@ const Select = ({
     : options.find(o => o.value === value)?.label || '';
 
   return (
-    <div className={containerClassName} ref={selectRef}>
+    <div className={cn(containerClassName, isOpen && 'relative z-50')} ref={selectRef}>
       {label && (
         <label className="block text-sm font-medium text-text-primary mb-1.5">
           {label}
@@ -82,11 +115,9 @@ const Select = ({
           onKeyDown={handleKeyDown}
           disabled={disabled}
           className={cn(
-            'w-full px-4 py-3 rounded-xl bg-input border transition-all duration-200',
-            'text-left focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
-            'hover:border-primary/50',
-            'disabled:bg-background disabled:cursor-not-allowed disabled:opacity-50',
-            error ? 'border-danger' : 'border-border',
+            'select-themed select-control flex items-center justify-between text-left',
+            'hover:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50',
+            error && 'border-danger',
             (multiple || clearable || searchable) && 'pr-12',
             className
           )}
@@ -153,8 +184,12 @@ const Select = ({
             </div>
           </span>
         </button>
-        {isOpen && (
-          <div className="absolute z-50 w-full mt-1.5 glass rounded-xl shadow-lg border border-border py-2 animate-dropdown max-h-60 overflow-auto">
+        {isOpen && menuPosition && createPortal(
+          <div
+            ref={menuRef}
+            className="fixed z-[1100] rounded-xl bg-card shadow-lg border border-border py-2 animate-dropdown overflow-auto"
+            style={menuPosition}
+          >
             {searchable && (
               <div className="px-3 py-2">
                 <input
@@ -210,7 +245,8 @@ const Select = ({
                 </button>
               ))
             )}
-          </div>
+          </div>,
+          document.body
         )}
       </div>
       {(error || hint) && (

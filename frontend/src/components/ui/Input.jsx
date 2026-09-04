@@ -18,13 +18,13 @@ const Input = ({
   const inputId = id || `input-${reactId}`;
   
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0">
       {label && (
         <label htmlFor={inputId} className="block text-sm font-medium text-text-primary mb-1.5">
           {label}
         </label>
       )}
-      <div className="relative">
+      <div className="relative min-w-0">
         {(leftIcon || leftElement) && (
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-text-secondary">
             {leftIcon || leftElement}
@@ -34,7 +34,7 @@ const Input = ({
           id={inputId}
           type={type}
           className={cn(
-            'w-full rounded-xl bg-input border transition-all duration-200',
+            'w-full min-w-0 rounded-xl bg-input border transition-all duration-200',
             'placeholder:text-text-secondary',
             'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
             'hover:border-primary/50',
