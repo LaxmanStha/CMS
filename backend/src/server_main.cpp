@@ -233,6 +233,7 @@ public:
     Database(const string& path) {
         int rc = sqlite3_open(path.c_str(), &db_);
         if (rc != SQLITE_OK) throw std::runtime_error("Cannot open database");
+        sqlite3_busy_timeout(db_, 5000);
         initSchema();
     }
     ~Database() { if (db_) sqlite3_close(db_); }
