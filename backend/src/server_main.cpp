@@ -241,6 +241,14 @@ public:
     Database& operator=(const Database&) = delete;
 
     void initSchema() {
+        sqlite3_stmt* check = nullptr;
+        bool hasSchema = false;
+        if (sqlite3_prepare_v2(db_, "SELECT 1 FROM sqlite_master WHERE type='table' AND name IN ('Person','Users','Attendance') LIMIT 1", -1, &check, nullptr) == SQLITE_OK) {
+            hasSchema = sqlite3_step(check) == SQLITE_ROW;
+            sqlite3_finalize(check);
+        }
+        if (hasSchema) return;
+
         std::ifstream f("schema.sql");
         if (f) {
             std::stringstream ss; ss << f.rdbuf();
@@ -1337,10 +1345,10 @@ int main() {
 
         WSADATA wsa;
         if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
-            std::cerr << "WSAStartup failed\n"; return 1;
+            std::cerr << "WSAStartup failed\n"; system("pause"); return 1;
         }
         SOCKET server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-        if (server == INVALID_SOCKET) { std::cerr << "socket failed\n"; return 1; }
+        if (server == INVALID_SOCKET) { std::cerr << "socket failed\n"; system("pause"); return 1; }
         int opt = 1;
         setsockopt(server, SOL_SOCKET, SO_REUSEADDR, (const char*)&opt, sizeof(opt));
 
@@ -1349,7 +1357,7 @@ int main() {
         addr.sin_addr.s_addr = INADDR_ANY;
         addr.sin_port = htons(8080);
         if (bind(server, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
-            std::cerr << "bind failed\n"; return 1;
+            std::cerr << "bind failed\n"; system("pause"); return 1;
         }
         listen(server, SOMAXCONN);
         std::cerr << "Starting server on port 8080...\n";
@@ -1415,6 +1423,7 @@ int main() {
         WSACleanup();
     } catch (const std::exception& e) {
         std::cerr << "Fatal error: " << e.what() << "\n";
+        system("pause");
         return 1;
     }
     return 0;
