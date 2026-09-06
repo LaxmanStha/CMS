@@ -1,4 +1,3 @@
-                  const assignmentNames = [roomNumber, classroom?.name].filter(Boolean);
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/Button";

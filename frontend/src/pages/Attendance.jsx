@@ -23,7 +23,6 @@ const columns = [
       <p className="text-xs text-text-secondary">{row.studentId}</p>
     </div>
   )},
-  { key: 'classroom', header: 'Classroom', width: '120px', render: (v) => v || '-' },
   { key: 'course', header: 'Course', width: '120px', sortable: true },
   { key: 'date', header: 'Date', width: '120px', render: (v) => formatDate(v), sortable: true },
   { key: 'status', header: 'Status', width: '100px', render: (v) => (
@@ -44,7 +43,6 @@ const Attendance = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [formData, setFormData] = useState({ studentId: '', course: '', date: new Date().toISOString().split('T')[0], status: 'present', time: '10:00', notes: '' });
   const [students, setStudents] = useState([]);
-  const [selectedClassroom, setSelectedClassroom] = useState('');
 
   useEffect(() => {
     const loadStudents = async () => {
@@ -79,17 +77,15 @@ const Attendance = () => {
   const filteredAttendance = useMemo(() => {
     return attendanceRecords.filter(a => {
       const matchesSearch = !searchTerm || a.student.toLowerCase().includes(searchTerm.toLowerCase()) || a.course.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesClassroom = !selectedClassroom || a.classroom === selectedClassroom;
-      return matchesSearch && matchesClassroom;
+      return matchesSearch;
     });
-  }, [attendanceRecords, searchTerm, selectedClassroom]);
+  }, [attendanceRecords, searchTerm]);
 
   const handleOpenModal = (record = null) => {
     if (record) {
       setEditingRecord(record);
       setFormData({
         studentId: record.studentId || '',
-        classroom: record.classroom || '',
         course: record.course || '',
         date: record.date || new Date().toISOString().split('T')[0],
         status: record.status || 'present',
@@ -98,7 +94,7 @@ const Attendance = () => {
       });
     } else {
       setEditingRecord(null);
-      setFormData({ studentId: '', classroom: '', course: '', date: new Date().toISOString().split('T')[0], status: 'present', time: '10:00', notes: '' });
+      setFormData({ studentId: '', course: '', date: new Date().toISOString().split('T')[0], status: 'present', time: '10:00', notes: '' });
     }
     setShowModal(true);
   };
@@ -106,7 +102,6 @@ const Attendance = () => {
   const handleSubmit = async () => {
     const payload = {
       studentId: formData.studentId,
-      classroom: formData.classroom || students.find(s => String(s.id) === String(formData.studentId))?.classroom || students.find(s => String(s.id) === String(formData.studentId))?.section || '',
       course: formData.course,
       date: formData.date,
       status: formData.status,
@@ -205,47 +200,6 @@ const Attendance = () => {
             <p className="text-xl font-bold text-text-primary">{stats.rate}%</p>
             <p className="text-[11px] text-text-tertiary">Rate</p>
           </div>
-        </div>
-      </div>
-
-      {/* Classroom Filter */}
-      <div className="p-5 rounded-2xl bg-[#151C2C] border border-white/[0.06]">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-text-primary">Classrooms</h3>
-            <p className="text-[11px] text-text-tertiary">Filter by classroom</p>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {(() => {
-            const rooms = Array.from(new Set(students.filter(s => s.section).map(s => s.section)));
-            if (rooms.length === 0) return <span className="text-sm text-text-secondary">No classroom data available</span>;
-            return rooms.map(room => (
-              <button
-                key={room}
-                onClick={() => setSelectedClassroom(selectedClassroom === room ? '' : room)}
-                className={cn(
-                  'inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-200',
-selectedClassroom === room
-                    ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20'
-                    : 'bg-white/[0.03] text-text-secondary border-white/[0.06] hover:bg-white/[0.06] hover:text-text-primary'
-                )}
-              >
-                {room}
-              </button>
-            ));
-          })()}
-          {selectedClassroom && (
-            <button
-              onClick={() => setSelectedClassroom('')}
-              className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium border border-red-500/20 text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-all duration-200"
-            >
-              Clear Filter
-            </button>
-          )}
         </div>
       </div>
 

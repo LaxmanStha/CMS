@@ -91,11 +91,11 @@ INSERT OR IGNORE INTO Student (id, program, year, status, phone, classroom)
 -- Teacher Profiles
 -- ============================================================
 INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
-  VALUES (2, 'CSIT', '555-0102', 'faculty@college.edu', '2015-08-15', 'active', 'CS-A', 'CS101');
+  VALUES (2, 'CSIT', '555-0102', 'faculty@college.edu', '2015-08-15', 'active', 'Room 201', 'CS101');
 INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
-  VALUES (11, 'BIM', '555-0111', 'chen@college.edu', '2018-01-10', 'active', 'ENG-A', 'ENG110');
+  VALUES (11, 'BIM', '555-0111', 'chen@college.edu', '2018-01-10', 'active', 'Room 301', 'ENG110');
 INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
-  VALUES (12, 'BCA', '555-0112', 'park@college.edu', '2020-09-01', 'active', 'PHY-A', 'PHYS101');
+  VALUES (12, 'BCA', '555-0112', 'park@college.edu', '2020-09-01', 'active', 'Room 401', 'PHYS101');
 
 -- ============================================================
 -- Classrooms (linked to teachers)

@@ -126,7 +126,6 @@ const FacultyAttendance = () => {
       }));
       await api.post(`/classroom/${selectedClassroomId}/attendance`, {
         teacherId: user.id,
-        classroom: selectedClassroom?.name || selectedClassroom?.room_number || '',
         date: selectedDate,
         time: new Date().toTimeString().slice(0, 5),
         records,

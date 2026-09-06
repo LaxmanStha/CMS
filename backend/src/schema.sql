@@ -73,7 +73,6 @@ CREATE TABLE IF NOT EXISTS Attendance (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   studentId TEXT,
   student TEXT,
-  classroom TEXT DEFAULT '',
   course TEXT,
   date TEXT,
   status TEXT DEFAULT 'present',
