@@ -794,12 +794,12 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
                     }
                 } else if (rest.substr(slash) == "/students" && req.method == "GET") {
                     JsonVal classroomRows = db.queryArray(
-                        "SELECT room_number FROM Classroom WHERE id=" + std::to_string(id),
-                        [](sqlite3_stmt* st){ JsonVal o; o.type=JsonVal::Obj; o.obj.push_back({"room_number",JsonVal(readText(st,0))}); return o; });
+                        "SELECT room_number, name, section_name FROM Classroom WHERE id=" + std::to_string(id),
+                        [](sqlite3_stmt* st){ JsonVal o; o.type=JsonVal::Obj; o.obj.push_back({"room_number",JsonVal(readText(st,0))}); o.obj.push_back({"name",JsonVal(readText(st,1))}); o.obj.push_back({"section_name",JsonVal(readText(st,2))}); return o; });
                     if (classroomRows.arr.empty()) return send(404, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Classroom not found")});return v;}());
                     string roomNumber = classroomRows.arr[0].strVal("room_number");
                     JsonVal rows = db.queryArray(
-                        "SELECT p.id, p.name, p.contactInfo, s.classroom FROM Person p JOIN Student s ON s.id=p.id WHERE s.classroom='" + roomNumber + "' ORDER BY p.id",
+                        "SELECT p.id, p.name, p.contactInfo, s.classroom FROM Person p JOIN Student s ON s.id=p.id JOIN ClassroomStudent cs ON cs.student_id=s.id WHERE cs.classroom_id=" + std::to_string(id) + " ORDER BY p.id",
                         [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"name",JsonVal(readText(st,1))});o.obj.push_back({"email",JsonVal(readText(st,2))});o.obj.push_back({"classroom",JsonVal(readText(st,3))});return o;});
                     return send(200, rows);
                 }
@@ -850,12 +850,26 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
                         string course = teacherRows.arr[0].strVal("course");
                         string assignedRoom = teacherRows.arr[0].strVal("room");
                         JsonVal classroomRows = db.queryArray(
-                            "SELECT room_number FROM Classroom WHERE id=" + std::to_string(id),
-                            [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"room",JsonVal(readText(st,0))});return o;});
-                        if (classroomRows.arr.empty() || classroomRows.arr[0].strVal("room") != assignedRoom) return send(403, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Classroom is not assigned to this teacher")});return v;}());
+                            "SELECT room_number, name, section_name, teacher_id FROM Classroom WHERE id=" + std::to_string(id),
+                            [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"room",JsonVal(readText(st,0))});o.obj.push_back({"name",JsonVal(readText(st,1))});o.obj.push_back({"section",JsonVal(readText(st,2))});o.obj.push_back({"teacherId",JsonVal(readInt(st,3))});return o;});
+                        if (classroomRows.arr.empty()) return send(403, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Classroom is not assigned to this teacher")});return v;}());
+                        const JsonVal& classroom = classroomRows.arr[0];
+                        long classroomTeacherId = (long)classroom.get("teacherId").num;
+                        bool legacyMatch = false;
+                        {
+                            string normalizedAssigned = "," + assignedRoom + ",";
+                            normalizedAssigned.erase(std::remove(normalizedAssigned.begin(), normalizedAssigned.end(), ' '), normalizedAssigned.end());
+                            auto matches = [&](const string& field) {
+                                string normalizedField = "," + field + ",";
+                                normalizedField.erase(std::remove(normalizedField.begin(), normalizedField.end(), ' '), normalizedField.end());
+                                return normalizedAssigned.find(normalizedField) != string::npos;
+                            };
+                            legacyMatch = matches(classroom.strVal("room")) || matches(classroom.strVal("name")) || matches(classroom.strVal("section"));
+                        }
+                        if (classroomTeacherId != teacherId && !legacyMatch) return send(403, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Classroom is not assigned to this teacher")});return v;}());
                         if (course.empty()) return send(400, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Teacher has no assigned course")});return v;}());
                         JsonVal roster = db.queryArray(
-                            "SELECT p.id, p.name FROM Person p JOIN Student s ON s.id=p.id WHERE s.classroom='" + assignedRoom + "'",
+                            "SELECT p.id, p.name FROM Person p JOIN Student s ON s.id=p.id JOIN ClassroomStudent cs ON cs.student_id=s.id WHERE cs.classroom_id=" + std::to_string(id),
                             [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"name",JsonVal(readText(st,1))});return o;});
                         long count = 0;
                         for (auto& r : records.arr) {
