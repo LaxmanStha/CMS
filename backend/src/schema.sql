@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS Attendance (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   studentId TEXT,
   student TEXT,
+  classroom TEXT DEFAULT '',
   course TEXT,
   date TEXT,
   status TEXT DEFAULT 'present',
@@ -200,11 +201,7 @@ CREATE TABLE IF NOT EXISTS Users (
 CREATE TABLE IF NOT EXISTS Classroom (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   room_number TEXT NOT NULL,
-  name TEXT NOT NULL,
-  section_name TEXT NOT NULL DEFAULT '',
-  capacity INTEGER NOT NULL DEFAULT 0,
-  teacher_id INTEGER,
-  status TEXT NOT NULL DEFAULT 'active'
+  name TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS ClassroomStudent (

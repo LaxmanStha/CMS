@@ -126,6 +126,7 @@ const FacultyAttendance = () => {
       }));
       await api.post(`/classroom/${selectedClassroomId}/attendance`, {
         teacherId: user.id,
+        classroom: selectedClassroom?.name || selectedClassroom?.room_number || '',
         date: selectedDate,
         time: new Date().toTimeString().slice(0, 5),
         records,
@@ -160,7 +161,7 @@ const FacultyAttendance = () => {
             <h3 className="text-lg font-semibold text-text-primary">Session</h3>
             <p className="text-xs text-text-secondary">
               {selectedClassroomId
-                ? `${selectedClassroom?.section_name || 'Class'} · ${selectedClassroom?.room_number || ''}`.trim()
+                ? `${selectedClassroom?.name || 'Class'} · ${selectedClassroom?.room_number || ''}`.trim()
                 : 'No classroom selected'}
               {' '}· {formatDate(selectedDate)}
             </p>

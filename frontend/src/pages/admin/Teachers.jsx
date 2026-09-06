@@ -414,7 +414,7 @@ const AdminTeachers = () => {
                 {classroomOptions.map((option) => {
                   const classroom = classrooms.find((item) => String(item.id) === option.value);
                   const roomNumber = classroom?.room_number || option.label.split(' - ')[0];
-                  const assignmentNames = [roomNumber, classroom?.name, classroom?.section_name].filter(Boolean);
+                  const assignmentNames = [roomNumber, classroom?.name].filter(Boolean);
                   return (
                     <label key={option.value} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-text-secondary hover:bg-white/[0.04] cursor-pointer">
                       <input

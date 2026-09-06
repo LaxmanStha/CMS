@@ -89,6 +89,7 @@ const Attendance = () => {
       setEditingRecord(record);
       setFormData({
         studentId: record.studentId || '',
+        classroom: record.classroom || '',
         course: record.course || '',
         date: record.date || new Date().toISOString().split('T')[0],
         status: record.status || 'present',
@@ -97,7 +98,7 @@ const Attendance = () => {
       });
     } else {
       setEditingRecord(null);
-      setFormData({ studentId: '', course: '', date: new Date().toISOString().split('T')[0], status: 'present', time: '10:00', notes: '' });
+      setFormData({ studentId: '', classroom: '', course: '', date: new Date().toISOString().split('T')[0], status: 'present', time: '10:00', notes: '' });
     }
     setShowModal(true);
   };
@@ -105,6 +106,7 @@ const Attendance = () => {
   const handleSubmit = async () => {
     const payload = {
       studentId: formData.studentId,
+      classroom: formData.classroom || students.find(s => String(s.id) === String(formData.studentId))?.classroom || students.find(s => String(s.id) === String(formData.studentId))?.section || '',
       course: formData.course,
       date: formData.date,
       status: formData.status,
