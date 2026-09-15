@@ -54,15 +54,7 @@ const StudentTimetable = () => {
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="text-text-primary">My Timetable</h2>
-        <div>
-          <label className="me-2">Week:</label>
-          <select className="form-select form-select-sm d-inline-block w-auto" value={week} onChange={e => setWeek(e.target.value)}>
-            <option value="Week 1">Week 1</option>
-            <option value="Week 2">Week 2</option>
-            <option value="Week 3">Week 3</option>
-            <option value="Week 4">Week 4</option>
-          </select>
-        </div>
+        
       </div>
       <div className="card">
         <div className="card-body p-0">

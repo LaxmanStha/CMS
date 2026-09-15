@@ -5,7 +5,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
 import './index.css';
 
@@ -25,15 +24,13 @@ const queryClient = new QueryClient({
 function Root() {
   return (
     <BrowserRouter>
-      <ThemeProvider>
-        <AuthProvider>
-          <ToastProvider>
-            <QueryClientProvider client={queryClient}>
-              <App />
-            </QueryClientProvider>
-          </ToastProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <QueryClientProvider client={queryClient}>
+            <App />
+          </QueryClientProvider>
+        </ToastProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

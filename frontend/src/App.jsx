@@ -50,8 +50,7 @@ function withBoundary(node) {
 
 function App() {
   useEffect(() => {
-    document.body.classList.add("dark-premium");
-    document.body.classList.remove("light");
+    document.body.classList.remove("dark-premium", "light", "dark");
   }, []);
 
   const fallback = <LoadingState label="Loading…" size="lg" />;

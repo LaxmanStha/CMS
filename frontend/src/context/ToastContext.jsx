@@ -9,15 +9,15 @@ export function ToastProvider({ children }) {
   const showToast = useCallback((message, type = 'info', duration = 5000) => {
     const id = uuidv4();
     const toast = { id, message, type, duration };
-    
+
     setToasts(prev => [...prev, toast]);
-    
+
     if (duration > 0) {
       setTimeout(() => {
         setToasts(prev => prev.filter(t => t.id !== id));
       }, duration);
     }
-    
+
     return id;
   }, []);
 
@@ -61,30 +61,30 @@ function Toast({ toast, onRemove }) {
   const [exiting, setExiting] = useState(false);
 
   const toastStyles = {
-    success: 'bg-[var(--success)]/15 border border-[var(--success)]/30 text-[var(--success-light)]',
-    error: 'bg-[var(--danger)]/15 border border-[var(--danger)]/30 text-[var(--danger-light)]',
-    warning: 'bg-amber-500/15 border border-amber-500/30 text-amber-100',
-    info: 'bg-[var(--info)]/15 border border-[var(--info)]/30 text-[var(--info-light)]',
+    success: 'bg-[var(--color-success)]/15 border border-[var(--color-success)]/30 text-[var(--color-success)]',
+    error: 'bg-[var(--color-danger)]/15 border border-[var(--color-danger)]/30 text-[var(--color-danger)]',
+    warning: 'bg-[var(--color-warning)]/15 border border-[var(--color-warning)]/30 text-[var(--color-warning)]',
+    info: 'bg-[var(--color-primary)]/15 border border-[var(--color-primary)]/30 text-[var(--color-primary)]',
   };
 
   const icons = {
     success: (
-      <svg className="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-[var(--color-success)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
       </svg>
     ),
     error: (
-      <svg className="w-5 h-5 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-[var(--color-danger)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
       </svg>
     ),
     warning: (
-      <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-[var(--color-warning)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
       </svg>
     ),
     info: (
-      <svg className="w-5 h-5 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
@@ -106,7 +106,7 @@ function Toast({ toast, onRemove }) {
 
   return (
     <div
-      className={`pointer-events-auto flex items-start gap-3 p-4 rounded-xl border shadow-lg animate-toast ${exiting ? 'animate-toast-out' : ''} ${toastStyles[toast.type]}`}
+      className={`pointer-events-auto flex items-start gap-3 p-4 rounded-lg border shadow-lg animate-toast ${exiting ? 'animate-toast-out' : ''} ${toastStyles[toast.type]}`}
       role="alert"
       aria-live="polite"
     >
@@ -119,10 +119,10 @@ function Toast({ toast, onRemove }) {
           setExiting(true);
           setTimeout(() => onRemove(toast.id), 300);
         }}
-        className="flex-shrink-0 p-1 rounded-lg hover:bg-white/5 text-text-tertiary hover:text-text-primary transition-colors"
+        className="flex-shrink-0 p-1 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
         aria-label="Dismiss"
       >
-        <svg className="w-4 h-4 text-text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>

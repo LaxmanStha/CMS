@@ -11,6 +11,7 @@ import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 import Dropdown from '@/components/ui/Dropdown';
+import Select from '@/components/ui/Select';
 import { useApiData } from '@/hooks/useApiData';
 
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -27,11 +28,14 @@ const Timetable = () => {
   const { success } = useToast();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
-  const { data: timetable, loading, error, reload } = useApiData('/timetable');
-  const courseColors = getCourseColors(timetable);
   const [view, setView] = useState('week');
   const [courseFilter, setCourseFilter] = useState('');
   const [dayFilter, setDayFilter] = useState('');
+  const [selectedClassroomId, setSelectedClassroomId] = useState('');
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [classroomOptions, setClassroomOptions] = useState([]);
+  const [classroomsLoading, setClassroomsLoading] = useState(false);
+  const [classroomsError, setClassroomsError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -43,13 +47,16 @@ const Timetable = () => {
   const [conflicts, setConflicts] = useState(null);
   const [showConflicts, setShowConflicts] = useState(false);
 
+  const endpoint = useMemo(() => selectedClassroomId ? `/timetable?classroom=${selectedClassroomId}&date=${selectedDate}` : '/timetable', [selectedClassroomId, selectedDate]);
+  const { data: timetable, loading, error, reload } = useApiData(endpoint);
+  
+  const courseColors = getCourseColors(timetable);
+
   const courses = useMemo(() => [...new Set(timetable.map(t => t.course))], [timetable]);
 
-  const filteredTimetable = timetable.filter(entry => {
-    const matchesCourse = !courseFilter || entry.course === courseFilter;
-    const matchesDay = !dayFilter || entry.day === dayFilter;
-    return matchesCourse && matchesDay;
-  });
+  // Since filtering is now done by backend via classroom and date, 
+  // we just use the timetable data as-is (or add additional client-side filters if needed)
+  const filteredTimetable = timetable;
 
   const getCellEntries = (day, time) => {
     return filteredTimetable.filter(e => e.day === day && e.time === time);
@@ -174,13 +181,8 @@ const Timetable = () => {
           <p className="text-text-secondary mt-1">Weekly class schedule and room assignments</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex border border-border rounded-xl overflow-hidden">
-            {['week', 'day', 'month'].map(v => (
-              <button key={v} onClick={() => setView(v)} className={cn('px-4 py-2 text-sm font-medium transition-colors', view === v ? 'bg-primary text-white' : 'text-text-secondary hover:bg-hover')}>
-                {v.charAt(0).toUpperCase() + v.slice(1)}
-              </button>
-            ))}
-          </div>
+          
+          
           {isAdmin ? (
             <Button onClick={() => setShowModal(true)}><Plus className="w-4 h-4 mr-1" /> Add Entry</Button>
           ) : (
@@ -191,9 +193,21 @@ const Timetable = () => {
 
       <Card className="overflow-hidden">
         <Card.Header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex flex-col sm:flex-row gap-3 flex-1 flex-wrap">
-            <Dropdown value={courseFilter} onChange={setCourseFilter} options={courses} placeholder="All Courses" />
-            <Dropdown value={dayFilter} onChange={setDayFilter} options={days} placeholder="All Days" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5 w-full">
+            <Select
+              label="Classroom"
+              value={selectedClassroomId}
+              onChange={setSelectedClassroomId}
+              options={classroomOptions}
+              placeholder={classroomsLoading ? 'Loading rooms...' : classroomsError ? classroomsError : classroomOptions.length ? 'Select Room Number' : 'No rooms available'}
+              disabled={classroomsLoading || !!classroomsError}
+            />
+            <Input
+              label="Date"
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+            />
           </div>
           <div className="flex items-center gap-2">
             {isAdmin && (

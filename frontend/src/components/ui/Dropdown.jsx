@@ -44,11 +44,11 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
         onClick={() => setOpen((v) => !v)}
         className="select-themed select-control w-auto min-w-[140px] flex items-center justify-between gap-2 cursor-pointer select-none"
       >
-        <span className={cn('truncate', !selected && 'text-text-secondary')}>{selected ? selected.label : placeholder}</span>
+        <span className={cn('truncate', !selected && 'text-[var(--color-text-muted)]')}>{selected ? selected.label : placeholder}</span>
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1.5 w-full glass rounded-xl shadow-lg border border-border py-1.5 animate-dropdown max-h-64 overflow-auto">
+        <div className="absolute z-50 mt-1.5 w-full bg-white rounded-xl shadow-lg border border-[var(--color-border)] py-1.5 max-h-64 overflow-auto">
           {list.map((o) => (
             <button
               key={o.value}
@@ -57,8 +57,8 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
               className={cn(
                 'w-full px-4 py-2 text-left text-sm transition-colors flex items-center justify-between',
                 value === o.value
-                  ? 'text-primary font-medium bg-primary/5'
-                  : 'text-text-primary hover:bg-hover'
+                  ? 'text-[var(--color-primary)] font-medium bg-[var(--color-primary)]/5'
+                  : 'text-[var(--color-text)] hover:bg-[var(--color-surface)]'
               )}
             >
               {o.label}

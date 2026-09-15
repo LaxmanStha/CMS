@@ -51,7 +51,7 @@ const Table = memo(({
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       const cols = searchColumns.length > 0 ? searchColumns : columns.map(c => c.key);
-      result = result.filter(row => 
+      result = result.filter(row =>
         cols.some(col => {
           const value = row[col];
           return value?.toString().toLowerCase().includes(searchLower);
@@ -138,10 +138,10 @@ const Table = memo(({
   return (
     <div className={cn('w-full', className)}>
       {(searchable || filterable) && (
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-transparent rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 rounded-lg border border-[var(--color-border)]">
           {searchable && (
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)]" />
               <input
                 type="text"
                 placeholder="Search..."
@@ -150,7 +150,7 @@ const Table = memo(({
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-10 pr-4 py-2.5 bg-input border border-border rounded-xl text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
+                className="input pl-10"
               />
             </div>
           )}
@@ -161,37 +161,37 @@ const Table = memo(({
                   <button
                     onClick={() => setFilterOpen(filterOpen === col.key ? null : col.key)}
                     className={cn(
-                      'px-3 py-2 rounded-xl text-sm font-medium transition-all',
-                      'hover:bg-hover',
-                      filters[col.key] ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-secondary border border-border'
+                      'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                      'hover:bg-[var(--color-surface)]',
+                      filters[col.key] ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20' : 'text-[var(--color-text-muted)] border border-[var(--color-border)]'
                     )}
                   >
                     <Filter className="w-4 h-4 mr-1.5 inline" />
                     {col.header}
                   </button>
                   {filterOpen === col.key && (
-                    <div className="absolute right-0 top-full mt-2 w-56 glass rounded-xl shadow-lg border border-border py-2 z-50 animate-dropdown">
+                    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-[var(--color-border)] py-2 z-50">
                       <input
                         type="text"
                         placeholder={`Filter ${col.header}...`}
                         value={filters[col.key] || ''}
                         onChange={(e) => setFilters(prev => ({ ...prev, [col.key]: e.target.value }))}
-                         className="w-full px-3 py-2 text-sm bg-input border border-border rounded-xl mx-2 mb-2 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                        className="input w-full px-3 py-2 text-sm mx-2 mb-2"
                         autoFocus
                       />
                       {col.filterOptions?.map(opt => (
-                        <label key={opt.value} className="flex items-center gap-2 px-3 py-2 hover:bg-hover cursor-pointer">
+                        <label key={opt.value} className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--color-surface)] cursor-pointer">
                           <input
                             type="checkbox"
                             checked={Array.isArray(filters[col.key]) && filters[col.key].includes(opt.value)}
                             onChange={(e) => {
                               const current = Array.isArray(filters[col.key]) ? [...filters[col.key]] : [];
-                              const updated = e.target.checked 
-                                ? [...current, opt.value] 
+                              const updated = e.target.checked
+                                ? [...current, opt.value]
                                 : current.filter(v => v !== opt.value);
                               setFilters(prev => ({ ...prev, [col.key]: updated }));
                             }}
-                            className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
+                            className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]/20"
                           />
                           <span className="text-sm">{opt.label}</span>
                         </label>
@@ -205,25 +205,25 @@ const Table = memo(({
         </div>
       )}
 
-      <div className="table-container overflow-x-auto rounded-2xl border border-border bg-card shadow-card">
-        <table className="w-full border-collapse">
-          <thead className={cn('sticky top-0 z-10', stickyHeader && 'bg-table-header')}>
+      <div className="table-container overflow-x-auto">
+        <table className="table">
+          <thead className={cn('sticky top-0 z-10', stickyHeader && 'bg-[var(--color-surface)]')}>
             <tr>
               {selectable && (
-                <th className="px-6 py-4 w-12">
+                <th className="px-4 py-3 w-12">
                   <label className="flex items-center justify-center cursor-pointer">
                     <input
                       type="checkbox"
                       checked={selectedRowsState.length === paginatedData.length && paginatedData.length > 0}
                       onChange={handleSelectAll}
-                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
+                      className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]/20"
                       aria-label="Select all rows"
                     />
                   </label>
                 </th>
               )}
               {showRowNumbers && (
-                <th className="px-6 py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider w-12">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider w-12">
                   #
                 </th>
               )}
@@ -231,7 +231,7 @@ const Table = memo(({
                 <th
                   key={column.key}
                   className={cn(
-                    'px-6 py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider',
+                    'px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider',
                     column.className,
                     column.align && `text-${column.align}`
                   )}
@@ -242,7 +242,7 @@ const Table = memo(({
                     {sortable && column.sortable !== false && (
                       <button
                         onClick={() => handleSort(column.key)}
-                        className="p-1 rounded-full hover:bg-primary/10 text-text-secondary hover:text-primary transition-colors"
+                        className="p-1 rounded-full hover:bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
                         aria-label={`Sort by ${column.header}`}
                       >
                         {getSortIcon(column.key)}
@@ -252,30 +252,30 @@ const Table = memo(({
                 </th>
               ))}
               {(actions || rowActions) && (
-                <th className="px-6 py-4 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider w-32">
+                <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider w-32">
                   Actions
                 </th>
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/50">
+          <tbody className="divide-y divide-[var(--color-border)]/50">
             {loading ? (
               <tr>
                 <td colSpan={columns.length + (selectable ? 1 : 0) + (showRowNumbers ? 1 : 0) + ((actions || rowActions) ? 1 : 0)} className="py-12 text-center">
                   <div className="flex items-center justify-center gap-3">
                     <div className="loader" />
-                    <span className="text-text-secondary">Loading...</span>
+                    <span className="text-[var(--color-text-muted)]">Loading...</span>
                   </div>
                 </td>
               </tr>
             ) : paginatedData.length === 0 ? (
               <tr>
                 <td colSpan={columns.length + (selectable ? 1 : 0) + (showRowNumbers ? 1 : 0) + ((actions || rowActions) ? 1 : 0)} className="py-12 text-center">
-                  <div className="flex flex-col items-center gap-3 text-text-secondary">
-                    <svg className="w-12 h-12 text-border" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex flex-col items-center gap-3 text-[var(--color-text-muted)]">
+                    <svg className="w-12 h-12 text-[var(--color-border)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <p className="text-lg font-medium text-text-primary">{emptyMessage}</p>
+                    <p className="text-lg font-medium text-[var(--color-text)]">{emptyMessage}</p>
                   </div>
                 </td>
               </tr>
@@ -286,35 +286,35 @@ const Table = memo(({
                   onClick={() => onRowClick?.(row)}
                   className={cn(
                     'transition-colors',
-                    hoverable && 'hover:bg-hover',
-                    striped && rowIndex % 2 === 1 && 'bg-background/50',
+                    hoverable && 'hover:bg-[var(--color-surface)]',
+                    striped && rowIndex % 2 === 1 && 'bg-[var(--color-surface)]/50',
                     rowClassName,
                     typeof rowClassName === 'function' ? rowClassName(row) : '',
                     onRowClick && 'cursor-pointer'
                   )}
                 >
                   {selectable && (
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <label className="flex items-center justify-center cursor-pointer">
                         <input
                           type="checkbox"
                           checked={selectedRowsState.some(r => r[keyField] === row[keyField])}
                           onChange={() => handleSelectRow(row)}
                           onClick={e => e.stopPropagation()}
-                          className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
+                          className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]/20"
                         />
                       </label>
                     </td>
                   )}
                   {showRowNumbers && (
-                    <td className="px-6 py-4 text-text-secondary text-sm">
+                    <td className="px-4 py-3 text-[var(--color-text-muted)] text-sm">
                       {(currentPage - 1) * pageSizeState + rowIndex + 1}
                     </td>
                   )}
                   {columns.map(column => {
                     const value = row[column.key];
                     let content;
-                    
+
                     if (column.render) {
                       content = column.render(value, row, rowIndex);
                     } else if (column.type === 'badge') {
@@ -326,12 +326,12 @@ const Table = memo(({
                     } else if (column.type === 'avatar') {
                       content = (
                         <div className="flex items-center gap-3">
-                          <div className="avatar avatar-sm bg-primary/10 text-primary">
+                          <div className="avatar avatar-sm bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
                             {value?.name?.charAt(0).toUpperCase() || '?'}
                           </div>
                           <div>
-                            <p className="font-medium text-text-primary">{value?.name}</p>
-                            <p className="text-sm text-text-secondary">{value?.email}</p>
+                            <p className="font-medium text-[var(--color-text)]">{value?.name}</p>
+                            <p className="text-sm text-[var(--color-text-muted)]">{value?.email}</p>
                           </div>
                         </div>
                       );
@@ -347,7 +347,7 @@ const Table = memo(({
                       <td
                         key={column.key}
                         className={cn(
-                          'px-6 py-4 text-sm text-text-primary',
+                          'px-4 py-3 text-sm text-[var(--color-text)]',
                           column.className,
                           column.align && `text-${column.align}`
                         )}
@@ -358,7 +358,7 @@ const Table = memo(({
                     );
                   })}
                   {(actions || rowActions) && (
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         {rowActions?.map((action, i) => (
                           <button
@@ -369,9 +369,9 @@ const Table = memo(({
                             }}
                             className={cn(
                               'p-2 rounded-full transition-colors',
-                              action.variant === 'danger' ? 'text-danger hover:bg-danger/10' :
-                              action.variant === 'primary' ? 'text-primary hover:bg-primary/10' :
-                              'text-text-secondary hover:bg-hover'
+                              action.variant === 'danger' ? 'text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10' :
+                              action.variant === 'primary' ? 'text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10' :
+                              'text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]'
                             )}
                             title={action.label}
                             aria-label={action.label}
@@ -385,7 +385,7 @@ const Table = memo(({
                               e.stopPropagation();
                               actions.onClick(row);
                             }}
-                            className="p-2 rounded-full text-text-secondary hover:bg-hover hover:text-text-primary transition-colors"
+                            className="p-2 rounded-full text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] transition-colors"
                             aria-label="More actions"
                           >
                             <MoreHorizontal className="w-5 h-5" />
@@ -402,9 +402,9 @@ const Table = memo(({
       </div>
 
       {paginated && totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 p-4 bg-transparent rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 p-4 rounded-lg border border-[var(--color-border)]">
           <div className="flex items-center gap-3">
-            <span className="text-sm text-text-secondary">
+            <span className="text-sm text-[var(--color-text-muted)]">
               Showing <span className="font-semibold">{((currentPage - 1) * pageSizeState) + 1}</span> to{' '}
               <span className="font-semibold">{Math.min(currentPage * pageSizeState, filteredData.length)}</span> of{' '}
               <span className="font-semibold">{filteredData.length}</span> results
@@ -412,7 +412,7 @@ const Table = memo(({
             <select
               value={pageSizeState}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              className="px-3 py-1.5 text-sm rounded-lg border border-border bg-input focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
             >
               {pageSizes.map(size => (
                 <option key={size} value={size}>{size} per page</option>
@@ -423,7 +423,7 @@ const Table = memo(({
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="p-2 rounded-xl text-text-secondary hover:bg-hover hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-label="Previous page"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -445,10 +445,10 @@ const Table = memo(({
                     key={pageNum}
                     onClick={() => handlePageChange(pageNum)}
                     className={cn(
-                      'w-10 h-10 rounded-xl font-medium transition-all',
+                      'w-10 h-10 rounded-lg font-medium transition-colors',
                       currentPage === pageNum
-                         ? 'bg-primary text-white shadow-md'
-                        : 'text-text-secondary hover:bg-hover hover:text-text-primary'
+                        ? 'bg-[var(--color-primary)] text-white shadow-sm'
+                        : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]'
                     )}
                     aria-label={`Page ${pageNum}`}
                     aria-current={currentPage === pageNum ? 'page' : undefined}
@@ -461,7 +461,7 @@ const Table = memo(({
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-xl text-text-secondary hover:bg-hover hover:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-label="Next page"
             >
               <ChevronRight className="w-5 h-5" />
@@ -471,7 +471,7 @@ const Table = memo(({
       )}
 
       {footer && (
-        <div className="mt-4 p-4 bg-transparent rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
+        <div className="mt-4 p-4 rounded-lg border border-[var(--color-border)]">
           {footer}
         </div>
       )}

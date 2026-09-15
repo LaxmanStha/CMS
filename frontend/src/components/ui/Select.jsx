@@ -3,11 +3,11 @@ import { createPortal } from 'react-dom';
 import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const Select = ({ 
-  options = [], 
-  value, 
-  onChange, 
-  placeholder = 'Select...', 
+const Select = ({
+  options = [],
+  value,
+  onChange,
+  placeholder = 'Select...',
   className,
   containerClassName = 'w-full',
   disabled = false,
@@ -17,7 +17,7 @@ const Select = ({
   error,
   hint,
   clearable = false,
-  ...props 
+  ...props
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,7 +40,7 @@ const Select = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const filteredOptions = options.filter(option => 
+  const filteredOptions = options.filter(option =>
     String(option.label || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (option.value && String(option.value).toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -73,7 +73,7 @@ const Select = ({
 
   const handleSelect = (option) => {
     if (multiple) {
-      const newValue = value.includes(option.value) 
+      const newValue = value.includes(option.value)
         ? value.filter(v => v !== option.value)
         : [...value, option.value];
       onChange(newValue);
@@ -96,14 +96,14 @@ const Select = ({
     }
   };
 
-  const displayValue = multiple 
+  const displayValue = multiple
     ? value.map(v => options.find(o => o.value === v)?.label).filter(Boolean).join(', ')
     : options.find(o => o.value === value)?.label || '';
 
   return (
     <div className={cn(containerClassName, isOpen && 'relative z-50')} ref={selectRef}>
       {label && (
-        <label className="block text-sm font-medium text-text-primary mb-1.5">
+        <label className="label">
           {label}
         </label>
       )}
@@ -116,8 +116,8 @@ const Select = ({
           disabled={disabled}
           className={cn(
             'select-themed select-control flex items-center justify-between text-left',
-            'hover:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50',
-            error && 'border-danger',
+            'hover:border-[var(--color-primary)]/50 disabled:cursor-not-allowed disabled:opacity-50',
+            error && 'border-[var(--color-danger)]',
             (multiple || clearable || searchable) && 'pr-12',
             className
           )}
@@ -125,14 +125,14 @@ const Select = ({
         >
           <span className={cn(
             'flex items-center justify-between',
-            !displayValue && !searchable && 'text-text-secondary'
+            !displayValue && !searchable && 'text-[var(--color-text-muted)]'
           )}>
             {multiple && value.length > 0 ? (
               <div className="flex flex-wrap gap-1.5">
                 {value.map(v => {
                   const option = options.find(o => o.value === v);
                   return option && (
-                    <span key={v} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-primary/10 text-primary text-xs">
+                    <span key={v} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs">
                       {option.label}
                       <span
                         role="button"
@@ -140,7 +140,7 @@ const Select = ({
                           e.stopPropagation();
                           handleSelect(option);
                         }}
-                        className="p-0.5 rounded hover:bg-primary/20 cursor-pointer"
+                        className="p-0.5 rounded hover:bg-[var(--color-primary)]/20 cursor-pointer"
                         tabIndex={-1}
                       >
                         <X className="w-3 h-3" />
@@ -150,9 +150,9 @@ const Select = ({
                 })}
               </div>
             ) : displayValue ? (
-              <span className="text-text-primary">{displayValue}</span>
+              <span className="text-[var(--color-text)]">{displayValue}</span>
             ) : (
-              <span className="text-text-secondary">{placeholder}</span>
+              <span className="text-[var(--color-text-muted)]">{placeholder}</span>
             )}
             <div className="flex items-center gap-1.5 ml-2">
               {searchable && isOpen && (
@@ -170,16 +170,16 @@ const Select = ({
                 <span
                   role="button"
                   onClick={handleClear}
-                  className="p-1 rounded-lg hover:bg-hover text-text-secondary transition-colors cursor-pointer"
+                  className="p-1 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-muted)] transition-colors cursor-pointer"
                   tabIndex={-1}
                 >
                   <X className="w-4 h-4" />
                 </span>
               )}
               {isOpen ? (
-                <ChevronUp className="w-5 h-5 text-text-secondary transition-transform" />
+                <ChevronUp className="w-5 h-5 text-[var(--color-text-muted)] transition-transform" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-text-secondary transition-transform" />
+                <ChevronDown className="w-5 h-5 text-[var(--color-text-muted)] transition-transform" />
               )}
             </div>
           </span>
@@ -187,7 +187,7 @@ const Select = ({
         {isOpen && menuPosition && createPortal(
           <div
             ref={menuRef}
-            className="fixed z-[1100] rounded-xl bg-card shadow-lg border border-border py-2 animate-dropdown overflow-auto"
+            className="fixed z-[1100] rounded-xl bg-white shadow-lg border border-[var(--color-border)] py-2 overflow-auto"
             style={menuPosition}
           >
             {searchable && (
@@ -197,14 +197,14 @@ const Select = ({
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="input w-full px-3 py-2 rounded-lg text-sm"
                   placeholder="Search options..."
                   autoFocus
                 />
               </div>
             )}
             {filteredOptions.length === 0 ? (
-              <div className="px-4 py-3 text-center text-text-secondary text-sm">
+              <div className="px-4 py-3 text-center text-[var(--color-text-muted)] text-sm">
                 No options found
               </div>
             ) : (
@@ -218,9 +218,9 @@ const Select = ({
                   }}
                   className={cn(
                     'w-full px-4 py-3 text-left text-sm transition-colors flex items-center gap-3',
-                    value.includes(option.value) 
-                      ? 'bg-primary/10 text-primary' 
-                      : 'text-text-primary hover:bg-hover'
+                    value.includes(option.value)
+                      ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
+                      : 'text-[var(--color-text)] hover:bg-[var(--color-surface)]'
                   )}
                   tabIndex={-1}
                 >
@@ -228,8 +228,8 @@ const Select = ({
                     <div className={cn(
                       'w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors',
                       value.includes(option.value)
-                        ? 'bg-primary border-primary text-white'
-                        : 'border-border text-transparent'
+                        ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white'
+                        : 'border-[var(--color-border)] text-transparent'
                     )}>
                       {value.includes(option.value) && (
                         <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
@@ -240,7 +240,7 @@ const Select = ({
                   )}
                   <span>{option.label}</span>
                   {option.description && (
-                    <span className="text-text-secondary ml-auto text-xs">{option.description}</span>
+                    <span className="text-[var(--color-text-muted)] ml-auto text-xs">{option.description}</span>
                   )}
                 </button>
               ))
@@ -250,7 +250,7 @@ const Select = ({
         )}
       </div>
       {(error || hint) && (
-        <p className={cn('mt-1.5 text-sm', error ? 'text-danger' : 'text-text-secondary')}>
+        <p className={cn('form-error', !error && 'form-hint')}>
           {error || hint}
         </p>
       )}

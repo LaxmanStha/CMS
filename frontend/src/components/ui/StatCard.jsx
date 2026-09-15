@@ -7,7 +7,7 @@ const StatCard = memo(({
   title,
   value,
   icon: Icon,
-  iconClass = 'bg-primary/10 text-primary',
+  iconClass = 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]',
   trend,
   trendUp = true,
   trendLabel,
@@ -19,23 +19,23 @@ const StatCard = memo(({
   <Card className="p-6">
     <div className="flex items-start justify-between gap-4">
       <div className="min-w-0">
-        <p className="text-sm font-medium text-text-secondary">{title}</p>
+        <p className="text-sm font-medium text-[var(--color-text-muted)]">{title}</p>
         {value !== undefined && (
-          <p className="dashboard-number mt-2 text-3xl font-extrabold leading-tight text-text-primary">
-            {loading ? <span className="text-text-tertiary">—</span> : format ? format(value) : value}
+          <p className="dashboard-number mt-2 text-3xl font-extrabold leading-tight text-[var(--color-text)]">
+            {loading ? <span className="text-[var(--color-text-muted)]">—</span> : format ? format(value) : value}
           </p>
         )}
-        {description && <p className="mt-2 text-sm text-text-secondary">{description}</p>}
+        {description && <p className="mt-2 text-sm text-[var(--color-text-muted)]">{description}</p>}
         {trend && (
           <p
             className={cn(
               'mt-2 flex items-center gap-1 text-xs font-semibold',
-              trendUp ? 'text-success' : 'text-danger'
+              trendUp ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'
             )}
           >
             {trendUp ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
             {trend}
-            {trendLabel && <span className="font-normal text-text-secondary">{trendLabel}</span>}
+            {trendLabel && <span className="font-normal text-[var(--color-text-muted)]">{trendLabel}</span>}
           </p>
         )}
         {action && <div className="mt-4">{action}</div>}

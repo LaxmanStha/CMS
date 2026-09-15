@@ -41,9 +41,9 @@ const AccountantDues = () => {
   });
 
   const summary = filteredDues.reduce((acc, due) => {
-    acc.totalFees += due.totalFees;
-    acc.totalPaid += due.paid;
-    acc.totalDue += due.due;
+    acc.totalFees += due.totalFees || 0;
+    acc.totalPaid += due.paid || 0;
+    acc.totalDue += due.due || 0;
     return acc;
   }, { totalFees: 0, totalPaid: 0, totalDue: 0 });
 
@@ -130,9 +130,9 @@ const AccountantDues = () => {
                     <td>{due.student}</td>
                     <td>{due.studentId}</td>
                     <td>{due.course}</td>
-                    <td className="fw-bold">${due.totalFees.toLocaleString()}</td>
-                    <td className="text-success fw-bold">${due.paid.toLocaleString()}</td>
-                    <td className="text-danger fw-bold">${due.due.toLocaleString()}</td>
+                    <td className="fw-bold">${(due.totalFees || 0).toLocaleString()}</td>
+                    <td className="text-success fw-bold">${(due.paid || 0).toLocaleString()}</td>
+                    <td className="text-danger fw-bold">${(due.due || 0).toLocaleString()}</td>
                     <td><span className={`badge ${statusColors[due.status] || 'bg-secondary'}`}>{due.status}</span></td>
                     <td>
                       <div className="btn-group btn-group-sm" role="group">

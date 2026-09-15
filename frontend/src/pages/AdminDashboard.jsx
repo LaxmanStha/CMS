@@ -118,7 +118,6 @@ const AdminDashboard = () => {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
             <h1 className="page-header-title">Admin Dashboard</h1>
-            <p className="page-header-subtitle">Welcome back! Here's what's happening at your institution today.</p>
           </div>
           <div className="flex items-center gap-2 text-sm text-text-tertiary">
             <Calendar className="h-4 w-4" />
@@ -138,7 +137,6 @@ const AdminDashboard = () => {
           iconClass="bg-amber-500/10 text-amber-500"
           format={formatNumber}
           trend="+12%"
-          trendLabel=" from last month"
           trendUp={true}
         />
         <StatCard
@@ -149,7 +147,6 @@ const AdminDashboard = () => {
           iconClass="bg-blue-500/10 text-blue-500"
           format={formatNumber}
           trend="+5%"
-          trendLabel=" from last month"
           trendUp={true}
         />
         <StatCard
@@ -160,37 +157,11 @@ const AdminDashboard = () => {
           iconClass="bg-orange-500/10 text-orange-500"
           format={formatNumber}
           trend="-8%"
-          trendLabel=" from last week"
           trendUp={false}
         />
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <button className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-amber-500/20 transition-all duration-200 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 group-hover:scale-110 transition-transform">
-            <UserPlus className="h-5 w-5" />
-          </div>
-          <span className="text-xs font-medium text-text-secondary group-hover:text-text-primary">Add Student</span>
-        </button>
-        <button className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-blue-500/20 transition-all duration-200 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
-            <BookOpen className="h-5 w-5" />
-          </div>
-          <span className="text-xs font-medium text-text-secondary group-hover:text-text-primary">New Course</span>
-        </button>
-        <button className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-emerald-500/20 transition-all duration-200 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
-            <Award className="h-5 w-5" />
-          </div>
-          <span className="text-xs font-medium text-text-secondary group-hover:text-text-primary">Schedule Exam</span>
-        </button>
-        <button className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-purple-500/20 transition-all duration-200 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform">
-            <TrendingUp className="h-5 w-5" />
-          </div>
-          <span className="text-xs font-medium text-text-secondary group-hover:text-text-primary">View Reports</span>
-        </button>
-      </div>
+      
 
       <div className="card-premium">
         <div className="flex items-center justify-between p-5 border-b border-white/[0.06]">

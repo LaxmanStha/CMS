@@ -2,12 +2,12 @@ import { X, Check, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
-const Modal = ({ 
-  isOpen, 
-  onClose, 
-  title, 
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
   description,
-  children, 
+  children,
   size = 'md',
   showClose = true,
   closeOnOverlayClick = true,
@@ -57,10 +57,10 @@ const Modal = ({
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
     if (!focusableElements?.length) return;
-    
+
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
-    
+
     if (e.shiftKey && document.activeElement === firstElement) {
       e.preventDefault();
       lastElement.focus();
@@ -81,17 +81,17 @@ const Modal = ({
   };
 
   const variants = {
-    default: 'bg-card',
-    danger: 'bg-card border-danger',
-    success: 'bg-card border-success',
+    default: 'bg-white',
+    danger: 'bg-white border-[var(--color-danger)]',
+    success: 'bg-white border-[var(--color-success)]',
   };
 
   const isTopRight = anchor === 'top-right';
 
   return (
-    <div className="fixed inset-0 z-[1000] animate-fade-in">
+    <div className="fixed inset-0 z-[1000]">
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+        className="fixed inset-0 bg-black/50"
         aria-hidden="true"
       />
       <div
@@ -110,28 +110,23 @@ const Modal = ({
           aria-describedby={description ? 'modal-description' : undefined}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            'relative w-full my-4 max-h-[calc(100vh-2rem)] rounded-2xl shadow-xl flex flex-col overflow-hidden',
-            isTopRight ? 'animate-toast' : 'animate-modal',
+            'relative w-full my-4 max-h-[calc(100vh-2rem)] rounded-xl shadow-xl flex flex-col overflow-hidden',
             sizes[size],
             variants[variant],
-            'border border-border',
+            'border border-[var(--color-border)]',
             className
           )}
         >
         {(title || showClose) && (
-          <div
-            className={cn(
-              'flex flex-shrink-0 items-start justify-between p-6 border-b border-border'
-            )}
-          >
+          <div className="flex flex-shrink-0 items-start justify-between p-4 border-b border-[var(--color-border)]">
             <div>
               {title && (
-                <h2 id="modal-title" className="text-xl font-semibold text-text-primary">
+                <h2 id="modal-title" className="text-lg font-semibold text-[var(--color-text)]">
                   {title}
                 </h2>
               )}
               {description && (
-                <p id="modal-description" className="mt-1 text-sm text-text-secondary">
+                <p id="modal-description" className="mt-1 text-sm text-[var(--color-text-muted)]">
                   {description}
                 </p>
               )}
@@ -139,7 +134,7 @@ const Modal = ({
             {showClose && (
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg text-text-secondary hover:bg-hover hover:text-text-primary transition-colors"
+                className="p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] transition-colors"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
@@ -147,11 +142,11 @@ const Modal = ({
             )}
           </div>
         )}
-        <div className="flex-1 min-h-0 overflow-y-auto p-6">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4">
           {children}
         </div>
         {footer && (
-          <div className="flex flex-shrink-0 items-center justify-end gap-3 p-6 border-t border-border">
+          <div className="flex flex-shrink-0 items-center justify-end gap-3 p-4 border-t border-[var(--color-border)]">
             {footer}
           </div>
         )}
@@ -161,11 +156,11 @@ const Modal = ({
   );
 };
 
-const ConfirmDialog = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  title = 'Are you sure?', 
+const ConfirmDialog = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title = 'Are you sure?',
   message = 'This action cannot be undone.',
   confirmText = 'Confirm',
   cancelText = 'Cancel',
@@ -173,27 +168,27 @@ const ConfirmDialog = ({
   loading = false,
 }) => {
   const variants = {
-    danger: { icon: AlertTriangle, iconColor: 'text-warning', btnColor: 'btn-danger' },
-    success: { icon: Check, iconColor: 'text-success', btnColor: 'btn-success' },
-    info: { icon: Info, iconColor: 'text-info', btnColor: 'btn-primary' },
-    warning: { icon: AlertCircle, iconColor: 'text-warning', btnColor: 'btn-warning' },
+    danger: { icon: AlertTriangle, iconColor: 'text-[var(--color-warning)]', btnColor: 'btn-danger' },
+    success: { icon: Check, iconColor: 'text-[var(--color-success)]', btnColor: 'btn-primary' },
+    info: { icon: Info, iconColor: 'text-[var(--color-primary)]', btnColor: 'btn-primary' },
+    warning: { icon: AlertCircle, iconColor: 'text-[var(--color-warning)]', btnColor: 'btn-primary' },
   };
 
   const { icon: Icon, iconColor, btnColor } = variants[variant];
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      title={title} 
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
       size="sm"
       footer={
         <>
           <button onClick={onClose} className="btn btn-ghost" disabled={loading}>
             {cancelText}
           </button>
-          <button 
-            onClick={onConfirm} 
+          <button
+            onClick={onConfirm}
             className={cn('btn', btnColor)}
             disabled={loading}
           >
@@ -215,7 +210,7 @@ const ConfirmDialog = ({
           <Icon className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <p className="text-text-secondary">{message}</p>
+          <p className="text-[var(--color-text-muted)]">{message}</p>
         </div>
       </div>
     </Modal>

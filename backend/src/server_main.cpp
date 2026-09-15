@@ -1023,8 +1023,8 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
 
     // ---- accountant ----
     if (p == "/api/accountant/dues" && req.method == "GET") {
-        JsonVal rows = db.queryArray("SELECT id, student, course, amount, paid, dueDate, status FROM Fee WHERE status IN ('pending','partial','overdue') ORDER BY dueDate",
-            [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"student",JsonVal(readText(st,1))});o.obj.push_back({"course",JsonVal(readText(st,2))});o.obj.push_back({"amount",JsonVal(readDbl(st,3))});o.obj.push_back({"paid",JsonVal(readDbl(st,4))});o.obj.push_back({"dueDate",JsonVal(readText(st,5))});o.obj.push_back({"status",JsonVal(readText(st,6))});return o;});
+        JsonVal rows = db.queryArray("SELECT id, student, studentId, course, amount, paid, dueDate, status FROM Fee WHERE status IN ('pending','partial','overdue') ORDER BY dueDate",
+            [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"student",JsonVal(readText(st,1))});o.obj.push_back({"studentId",JsonVal(readInt(st,2))});o.obj.push_back({"course",JsonVal(readText(st,3))});o.obj.push_back({"totalFees",JsonVal(readDbl(st,4))});o.obj.push_back({"paid",JsonVal(readDbl(st,5))});o.obj.push_back({"due",JsonVal(readDbl(st,4) - readDbl(st,5))});o.obj.push_back({"status",JsonVal(readText(st,7))});return o;});
         return send(200, rows);
     }
     if (p == "/api/accountant/invoices" && req.method == "GET") {
@@ -1418,6 +1418,7 @@ int main() {
     }
     return 0;
 }
+
 
 
 
