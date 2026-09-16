@@ -165,40 +165,61 @@ const AdminDashboard = () => {
 
       {error && <div className="alert alert-danger">{error}</div>}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard
-          title="Total Students"
-          value={loading ? 0 : stats.students}
-          loading={loading}
-          icon={Users}
-          iconClass="bg-emerald-500/10 text-emerald-500"
-          format={formatNumber}
-          trend="+12%"
-          trendUp={true}
-        />
-        <StatCard
-          title="Total Teachers"
-          value={loading ? 0 : stats.faculty}
-          loading={loading}
-          icon={GraduationCap}
-          iconClass="bg-violet-500/10 text-violet-500"
-          format={formatNumber}
-          trend="+5%"
-          trendUp={true}
-        />
-        <StatCard
-          title="Pending Applications"
-          value={loading ? 0 : stats.pending}
-          loading={loading}
-          icon={Clock}
-          iconClass="bg-emerald-500/10 text-emerald-500"
-          format={formatNumber}
-          trend="-8%"
-          trendUp={false}
-        />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <ChartCard title="Students by Program" subtitle="Distribution across programs" className="card-premium">
+            <PieChartBox
+              data={studentsByProgram}
+              nameKey="name"
+              dataKey="value"
+              colors={CHART_PALETTE}
+              donut
+              centerLabel={`${stats.students} total`}
+            />
+          </ChartCard>
+        </div>
+
+        <div className="space-y-4">
+          <StatCard
+            title="Total Students"
+            value={loading ? 0 : stats.students}
+            loading={loading}
+            icon={Users}
+            iconClass="bg-emerald-500/10 text-emerald-500"
+            format={formatNumber}
+            trend="+12%"
+            trendUp={true}
+          />
+          <StatCard
+            title="Total Teachers"
+            value={loading ? 0 : stats.faculty}
+            loading={loading}
+            icon={GraduationCap}
+            iconClass="bg-violet-500/10 text-violet-500"
+            format={formatNumber}
+            trend="+5%"
+            trendUp={true}
+          />
+          <StatCard
+            title="Pending Applications"
+            value={loading ? 0 : stats.pending}
+            loading={loading}
+            icon={Clock}
+            iconClass="bg-emerald-500/10 text-emerald-500"
+            format={formatNumber}
+            trend="-8%"
+            trendUp={false}
+          />
+        </div>
       </div>
 
-      
+      <ChartCard title="Fee Collection" subtitle="Revenue collected per month" className="card-premium">
+        <BarChartBox
+          data={revenueByMonth}
+          xKey="month"
+          bars={[{ key: "Collected", color: CHART_PALETTE[2] }]}
+        />
+      </ChartCard>
 
       <div className="card-premium">
         <div className="flex items-center justify-between p-5 border-b border-white/[0.06]">
@@ -234,29 +255,6 @@ const AdminDashboard = () => {
             </ul>
           )}
         </div>
-      </div>
-
-     
-
-      <ChartCard title="Fee Collection" subtitle="Revenue collected per month" className="card-premium">
-        <BarChartBox
-          data={revenueByMonth}
-          xKey="month"
-          bars={[{ key: "Collected", color: CHART_PALETTE[2] }]}
-        />
-      </ChartCard>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ChartCard title="Students by Program" subtitle="Distribution across programs" className="card-premium">
-          <PieChartBox
-            data={studentsByProgram}
-            nameKey="name"
-            dataKey="value"
-            colors={CHART_PALETTE}
-            donut
-            centerLabel={`${stats.students} total`}
-          />
-        </ChartCard>
       </div>
     </div>
   );
