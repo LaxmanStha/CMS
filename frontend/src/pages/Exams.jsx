@@ -128,7 +128,6 @@ const Exams = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="page-header-title">Examinations</h1>
-            <p className="page-header-subtitle">Manage examinations and assessments</p>
           </div>
           {isAdmin ? (
             <Button onClick={() => setShowModal(true)}>
@@ -144,7 +143,7 @@ const Exams = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500">
             <FileText className="h-5 w-5" />
           </div>
           <div>
@@ -153,7 +152,7 @@ const Exams = () => {
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500">
             <Calendar className="h-5 w-5" />
           </div>
           <div>
@@ -182,7 +181,7 @@ const Exams = () => {
       </div>
 
       {/* Table Card */}
-      <div className="rounded-2xl bg-[#151C2C] border border-white/[0.06] shadow-[0_4px_20px_rgba(0,0,0,0.35)] overflow-hidden">
+      <div className="rounded-2xl bg-white border border-[var(--color-border)] shadow-sm overflow-hidden">
         <div className="p-5 border-b border-white/[0.06]">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1 max-w-sm">
@@ -192,7 +191,7 @@ const Exams = () => {
                 placeholder="Search exams..." 
                 value={searchTerm} 
                 onChange={(e) => setSearchTerm(e.target.value)} 
-                className="w-full h-10 pl-10 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 transition-all duration-200"
+                className="w-full h-10 pl-10 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-violet-500/30 focus:ring-1 focus:ring-violet-500/20 transition-all duration-200"
               />
             </div>
             <Dropdown value={typeFilter} onChange={setTypeFilter} options={types} placeholder="All Types" />
@@ -252,11 +251,11 @@ const Exams = () => {
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-4">
             <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20"><p className="text-xs text-text-secondary">Average Score</p><p className="text-2xl font-bold text-emerald-500">-</p></div>
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20"><p className="text-xs text-text-secondary">Highest</p><p className="text-2xl font-bold text-amber-500">-</p></div>
-            <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20"><p className="text-xs text-text-secondary">Lowest</p><p className="text-2xl font-bold text-orange-500">-</p></div>
-            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20"><p className="text-xs text-text-secondary">Pass Rate</p><p className="text-2xl font-bold text-blue-500">-</p></div>
+            <div className="p-4 rounded-xl bg-violet-500/10 border border-violet-500/20"><p className="text-xs text-text-secondary">Highest</p><p className="text-2xl font-bold text-violet-500">-</p></div>
+            <div className="p-4 rounded-xl bg-pink-500/10 border border-pink-500/20"><p className="text-xs text-text-secondary">Lowest</p><p className="text-2xl font-bold text-pink-500">-</p></div>
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20"><p className="text-xs text-text-secondary">Pass Rate</p><p className="text-2xl font-bold text-emerald-500">-</p></div>
           </div>
-          <div className="rounded-2xl bg-[#151C2C] border border-white/[0.06] overflow-hidden">
+          <div className="rounded-2xl bg-white border border-[var(--color-border)] overflow-hidden">
             <div className="p-5 border-b border-white/[0.06]">
               <h3 className="font-display text-base font-semibold text-text-primary">Student Results</h3>
             </div>

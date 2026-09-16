@@ -6,7 +6,7 @@
 -- ============================================================
 -- Admin
 INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
-  VALUES (1, 'Dr. Sarah Mitchell', 'admin@college.edu', 'Accountant', 'ADM-001');
+  VALUES (1, 'Ratish Humagain', 'admin@college.edu', 'Accountant', 'ADM-001');
 
 -- Teacher (login user)
 INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
@@ -40,6 +40,41 @@ INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
 INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
   VALUES (16, 'Ava Thompson', 'ava.thompson@college.edu', 'Student', 'STU-016');
 
+-- ============================================================
+-- 5 Random seed entries for testing
+-- ============================================================
+-- Random Person (Student)
+INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
+  VALUES (17, 'Mia Chen', 'mia.chen@college.edu', 'Student', 'STU-017');
+
+-- Random Person (Teacher)
+INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
+  VALUES (18, 'Dr. Aaron Kim', 'aaron.kim@college.edu', 'Teacher', 'TCH-018');
+
+-- Random Student Profile
+INSERT OR IGNORE INTO Student (id, program, year, status, phone, classroom)
+  VALUES (17, 'CSIT', 3, 'active', '555-0217', 'CS-A');
+
+-- Random Teacher Profile
+INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
+  VALUES (18, 'CSIT', '555-0118', 'aaron.kim@college.edu', '2023-01-15', 'active', 'Room 202', 'AI201');
+
+-- Random Course
+INSERT OR IGNORE INTO Course (id, code, name, credits, department, maxCapacity, instructorId, semester, status)
+  VALUES (21, 'AI201', 'Artificial Intelligence Fundamentals', 3, 'CSIT', 40, 18, 'Fall 2024', 'active');
+
+-- Random Section
+INSERT OR IGNORE INTO Sections (id, course_id, section_label, teacher_id, student_count)
+  VALUES (21, 21, 'A', 18, 35);
+
+-- Random Fee Record
+INSERT OR IGNORE INTO Fee (studentId, student, course, amount, paid, dueDate, paidDate, semester, status)
+  VALUES (17, 'Mia Chen', 'AI201', 1200, 600, '2026-09-15', '2026-09-10', 'Fall 2024', 'partial');
+
+-- Random Exam
+INSERT OR IGNORE INTO Exam (name, course, date, startTime, endTime, type, location, status, students)
+  VALUES ('Midterm', 'AI201', date('now','+7 days'), '10:00', '11:30', 'midterm', 'Room 202', 'scheduled', 1);
+
 -- Accountant
 INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
   VALUES (4, 'Maria Rodriguez', 'accountant@college.edu', 'Accountant', 'ACC-004');
@@ -48,7 +83,7 @@ INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
 -- Users (login credentials)
 -- ============================================================
 INSERT OR IGNORE INTO Users (id, email, password, role, name)
-  VALUES (1, 'admin@college.edu', 'password123', 'admin', 'Dr. Sarah Mitchell');
+  VALUES (1, 'admin@college.edu', 'password123', 'admin', 'Ratish Humagain');
 INSERT OR IGNORE INTO Users (id, email, password, role, name)
   VALUES (2, 'faculty@college.edu', 'password123', 'faculty', 'Prof. James Anderson');
 INSERT OR IGNORE INTO Users (id, email, password, role, name)
@@ -143,6 +178,32 @@ INSERT OR IGNORE INTO Course (id, code, name, credits, department, maxCapacity, 
 
 
 INSERT OR IGNORE INTO Accountant (id) VALUES (4);
+
+
+-- ============================================================
+-- Sections (course sections with assigned teachers)
+-- ============================================================
+INSERT OR IGNORE INTO Sections (id, course_id, section_label, teacher_id, student_count) VALUES
+  (1, 1, 'A', 2, 60),   -- CS101 section A, Prof. James Anderson
+  (2, 2, 'A', 2, 50),   -- MATH201 section A, Prof. James Anderson
+  (3, 5, 'A', 2, 60),   -- OOP section A, Prof. James Anderson
+  (4, 6, 'A', 2, 60),   -- CPROG section A, Prof. James Anderson
+  (5, 7, 'A', 2, 50),   -- MICRO section A, Prof. James Anderson
+  (6, 8, 'A', 2, 60),   -- DBMS section A, Prof. James Anderson
+  (7, 9, 'A', 2, 50),   -- OS section A, Prof. James Anderson
+  (8, 10, 'A', 2, 60),  -- CN section A, Prof. James Anderson
+  (9, 3, 'A', 12, 40),  -- PHYS101 section A, Dr. Lisa Park
+  (10, 4, 'A', 11, 30), -- ENG110 section A, Dr. Robert Chen
+  (11, 11, 'A', 11, 60), -- MATH101 section A, Dr. Robert Chen
+  (12, 12, 'A', 11, 60), -- MATH102 section A, Dr. Robert Chen
+  (13, 13, 'A', 11, 60), -- STAT section A, Dr. Robert Chen
+  (14, 14, 'A', 11, 50), -- FM section A, Dr. Robert Chen
+  (15, 15, 'A', 11, 50), -- BM section A, Dr. Robert Chen
+  (16, 16, 'A', 11, 60), -- ECO section A, Dr. Robert Chen
+  (17, 17, 'A', 12, 40), -- CHEM101 section A, Dr. Lisa Park
+  (18, 18, 'A', 12, 40), -- BIO101 section A, Dr. Lisa Park
+  (19, 19, 'A', 12, 50), -- IT section A, Dr. Lisa Park
+  (20, 20, 'A', 12, 50); -- WEB section A, Dr. Lisa Park
 
 
 -- ============================================================

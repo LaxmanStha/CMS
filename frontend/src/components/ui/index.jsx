@@ -36,7 +36,7 @@ export function CategoryItem({
         selected
           ? 'bg-slate-800 text-white'
           : 'text-slate-400 hover:bg-slate-800 hover:text-white',
-        alert && !selected && 'text-orange-400 hover:text-orange-400',
+        alert && !selected && 'text-amber-400 hover:text-amber-400',
         className,
       )}
     >
@@ -120,7 +120,7 @@ export function DataTable({
 
 /* ───────────────────────── AlertBadge ───────────────────────── */
 const ALERT_VARIANTS = {
-  alert: 'bg-orange-500/20 text-orange-400',
+  alert: 'bg-amber-500/20 text-amber-400',
   success: 'bg-emerald-500/20 text-emerald-400',
   danger: 'bg-red-500/20 text-red-400',
   info: 'bg-indigo-500/20 text-indigo-400',
@@ -172,7 +172,7 @@ export function StatCard({ label, value, icon: Icon, trend, animated = true, cla
         <div
           className={cn(
             'flex items-center gap-1 text-xs font-medium',
-            positive ? 'text-emerald-400' : 'text-orange-400',
+            positive ? 'text-emerald-400' : 'text-amber-400',
           )}
         >
           {positive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}

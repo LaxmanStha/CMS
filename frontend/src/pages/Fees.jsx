@@ -130,7 +130,6 @@ const Fees = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="page-header-title">Fees & Invoices</h1>
-            <p className="page-header-subtitle">Manage student fees and payments</p>
           </div>
           {isAdmin ? (
             <Button onClick={() => handleOpenModal()}>
@@ -146,7 +145,7 @@ const Fees = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500">
             <DollarSign className="h-5 w-5" />
           </div>
           <div>
@@ -164,7 +163,7 @@ const Fees = () => {
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500">
             <Clock className="h-5 w-5" />
           </div>
           <div>
@@ -184,7 +183,7 @@ const Fees = () => {
       </div>
 
       {/* Table Card */}
-      <div className="rounded-2xl bg-[#151C2C] border border-white/[0.06] shadow-[0_4px_20px_rgba(0,0,0,0.35)] overflow-hidden">
+      <div className="rounded-2xl bg-white border border-[var(--color-border)] shadow-sm overflow-hidden">
         <div className="p-5 border-b border-white/[0.06]">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1 max-w-sm">
@@ -194,7 +193,7 @@ const Fees = () => {
                 placeholder="Search invoices..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full h-10 pl-10 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 transition-all duration-200"
+                className="w-full h-10 pl-10 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-violet-500/30 focus:ring-1 focus:ring-violet-500/20 transition-all duration-200"
               />
             </div>
             <Dropdown value={semFilter} onChange={setSemFilter} options={semesters} placeholder="All Semesters" />

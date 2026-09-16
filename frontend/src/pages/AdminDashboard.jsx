@@ -1,13 +1,16 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { Users, GraduationCap, Clock, TrendingUp, BookOpen, Calendar, Award, UserPlus } from "lucide-react";
+import { Users, GraduationCap, Clock, TrendingUp, BookOpen, Calendar, Award, UserPlus, RotateCcw, RefreshCw, AlertTriangle, Grid, Loader2 } from "lucide-react";
 import api from "@/services/api";
 import StatCard from "@/components/ui/StatCard";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import {
   ChartCard,
   BarChartBox,
   PieChartBox,
   CHART_PALETTE,
 } from "@/components/charts/Charts";
+import { useToast } from "@/context/ToastContext";
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -19,6 +22,7 @@ const monthKey = (dateStr) => {
 };
 
 const AdminDashboard = () => {
+  const { success } = useToast();
   const [stats, setStats] = useState({ students: 0, faculty: 0, pending: 0 });
   const [students, setStudents] = useState([]);
   const [fees, setFees] = useState([]);
@@ -26,6 +30,51 @@ const AdminDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Timetable generation state
+  const [generating, setGenerating] = useState(false);
+  const [diffResult, setDiffResult] = useState(null);
+  const [showDiff, setShowDiff] = useState(false);
+  const [conflicts, setConflicts] = useState(null);
+  const [showConflicts, setShowConflicts] = useState(false);
+
+  const handleGenerate = async () => {
+    setGenerating(true);
+    try {
+      const res = await api.post('/timetable/generate');
+      setDiffResult(res.data);
+      setShowDiff(true);
+      success(`Timetable ${res.data.status === 'generated' ? 'generated' : 'adjusted'} successfully`);
+    } catch (err) {
+      success('Generation failed: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleAdjust = async () => {
+    setGenerating(true);
+    try {
+      const res = await api.post('/timetable/adjust');
+      setDiffResult(res.data);
+      setShowDiff(true);
+      success('Timetable adjusted successfully');
+    } catch (err) {
+      success('Adjust failed: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleConflicts = async () => {
+    try {
+      const res = await api.get('/timetable/conflicts');
+      setConflicts(res.data);
+      setShowConflicts(true);
+    } catch (err) {
+      success('Failed to load conflicts');
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -134,7 +183,7 @@ const AdminDashboard = () => {
           value={loading ? 0 : stats.students}
           loading={loading}
           icon={Users}
-          iconClass="bg-amber-500/10 text-amber-500"
+          iconClass="bg-emerald-500/10 text-emerald-500"
           format={formatNumber}
           trend="+12%"
           trendUp={true}
@@ -144,7 +193,7 @@ const AdminDashboard = () => {
           value={loading ? 0 : stats.faculty}
           loading={loading}
           icon={GraduationCap}
-          iconClass="bg-blue-500/10 text-blue-500"
+          iconClass="bg-violet-500/10 text-violet-500"
           format={formatNumber}
           trend="+5%"
           trendUp={true}
@@ -154,7 +203,7 @@ const AdminDashboard = () => {
           value={loading ? 0 : stats.pending}
           loading={loading}
           icon={Clock}
-          iconClass="bg-orange-500/10 text-orange-500"
+          iconClass="bg-emerald-500/10 text-emerald-500"
           format={formatNumber}
           trend="-8%"
           trendUp={false}
@@ -168,7 +217,7 @@ const AdminDashboard = () => {
           <div className="flex items-center gap-3">
             <h5 className="font-display text-base font-semibold text-text-primary">System Notifications</h5>
             {notifications.length > 0 && (
-              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-amber-500/10 px-1.5 text-[10px] font-semibold text-amber-500">
+              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
                 {notifications.length}
               </span>
             )}
@@ -186,7 +235,7 @@ const AdminDashboard = () => {
             <ul className="space-y-3">
               {recentNotifications.map((notif) => (
                 <li key={notif.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.03] transition-colors">
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
                     <TrendingUp className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -198,6 +247,8 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
+
+     
 
       <ChartCard title="Fee Collection" subtitle="Revenue collected per month" className="card-premium">
         <BarChartBox

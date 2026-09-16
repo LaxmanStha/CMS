@@ -10,8 +10,7 @@ import {
   CheckCircle,
   AlertCircle,
   Info,
-  Menu,
-  Search
+  Menu
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotificationsContext } from "@/context/NotificationsContext";
@@ -131,18 +130,8 @@ const TopBar = memo(({ onMenuClick }) => {
           <p className="text-[11px] text-[var(--color-primary)] font-medium capitalize mt-0.5">{user?.role} Portal</p>
         </div>
 
-        {/* Search */}
-        <div className="relative ml-auto hidden md:block w-64 lg:w-72">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
-          <input
-            type="text"
-            placeholder="Search anything..."
-            className="w-full h-10 pl-10 pr-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)] focus:bg-white focus:ring-1 focus:ring-[var(--color-primary)]/20 transition-all duration-200"
-          />
-        </div>
-
         {/* Right Section */}
-        <div className="flex items-center gap-1.5 md:ml-0 ml-auto">
+        <div className="flex items-center gap-1.5 ml-auto">
           {/* Notifications */}
           <div className="relative" ref={notificationsRef}>
             <button

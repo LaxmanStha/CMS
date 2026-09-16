@@ -143,7 +143,6 @@ const Attendance = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="page-header-title">Attendance</h1>
-            <p className="page-header-subtitle">Track and manage student attendance</p>
           </div>
           {isAdmin && (
             <Button onClick={() => handleOpenModal()}>
@@ -175,7 +174,7 @@ const Attendance = () => {
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500">
             <Clock className="h-5 w-5" />
           </div>
           <div>
@@ -184,7 +183,7 @@ const Attendance = () => {
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
             <Calendar className="h-5 w-5" />
           </div>
           <div>
@@ -193,7 +192,7 @@ const Attendance = () => {
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-500/10 text-pink-500">
             <BarChart3 className="h-5 w-5" />
           </div>
           <div>
@@ -204,7 +203,7 @@ const Attendance = () => {
       </div>
 
       {/* Table Card */}
-      <div className="rounded-2xl bg-[#151C2C] border border-white/[0.06] shadow-[0_4px_20px_rgba(0,0,0,0.35)] overflow-hidden">
+      <div className="rounded-2xl bg-white border border-[var(--color-border)] shadow-sm overflow-hidden">
         <div className="p-5 border-b border-white/[0.06]">
           <div className="relative max-w-sm">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
@@ -213,7 +212,7 @@ const Attendance = () => {
               placeholder="Search students or courses..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-10 pl-10 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 transition-all duration-200"
+              className="w-full h-10 pl-10 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-violet-500/30 focus:ring-1 focus:ring-violet-500/20 transition-all duration-200"
             />
           </div>
         </div>

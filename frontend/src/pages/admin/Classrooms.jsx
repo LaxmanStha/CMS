@@ -121,7 +121,6 @@ const AdminClassrooms = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="page-header-title">Classrooms</h1>
-            <p className="page-header-subtitle">Manage classrooms</p>
           </div>
           {isAdmin ? (
             <Button onClick={() => handleOpenModal()}>
@@ -137,7 +136,7 @@ const AdminClassrooms = () => {
       {/* Stats Summary */}
       <div className="grid grid-cols-1 gap-4">
         <div className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
             <Building2 className="h-5 w-5" />
           </div>
           <div>
@@ -147,7 +146,7 @@ const AdminClassrooms = () => {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-[#151C2C] border border-white/[0.06] shadow-[0_4px_20px_rgba(0,0,0,0.35)] overflow-hidden">
+      <div className="rounded-2xl bg-white border border-[var(--color-border)] shadow-sm overflow-hidden">
         <div className="p-5 border-b border-white/[0.06]">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1 max-w-sm">
@@ -157,7 +156,7 @@ const AdminClassrooms = () => {
                 placeholder="Search classrooms..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full h-10 pl-10 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 transition-all duration-200"
+                className="w-full h-10 pl-10 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-violet-500/30 focus:ring-1 focus:ring-violet-500/20 transition-all duration-200"
               />
             </div>
           </div>

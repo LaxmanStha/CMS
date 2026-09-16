@@ -168,7 +168,7 @@ const AdminStudents = () => {
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="text-text-primary">Manage Students</h2>
+        <h2 className="text-text-primary">Students</h2>
         <div>
           <button className="btn btn-primary me-2" onClick={() => {
     setEditing(null);

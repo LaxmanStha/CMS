@@ -32,7 +32,7 @@ const SALES = [
 
 const STATUS_META = {
   'In Stock': { cls: 'text-emerald-400', badge: null },
-  'Low Stock': { cls: 'text-orange-400', badge: 'alert' },
+  'Low Stock': { cls: 'text-amber-400', badge: 'alert' },
   'Out of Stock': { cls: 'text-red-400', badge: 'danger' },
 };
 
@@ -69,7 +69,7 @@ export default function StoreInventory() {
   const exportData = rows.map(({ id, ...rest }) => rest);
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] p-4 text-text-primary">
+    <div className="min-h-screen bg-[var(--color-bg)] p-4 text-[var(--color-text)]">
       <div className="flex flex-col gap-6 md:flex-row">
         {/* Sidebar */}
         <aside className="w-full shrink-0 md:w-72">

@@ -18,13 +18,13 @@ import {
 } from 'recharts';
 
 export const CHART_PALETTE = [
-  '#F59E0B', // amber (primary)
-  '#2563EB', // blue (secondary)
-  '#10B981', // emerald
-  '#38BDF8', // sky
-  '#8B5CF6', // violet
+  '#10B981', // emerald (primary)
+  '#8B5CF6', // violet (secondary)
+  '#EC4899', // pink
   '#EF4444', // red
-  '#FB9F1C', // amber-alt
+  '#14B8A6', // teal
+  '#D946EF', // fuchsia
+  '#84CC16', // lime
   '#64748B', // slate
 ];
 
@@ -60,7 +60,7 @@ export const ChartCard = ({
   dark = false,
   className = '',
 }) => (
-  <div className={`rounded-2xl bg-[#151C2C] border border-white/[0.06] shadow-[0_4px_20px_rgba(0,0,0,0.35)] overflow-hidden ${className}`}>
+  <div className={`rounded-2xl bg-white border border-[var(--color-border)] shadow-sm overflow-hidden ${className}`}>
     <div className="px-6 py-5 border-b border-white/[0.06]">
       <h5 className="font-display text-base font-semibold text-text-primary">{title}</h5>
       {subtitle && (

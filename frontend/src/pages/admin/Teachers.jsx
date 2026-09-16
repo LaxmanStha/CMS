@@ -282,7 +282,7 @@ const AdminTeachers = () => {
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="text-text-primary">Manage Teachers</h2>
+        <h2 className="text-text-primary">Teachers</h2>
         <div>
           {isAdmin && <button className="btn btn-primary me-2" onClick={() => handleOpenModal()}><Plus className="w-4 h-4 me-1" />Add Teacher</button>}
           {!isAdmin && <span className="text-sm text-text-secondary bg-white/[0.03] px-3 py-1.5 rounded-lg">Read-only (admin only)</span>}
@@ -293,7 +293,7 @@ const AdminTeachers = () => {
         <div className="col">
           <div className="card bg-primary/10">
             <div className="card-body d-flex align-items-center gap-3">
-              <div className="d-flex align-items-center justify-content-center rounded bg-blue-500/10 text-blue-500" style={{ width: 44, height: 44 }}>
+              <div className="d-flex align-items-center justify-content-center rounded bg-violet-500/10 text-violet-500" style={{ width: 44, height: 44 }}>
                 <Users className="h-5 w-5" />
               </div>
               <div>
@@ -319,7 +319,7 @@ const AdminTeachers = () => {
         <div className="col">
           <div className="card bg-warning/10">
             <div className="card-body d-flex align-items-center gap-3">
-              <div className="d-flex align-items-center justify-content-center rounded bg-amber-500/10 text-amber-500" style={{ width: 44, height: 44 }}>
+              <div className="d-flex align-items-center justify-content-center rounded bg-violet-500/10 text-violet-500" style={{ width: 44, height: 44 }}>
                 <UserCog className="h-5 w-5" />
               </div>
               <div>

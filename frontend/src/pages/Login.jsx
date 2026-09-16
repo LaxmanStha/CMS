@@ -119,7 +119,7 @@ const validateForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] relative overflow-hidden flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#f8fafc] relative overflow-hidden flex flex-col md:flex-row">
       <div className="floating-shapes absolute inset-0 pointer-events-none">
         {floatingShapes.map((shape, i) => (
           <div
@@ -141,9 +141,9 @@ const validateForm = () => {
         <div className="absolute inset-0 bg-gradient-o-br from-primary/5 via-transparent to-secondary/5" />
       </div>
 
-      <div className="relative z-10 w-full md:w-1/2 flex flex-col items-center justify-center p-8 md:p-12 bg-gradient-o-br from-[#151C2C] to-[#111827]">
+      <div className="relative z-10 w-full md:w-1/2 flex flex-col items-center justify-center p-8 md:p-12 bg-gradient-o-br from-[#f8fafc] to-[#ffffff]">
         <div className="flex flex-col items-center text-center max-w-sm">
-<div className="w-20 h-20 rounded-3xl bg-amber-500 flex items-center justify-center mb-6 shadow-lg shadow-amber-500/20">
+<div className="w-20 h-20 rounded-3xl bg-blue-500 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/20">
             <GraduationCap className="w-10 h-10 text-white" />
           </div>
           <h1 className="font-bold text-3xl text-text-primary mb-3 tracking-tight">RapidStrik University</h1>
@@ -155,7 +155,7 @@ const validateForm = () => {
         <div
           ref={formRef}
           className={cn(
-            "w-full max-w-md bg-[#151C2C] border border-[#1E293D] rounded-2xl p-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] hover:shadow-[0_0_40px_rgba(245,158,11,0.08)] transition-shadow duration-300 animate-fade-in",
+            "w-full max-w-md bg-white border border-[#e2e8f0] rounded-2xl p-8 shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:shadow-[0_0_40px_rgba(37,99,235,0.08)] transition-shadow duration-300 animate-fade-in",
             formAnim === "visible" ? "animate-slide-up" : "opacity-0 translate-y-4"
           )}
           style={{ animationDelay: "400ms" }}
@@ -186,9 +186,9 @@ const validateForm = () => {
               </select>
             </div>
 
-            <div className="rounded-xl border border-[#2A364F] bg-amber-500/10 text-amber-200 p-4">
-              <h3 className="text-base font-semibold mb-1">{roleInfo[selectedRole].title}</h3>
-              <p className="text-sm text-amber-200/80">{roleInfo[selectedRole].description}</p>
+            <div className="rounded-xl border border-[#e2e8f0] bg-[var(--color-primary)]/10 text-[var(--color-primary)] p-4">
+              <h3 className="text-base font-semibold mb-1 text-text-primary">{roleInfo[selectedRole].title}</h3>
+              <p className="text-sm text-[var(--color-primary)]/80">{roleInfo[selectedRole].description}</p>
             </div>
 
             <Input

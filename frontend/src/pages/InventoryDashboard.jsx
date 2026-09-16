@@ -76,7 +76,7 @@ const KPIS = [
 
 function KpiCard({ kpi }) {
   const DeltaIcon = kpi.up ? TrendingUp : TrendingDown;
-  const deltaColor = kpi.good ? "text-emerald-500" : "text-orange-400";
+  const deltaColor = kpi.good ? "text-emerald-500" : "text-amber-400";
   return (
     <div className="rounded-2xl p-6 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-600/50 hover:shadow-lg hover:-translate-y-0.5 transition-all">
       <div className="text-xs font-semibold uppercase tracking-[0.05em] text-slate-400">{kpi.label}</div>
@@ -120,7 +120,7 @@ function ChartCard() {
               <div key={i} className="flex-1 flex flex-col items-center">
                 <div className="w-full h-[120px] flex items-end">
                   <div
-                    className="inv-bar w-full rounded-t-sm bg-gradient-to-t from-orange-500 to-orange-400 opacity-80 hover:opacity-100 transition-opacity"
+                    className="inv-bar w-full rounded-t-sm bg-gradient-to-t from-amber-500 to-amber-400 opacity-80 hover:opacity-100 transition-opacity"
                     style={{ height: `${(value / max) * 120}px`, animationDelay: `${i * 50}ms` }}
                   />
                 </div>
@@ -148,7 +148,7 @@ function CategoryHealth() {
             </div>
             <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
               <div
-                className={`h-2 rounded-full ${c.low ? "bg-orange-500" : "bg-emerald-500"}`}
+                className={`h-2 rounded-full ${c.low ? "bg-amber-500" : "bg-emerald-500"}`}
                 style={{ width: `${c.pct}%` }}
               />
             </div>
@@ -250,7 +250,7 @@ function InventoryTable({ rows, requested, onRequest }) {
                 <td className="px-4 py-4">
                   <StatusBadge status={r.status} />
                 </td>
-                <td className="px-4 py-4 text-sm font-semibold text-orange-400">{r.lost}</td>
+                <td className="px-4 py-4 text-sm font-semibold text-amber-400">{r.lost}</td>
                 <td className="px-4 py-4">
                   {requested.has(r.sku) ? (
                     <span className="text-xs font-medium text-emerald-400">Requested &#10003;</span>
@@ -336,7 +336,7 @@ function Sidebar({ selected, onSelect, mobileOpen, onClose }) {
         </nav>
         <div className="mt-6 p-4 rounded-xl bg-slate-800/60 border border-slate-700">
           <div className="flex items-center gap-2 text-slate-300 text-sm">
-            <Bell size={16} className="text-orange-400" /> 14 restock alerts
+            <Bell size={16} className="text-amber-400" /> 14 restock alerts
           </div>
           <div className="text-xs text-slate-500 mt-1">Resolve before end of day</div>
         </div>

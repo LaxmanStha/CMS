@@ -5,8 +5,8 @@
 @tailwind utilities;
 
 :root {
-  --color-bg: #ffffff;
-  --color-surface: #f8fafc;
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
   --color-border: #e2e8f0;
   --color-text: #1e293b;
   --color-text-muted: #64748b;
@@ -99,11 +99,16 @@ input, select, textarea {
   }
 
   .card {
-    @apply bg-white rounded-lg border border-[var(--color-border)] shadow-[var(--shadow)];
+    @apply bg-white rounded-lg border shadow-sm;
+    border-color: var(--color-border);
+    box-shadow: var(--shadow);
   }
 
   .card-hover {
-    @apply transition-shadow duration-200 hover:shadow-[var(--shadow-hover)];
+    @apply transition-shadow duration-200;
+  }
+  .card-hover:hover {
+    box-shadow: var(--shadow-hover);
   }
 
   .btn {
@@ -111,23 +116,53 @@ input, select, textarea {
   }
 
   .btn-primary {
-    @apply btn bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] focus:ring-[var(--color-primary)];
+    @apply btn text-white;
+    background-color: var(--color-primary);
+    --tw-ring-color: var(--color-primary);
+  }
+  .btn-primary:hover {
+    background-color: var(--color-primary-hover);
   }
 
   .btn-secondary {
-    @apply btn bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-border)] focus:ring-[var(--color-text-muted)];
+    @apply btn;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    --tw-ring-color: var(--color-text-muted);
+  }
+  .btn-secondary:hover {
+    background-color: var(--color-border);
   }
 
   .btn-danger {
-    @apply btn bg-[var(--color-danger)] text-white hover:opacity-90 focus:ring-[var(--color-danger)];
+    @apply btn text-white;
+    background-color: var(--color-danger);
+    --tw-ring-color: var(--color-danger);
+  }
+  .btn-danger:hover {
+    opacity: 0.9;
   }
 
   .btn-outline {
-    @apply btn border-2 border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white focus:ring-[var(--color-primary)];
+    @apply btn;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    --tw-ring-color: var(--color-primary);
+  }
+  .btn-outline:hover {
+    background-color: var(--color-primary);
+    color: white;
   }
 
   .btn-ghost {
-    @apply btn text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] focus:ring-[var(--color-text-muted)];
+    @apply btn;
+    color: var(--color-text-muted);
+    --tw-ring-color: var(--color-text-muted);
+  }
+  .btn-ghost:hover {
+    background-color: var(--color-surface);
+    color: var(--color-text);
   }
 
   .btn-sm {
@@ -139,15 +174,62 @@ input, select, textarea {
   }
 
   .input {
-    @apply w-full px-3 py-2 bg-white border border-[var(--color-border)] rounded-lg text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] transition-colors duration-150 focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20;
+    @apply w-full px-3 py-2 bg-white rounded-lg transition-colors duration-150 focus:outline-none;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+  }
+  .input::placeholder {
+    color: var(--color-text-muted);
+  }
+  .input:hover {
+    border-color: var(--color-primary);
+  }
+  .input:focus {
+    border-color: var(--color-primary);
+    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+    --tw-ring-color: var(--color-primary);
+    --tw-ring-opacity: 0.2;
+  }
+
+  .select-themed {
+    @apply w-full px-3 py-2.5 bg-white rounded-lg transition-colors duration-150 focus:outline-none appearance-none;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+  }
+  .select-themed::placeholder {
+    color: var(--color-text-muted);
+  }
+  .select-themed:hover {
+    border-color: var(--color-primary);
+  }
+  .select-themed:focus {
+    border-color: var(--color-primary);
+    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+    --tw-ring-color: var(--color-primary);
+    --tw-ring-opacity: 0.2;
   }
 
   .input-error {
-    @apply border-[var(--color-danger)] focus:ring-[var(--color-danger)]/20 focus:border-[var(--color-danger)];
+    border-color: var(--color-danger);
+  }
+  .input-error:focus {
+    --tw-ring-color: var(--color-danger);
+    --tw-ring-opacity: 0.2;
+    border-color: var(--color-danger);
   }
 
   .label {
-    @apply block text-sm font-medium text-[var(--color-text)] mb-1.5;
+    @apply block text-sm font-medium mb-1.5;
+    color: var(--color-text);
   }
 
   .form-group {
@@ -155,11 +237,13 @@ input, select, textarea {
   }
 
   .form-error {
-    @apply text-sm text-[var(--color-danger)] flex items-center gap-1;
+    @apply text-sm flex items-center gap-1;
+    color: var(--color-danger);
   }
 
   .form-hint {
-    @apply text-sm text-[var(--color-text-muted)];
+    @apply text-sm;
+    color: var(--color-text-muted);
   }
 
   .badge {
@@ -167,27 +251,39 @@ input, select, textarea {
   }
 
   .badge-primary {
-    @apply badge bg-[var(--color-primary)]/10 text-[var(--color-primary)];
+    @apply badge;
+    background-color: var(--color-primary);
+    background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    color: var(--color-primary);
   }
 
   .badge-success {
-    @apply badge bg-[var(--color-success)]/10 text-[var(--color-success)];
+    @apply badge;
+    background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
+    color: var(--color-success);
   }
 
   .badge-warning {
-    @apply badge bg-[var(--color-warning)]/10 text-[var(--color-warning)];
+    @apply badge;
+    background-color: color-mix(in srgb, var(--color-warning) 10%, transparent);
+    color: var(--color-warning);
   }
 
   .badge-danger {
-    @apply badge bg-[var(--color-danger)]/10 text-[var(--color-danger)];
+    @apply badge;
+    background-color: color-mix(in srgb, var(--color-danger) 10%, transparent);
+    color: var(--color-danger);
   }
 
   .badge-gray {
-    @apply badge bg-[var(--color-surface)] text-[var(--color-text-muted)];
+    @apply badge;
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
   }
 
   .table-container {
-    @apply overflow-x-auto rounded-lg border border-[var(--color-border)] bg-white;
+    @apply overflow-x-auto rounded-lg bg-white;
+    border: 1px solid var(--color-border);
   }
 
   .table {
@@ -195,15 +291,24 @@ input, select, textarea {
   }
 
   .table th {
-    @apply px-4 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider bg-[var(--color-surface)] border-b border-[var(--color-border)];
+    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider;
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
   }
 
   .table td {
-    @apply px-4 py-3 text-sm text-[var(--color-text)] border-b border-[var(--color-border)]/50;
+    @apply px-4 py-3 text-sm;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+    border-bottom-color: color-mix(in srgb, var(--color-border) 50%, transparent);
   }
 
   .table tbody tr {
-    @apply transition-colors hover:bg-[var(--color-surface)];
+    @apply transition-colors;
+  }
+  .table tbody tr:hover {
+    background-color: var(--color-surface);
   }
 
   .table tbody tr:last-child td {
@@ -211,15 +316,21 @@ input, select, textarea {
   }
 
   .dropdown {
-    @apply absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-[var(--color-border)] py-1 z-50;
+    @apply absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-50;
+    border: 1px solid var(--color-border);
   }
 
   .dropdown-item {
-    @apply flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors;
+    @apply flex items-center gap-2 px-3 py-2 text-sm transition-colors;
+    color: var(--color-text);
+  }
+  .dropdown-item:hover {
+    background-color: var(--color-surface);
   }
 
   .dropdown-divider {
-    @apply h-px bg-[var(--color-border)] my-1;
+    @apply h-px my-1;
+    background-color: var(--color-border);
   }
 
   .modal-overlay {
@@ -227,7 +338,8 @@ input, select, textarea {
   }
 
   .modal {
-    @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-xl shadow-xl border border-[var(--color-border)] z-50 p-6;
+    @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-xl shadow-xl z-50 p-6;
+    border: 1px solid var(--color-border);
   }
 
   .modal-lg {
@@ -247,27 +359,34 @@ input, select, textarea {
   }
 
   .toast-success {
-    @apply toast bg-[var(--color-success)] text-white;
+    @apply toast text-white;
+    background-color: var(--color-success);
   }
 
   .toast-error {
-    @apply toast bg-[var(--color-danger)] text-white;
+    @apply toast text-white;
+    background-color: var(--color-danger);
   }
 
   .toast-warning {
-    @apply toast bg-[var(--color-warning)] text-white;
+    @apply toast text-white;
+    background-color: var(--color-warning);
   }
 
   .toast-info {
-    @apply toast bg-[var(--color-primary)] text-white;
+    @apply toast text-white;
+    background-color: var(--color-primary);
   }
 
   .loader {
-    @apply w-6 h-6 border-2 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin;
+    @apply w-6 h-6 border-2 rounded-full animate-spin;
+    border-color: var(--color-border);
+    border-top-color: var(--color-primary);
   }
 
   .skeleton {
-    @apply animate-pulse bg-[var(--color-surface)] rounded-lg;
+    @apply animate-pulse rounded-lg;
+    background-color: var(--color-surface);
   }
 
   .empty-state {
@@ -275,19 +394,24 @@ input, select, textarea {
   }
 
   .empty-state-icon {
-    @apply w-12 h-12 text-[var(--color-text-muted)] mb-3;
+    @apply w-12 h-12 mb-3;
+    color: var(--color-text-muted);
   }
 
   .empty-state-title {
-    @apply text-base font-medium text-[var(--color-text)] mb-1;
+    @apply text-base font-medium mb-1;
+    color: var(--color-text);
   }
 
   .empty-state-description {
-    @apply text-sm text-[var(--color-text-muted)] max-w-sm;
+    @apply text-sm max-w-sm;
+    color: var(--color-text-muted);
   }
 
   .avatar {
-    @apply inline-flex items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-text-muted)] overflow-hidden;
+    @apply inline-flex items-center justify-center rounded-full overflow-hidden;
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
   }
 
   .avatar-sm {
@@ -307,27 +431,42 @@ input, select, textarea {
   }
 
   .chip {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-border)] transition-colors;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm transition-colors;
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+  }
+  .chip:hover {
+    background-color: var(--color-border);
   }
 
   .accordion {
-    @apply border border-[var(--color-border)] rounded-lg overflow-hidden bg-white;
+    @apply border rounded-lg overflow-hidden bg-white;
+    border-color: var(--color-border);
   }
 
   .accordion-item {
-    @apply border-t border-[var(--color-border)] first:border-t-0;
+    @apply border-t first:border-t-0;
+    border-color: var(--color-border);
   }
 
   .accordion-trigger {
-    @apply w-full flex items-center justify-between p-4 text-left text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:ring-inset;
+    @apply w-full flex items-center justify-between p-4 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-inset;
+    color: var(--color-text);
+    --tw-ring-color: var(--color-primary);
+    --tw-ring-opacity: 0.2;
+  }
+  .accordion-trigger:hover {
+    background-color: var(--color-surface);
   }
 
   .accordion-content {
-    @apply px-4 pb-4 text-[var(--color-text-muted)];
+    @apply px-4 pb-4;
+    color: var(--color-text-muted);
   }
 
   .tooltip {
-    @apply absolute z-50 px-2 py-1 text-xs text-white bg-[var(--color-text)] rounded shadow-lg opacity-0 invisible transition-all duration-150;
+    @apply absolute z-50 px-2 py-1 text-xs text-white rounded shadow-lg opacity-0 invisible transition-all duration-150;
+    background-color: var(--color-text);
   }
 
   .page-header {
@@ -335,11 +474,13 @@ input, select, textarea {
   }
 
   .page-header-title {
-    @apply text-2xl font-semibold text-[var(--color-text)];
+    @apply text-2xl font-semibold;
+    color: var(--color-text);
   }
 
   .page-header-subtitle {
-    @apply text-sm text-[var(--color-text-muted)] mt-1;
+    @apply text-sm mt-1;
+    color: var(--color-text-muted);
   }
 
   .stat-card {
@@ -347,7 +488,8 @@ input, select, textarea {
   }
 
   .progress-bar {
-    @apply h-2 bg-[var(--color-surface)] rounded-full overflow-hidden;
+    @apply h-2 rounded-full overflow-hidden;
+    background-color: var(--color-surface);
   }
 
   .progress-fill {
@@ -355,7 +497,8 @@ input, select, textarea {
   }
 
   .section-divider {
-    @apply h-px bg-[var(--color-border)] my-8;
+    @apply h-px my-8;
+    background-color: var(--color-border);
   }
 }
 
