@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, GraduationCap, CalendarCheck,
   CalendarDays, Building2, School, Wallet, BarChart3, Settings,
-  ClipboardEdit, LogOut, X, ChevronRight
+  LogOut, X, ChevronRight
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { ROLE_NAV } from "@/config/navigation";
@@ -13,7 +13,7 @@ const LABEL_ICONS = {
   Dashboard: LayoutDashboard, Students: Users, Faculty: GraduationCap, Teachers: GraduationCap,
   Attendance: CalendarCheck, Timetable: CalendarDays,
   Departments: Building2, Classrooms: School, Fees: Wallet,
-  Reports: BarChart3, Settings: Settings, Grading: ClipboardEdit,
+  Reports: BarChart3, Settings: Settings,
   Schedule: CalendarDays,
 };
 
@@ -23,6 +23,7 @@ const Sidebar = memo(({ open = false, onClose }) => {
   const items = ROLE_NAV[user?.role] || [];
 
   const handleLogout = useCallback(() => {
+    if (!window.confirm("Are you sure you want to sign out?")) return;
     logout();
     navigate("/login");
   }, [logout, navigate]);
@@ -134,13 +135,12 @@ const Sidebar = memo(({ open = false, onClose }) => {
 
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] transition-colors"
+            className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-[var(--color-danger)]/10 px-3 py-2 text-[12px] font-medium text-[var(--color-danger)] transition-all duration-300 hover:bg-[var(--color-danger)] hover:text-white hover:shadow-lg hover:shadow-[var(--color-danger)]/30 hover:-translate-y-0.5 active:translate-y-0"
           >
-            <div className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg">
-              <LogOut className="h-[16px] w-[16px] flex-shrink-0" />
-            </div>
-            <span className="flex-1 min-w-0 overflow-hidden whitespace-nowrap">
+            <LogOut className="h-[16px] w-[16px] flex-shrink-0 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
+            <span className="relative">
               Sign Out
+              <span className="absolute bottom-0 left-0 h-[2px] w-0 bg-white transition-all duration-300 group-hover:w-full" />
             </span>
           </button>
         </div>

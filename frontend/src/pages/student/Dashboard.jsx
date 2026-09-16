@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { CalendarCheck, Award, Wallet } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import { Card } from '@/components/ui/Card';
-import PageHeader from '@/components/ui/PageHeader';
 import { useMe, useStudentDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
@@ -84,15 +83,6 @@ const StudentDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Student Dashboard"
-        subtitle="Your academic summary at a glance"
-        breadcrumbs={[
-          { label: 'Home', to: '/dashboard' },
-          { label: 'Student Dashboard' },
-        ]}
-      />
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Attendance"

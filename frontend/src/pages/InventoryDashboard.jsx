@@ -377,10 +377,9 @@ export default function InventoryDashboard() {
         mobileOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
       />
-      <main className="flex-1 min-w-0">
+<main className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-semibold leading-[1.3] text-white">Inventory Overview</h1>
             <div className="text-sm text-slate-400 mt-1">Real-time stock health across 8 categories</div>
           </div>
           <div className="flex items-center gap-2">

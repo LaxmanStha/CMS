@@ -1,4 +1,4 @@
-import { User, Mail, GraduationCap, IdCard, Shield } from 'lucide-react';
+import { User, Mail, IdCard, Shield } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { useAuth } from '@/context/AuthContext';
 
@@ -8,7 +8,6 @@ export default function Profile() {
   if (!user) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-heading font-bold text-text-primary">Profile</h1>
         <Card className="p-6">
           <p className="text-text-secondary">No user information available.</p>
         </Card>
@@ -27,14 +26,6 @@ export default function Profile() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-heading font-bold text-text-primary">Profile</h1>
-          <p className="text-text-secondary mt-1">Your account details.</p>
-        </div>
-        <GraduationCap className="w-6 h-6 text-primary" />
-      </div>
-
       <Card className="p-6">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">

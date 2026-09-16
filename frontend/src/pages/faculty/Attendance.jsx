@@ -144,13 +144,6 @@ const FacultyAttendance = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary">Take Attendance</h1>
-        <p className="text-text-secondary mt-1">
-          Pick a classroom and date, then mark each student.
-        </p>
-      </div>
-
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-5">
           <div className="p-2.5 rounded-xl bg-primary/10 text-primary">

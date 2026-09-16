@@ -175,7 +175,7 @@ const validateForm = () => {
                   setSelectedRole(newRole);
                   const roleEmail = newRole === "teacher" ? "faculty@college.edu" : `${newRole}@college.edu`;
                   setEmail(roleEmail);
-                  setPassword("");
+                  setPassword("password123");
                 }}
                 className="select-themed"
                 disabled={loading}

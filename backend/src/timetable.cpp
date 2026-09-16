@@ -4,6 +4,9 @@
 #include <string>
 #include <iomanip>
 #include <algorithm>
+#include <map>
+#include <climits>
+#include <ctime>
 
 using namespace std;
 
@@ -101,119 +104,211 @@ void AddTeacher(){
          << "\tSubject: " << t1.subject << endl;
 }
 
-// ===== HELPER STRUCT FOR STORING TIMETABLE DATA =====
-// This struct stores all the data for one generated timetable
-// so we can display/save multiple timetables easily
+// ===== GLOBAL TEACHER STRUCTURE =====
+// Stores information about each teacher (name + subjects they teach)
+struct GlobalTeacher {
+    string name;
+    map<string, string> subjects;  // section -> subject mapping (e.g., "A" -> "Math")
+    int totalLoad = 0;             // total periods across all sections
+    
+    // Global assignment: which section is this teacher teaching at each time slot
+    // allocationMatrix[day][period] = section name (or "Free")
+    map<pair<int, int>, string> allocation;  // (day, period) -> section
+};
+
+// ===== TIMETABLE DATA STRUCTURE =====
+// Stores the final timetable for one section
 struct TimeTableData {
     string sectionName;
     vector<vector<string>> tName;      // Teacher names for each day/period
     vector<vector<string>> tSub;       // Subject names for each day/period
-    vector<int> teacherLoads;          // Total periods assigned to each teacher
-    vector<string> teacherNames;       // Names of all teachers
     int periodsPerDay;
 };
 
-// ===== GENERATE A SINGLE TIMETABLE =====
-// WHY: By separating generation logic, we can call it multiple times
-// This makes the code reusable and easier to maintain
-TimeTableData GenerateSingleTimeTable(){
-    struct Teacher {
-        string name;
-        string subject; // this single section's subject
-        int load = 0;   // whole week load
-    };
+// ===== GET ALL SECTIONS AND TEACHERS (READ ONCE) =====
+// WHY: Teachers are shared across sections, so we read them ONCE
+// and create a mapping of which subjects each teacher teaches in each section
+struct AllocationSetup {
+    vector<string> sections;
+    vector<GlobalTeacher> teachers;
+    int periodsPerDay;
+    int days = 5;
+};
 
-    const int days = 5;
-    vector<string> dayNames = {"Mon", "Tue", "Wed", "Thu", "Fri"};
-
-    string sectionName;
-    int periodsPerDay, numTeachers;
-
-    cout << "\nEnter section name: ";
-    cin >> sectionName;
-
-    cout << "Enter number of periods per day: ";
-    cin >> periodsPerDay;
-
-    cout << "Enter number of teachers: ";
-    cin >> numTeachers;
-
-    vector<Teacher> teachers(numTeachers);
-
-    for (int i = 0; i < numTeachers; i++) {
-        cout << "\n--- Teacher " << (i + 1) << " ---\n";
-        cout << "Teacher name: ";
-        cin >> teachers[i].name;
-
-        cout << "Subject: ";
-        cin >> teachers[i].subject;
+AllocationSetup SetupGlobalAllocation() {
+    AllocationSetup setup;
+    
+    cout << "\n========== SETUP: SECTIONS & TEACHERS ==========\n";
+    
+    // Step 1: Get section names
+    int numSections;
+    cout << "How many sections do you have? ";
+    cin >> numSections;
+    cin.ignore();
+    
+    for (int i = 0; i < numSections; i++) {
+        cout << "Section name " << (i + 1) << ": ";
+        string section;
+        getline(cin, section);
+        setup.sections.push_back(section);
     }
-
-    // timetable[day][period]
-    vector<vector<string>> tName(days, vector<string>(periodsPerDay, "Free"));
-    vector<vector<string>> tSub(days, vector<string>(periodsPerDay, ""));
-
-    // Generate timetable using load-balancing algorithm
-    for (int d = 0; d < days; d++) {
-        string lastTeacher = "";
-
-        for (int p = 0; p < periodsPerDay; p++) {
-
-            // least-load first (fair distribution)
-            sort(teachers.begin(), teachers.end(),
-                 [](const Teacher &a, const Teacher &b) {
-                     return a.load < b.load;
-                 });
-
-            int chosen = -1;
-
-            // choose teacher not equal to lastTeacher (avoid consecutive)
-            for (int i = 0; i < numTeachers; i++) {
-                if (teachers[i].name != lastTeacher) {
-                    chosen = i;
-                    break;
-                }
+    
+    // Step 2: Get periods per day (same for all sections)
+    cout << "\nEnter number of periods per day: ";
+    cin >> setup.periodsPerDay;
+    cin.ignore();
+    
+    // Step 3: Get teachers ONCE and their subjects for EACH section
+    int numTeachers;
+    cout << "\nHow many teachers do you have? ";
+    cin >> numTeachers;
+    cin.ignore();
+    
+    setup.teachers.resize(numTeachers);
+    
+    for (int t = 0; t < numTeachers; t++) {
+        cout << "\n========== TEACHER " << (t + 1) << " ==========\n";
+        cout << "Teacher name: ";
+        getline(cin, setup.teachers[t].name);
+        
+        // For each section, get what subject this teacher teaches
+        cout << "Which sections does " << setup.teachers[t].name << " teach? (Enter for all, or specific sections)\n";
+        
+        for (int s = 0; s < numSections; s++) {
+            cout << "Subject for Section " << setup.sections[s] << " (press Enter to skip): ";
+            string subject;
+            getline(cin, subject);
+            
+            if (!subject.empty()) {
+                setup.teachers[t].subjects[setup.sections[s]] = subject;
             }
-
-            // if only 1 teacher (or no alternative), allow repetition
-            if (chosen == -1) chosen = 0;
-
-            tName[d][p] = teachers[chosen].name;
-            tSub[d][p]  = teachers[chosen].subject;
-
-            teachers[chosen].load++;
-            lastTeacher = teachers[chosen].name;
         }
     }
+    
+    return setup;
+}
 
-    // Store teacher loads and names for display
-    vector<int> loads;
-    vector<string> names;
-    for (auto &t : teachers) {
-        loads.push_back(t.load);
-        names.push_back(t.name);
+// ===== CONSTRAINT: CHECK IF TEACHER IS FREE AT THIS TIME SLOT =====
+// WHY: Before assigning teacher to a section at (day, period),
+// check if teacher is already allocated to another section
+bool IsTeacherFreeAt(const GlobalTeacher& teacher, int day, int period) {
+    auto key = make_pair(day, period);
+    return teacher.allocation.find(key) == teacher.allocation.end();
+}
+
+// ===== ALLOCATE TEACHER TO SLOT WITH CONSTRAINT CHECK =====
+// Returns true if allocation was successful
+bool AllocateTeacherToSlot(GlobalTeacher& teacher, int day, int period, 
+                          const string& section, const AllocationSetup& setup) {
+    auto key = make_pair(day, period);
+    
+    // Check if teacher is already assigned to different section at this time
+    if (!IsTeacherFreeAt(teacher, day, period)) {
+        return false;  // Teacher busy at this slot
     }
+    
+    // Check if teacher teaches this section
+    if (teacher.subjects.find(section) == teacher.subjects.end()) {
+        return false;  // Teacher doesn't teach this section
+    }
+    
+    // Allocate the teacher
+    teacher.allocation[key] = section;
+    teacher.totalLoad++;
+    return true;
+}
 
-    // Return structured data - makes it easy to work with multiple timetables
-    return {sectionName, tName, tSub, loads, names, periodsPerDay};
+// ===== GENERATE TIMETABLES WITH GLOBAL CONSTRAINTS =====
+// WHY: All sections are generated together with constraint checking
+// A teacher cannot teach two sections in the same period
+vector<TimeTableData> GenerateAllTimetables(AllocationSetup& setup) {
+    const int days = 5;
+    vector<string> dayNames = {"Mon", "Tue", "Wed", "Thu", "Fri"};
+    
+    int periodsPerDay = setup.periodsPerDay;
+    int numSections = setup.sections.size();
+    int numTeachers = setup.teachers.size();
+    
+    // Initialize timetables for each section
+    vector<TimeTableData> allTimetables(numSections);
+    for (int s = 0; s < numSections; s++) {
+        allTimetables[s].sectionName = setup.sections[s];
+        allTimetables[s].periodsPerDay = periodsPerDay;
+        allTimetables[s].tName.assign(days, vector<string>(periodsPerDay, "Unassigned"));
+        allTimetables[s].tSub.assign(days, vector<string>(periodsPerDay, ""));
+    }
+    
+    // ALGORITHM: For each day and period, assign teachers to sections
+    cout << "\n========== GENERATING TIMETABLES WITH CONSTRAINT CHECKING ==========\n";
+    
+    for (int d = 0; d < days; d++) {
+        cout << "Processing day: " << dayNames[d] << "\n";
+        
+        for (int p = 0; p < periodsPerDay; p++) {
+            // For each section, find an available teacher
+            for (int s = 0; s < numSections; s++) {
+                string sectionName = setup.sections[s];
+                
+                // Try to find best available teacher (least loaded)
+                int bestTeacher = -1;
+                int lowestLoad = INT_MAX;
+                
+                for (int t = 0; t < numTeachers; t++) {
+                    // Check if teacher teaches this section
+                    if (setup.teachers[t].subjects.find(sectionName) == 
+                        setup.teachers[t].subjects.end()) {
+                        continue;  // Skip - teacher doesn't teach this section
+                    }
+                    
+                    // Check if teacher is free at this time
+                    if (!IsTeacherFreeAt(setup.teachers[t], d, p)) {
+                        continue;  // Skip - teacher busy at this time
+                    }
+                    
+                    // Among available teachers, pick the one with least load
+                    if (setup.teachers[t].totalLoad < lowestLoad) {
+                        lowestLoad = setup.teachers[t].totalLoad;
+                        bestTeacher = t;
+                    }
+                }
+                
+                // If found a suitable teacher, allocate
+                if (bestTeacher != -1) {
+                    GlobalTeacher& teacher = setup.teachers[bestTeacher];
+                    string subject = teacher.subjects[sectionName];
+                    
+                    AllocateTeacherToSlot(teacher, d, p, sectionName, setup);
+                    
+                    // Record in timetable
+                    allTimetables[s].tName[d][p] = teacher.name;
+                    allTimetables[s].tSub[d][p] = subject;
+                } else {
+                    // No suitable teacher found - mark as issue
+                    allTimetables[s].tName[d][p] = "NO TEACHER";
+                    allTimetables[s].tSub[d][p] = "CONFLICT";
+                }
+            }
+        }
+    }
+    
+    cout << "\nTimetable generation complete!\n";
+    return allTimetables;
 }
 
 // ===== DISPLAY A TIMETABLE =====
-// WHY: Separated display logic so we can show multiple timetables uniformly
-void DisplayTimeTable(const TimeTableData& data, int timetableNumber = 0) {
+void DisplayTimeTable(const TimeTableData& data, const AllocationSetup& setup) {
     const int days = 5;
     vector<string> dayNames = {"Mon", "Tue", "Wed", "Thu", "Fri"};
 
-    cout << "\n================== 5-DAY TIMETABLE";
-    if (timetableNumber > 0) cout << " #" << timetableNumber;
-    cout << " ==================\n";
-    cout << "Section: " << data.sectionName << "\n\n";
+    cout << "\n" << string(80, '=') << "\n";
+    cout << "TIMETABLE - SECTION: " << data.sectionName << "\n";
+    cout << string(80, '=') << "\n\n";
 
-    int colWidth = 18;
+    int colWidth = 22;
 
     cout << left << setw(10) << "Day";
     for (int p = 0; p < data.periodsPerDay; p++) {
-        cout << left << setw(colWidth) << ("P" + to_string(p + 1));
+        cout << left << setw(colWidth) << ("Period " + to_string(p + 1));
     }
     cout << "\n";
     cout << string(10 + data.periodsPerDay * colWidth, '-') << "\n";
@@ -221,78 +316,176 @@ void DisplayTimeTable(const TimeTableData& data, int timetableNumber = 0) {
     for (int d = 0; d < days; d++) {
         cout << left << setw(10) << dayNames[d];
         for (int p = 0; p < data.periodsPerDay; p++) {
-            string cell = data.tName[d][p] + "(" + data.tSub[d][p] + ")";
+            string teacher = data.tName[d][p];
+            string subject = data.tSub[d][p];
+            
+            string cell;
+            if (teacher == "NO TEACHER") {
+                cell = "NO TEACHER";
+            } else if (teacher != "Unassigned" && !teacher.empty()) {
+                cell = teacher;
+                if (!subject.empty()) {
+                    cell += " / " + subject;
+                }
+            } else {
+                cell = "Free";
+            }
+            
+            if (cell.length() > colWidth - 1) {
+                cell = cell.substr(0, colWidth - 4) + "...";
+            }
             cout << left << setw(colWidth) << cell;
         }
         cout << "\n";
     }
-
-    cout << "\nTeacher Load (Whole Week):\n";
-    cout << "-----------------------------\n";
-    for (int i = 0; i < data.teacherNames.size(); i++) {
-        cout << left << setw(15) << data.teacherNames[i] << " : " 
-             << data.teacherLoads[i] << " periods\n";
-    }
-    cout << "-----------------------------\n";
+    cout << "\n";
 }
 
-// ===== MAIN TIMETABLE FUNCTION - ENHANCED WITH MULTIPLE GENERATION =====
+// ===== DISPLAY TEACHER WORKLOAD ACROSS ALL SECTIONS =====
+void DisplayGlobalTeacherLoad(const AllocationSetup& setup) {
+    cout << "\n" << string(80, '=') << "\n";
+    cout << "GLOBAL TEACHER WORKLOAD ANALYSIS\n";
+    cout << string(80, '=') << "\n\n";
+
+    // Create header
+    cout << left << setw(20) << "Teacher";
+    for (const auto& section : setup.sections) {
+        cout << left << setw(15) << ("Sec " + section);
+    }
+    cout << left << setw(15) << "TOTAL\n";
+    cout << string(20 + setup.sections.size() * 15 + 15, '-') << "\n";
+
+    // For each teacher, count load per section
+    for (const auto& teacher : setup.teachers) {
+        cout << left << setw(20) << teacher.name;
+        
+        int totalLoad = 0;
+        for (const auto& section : setup.sections) {
+            int sectionLoad = 0;
+            
+            // Count periods this teacher teaches in this section
+            for (const auto& alloc : teacher.allocation) {
+                if (alloc.second == section) {
+                    sectionLoad++;
+                }
+            }
+            
+            cout << left << setw(15) << to_string(sectionLoad);
+            totalLoad += sectionLoad;
+        }
+        
+        cout << left << setw(15) << to_string(totalLoad) << "\n";
+    }
+    cout << "\n";
+}
+
+// ===== MAIN TIMETABLE FUNCTION - WITH GLOBAL CONSTRAINTS =====
 // HOW IT WORKS:
-// 1. Ask user how many timetables they want
-// 2. Loop: get input for each timetable and generate it
-// 3. Store all results in a vector
-// 4. Display all timetables together
-// 5. Optionally save to file
+// 1. Get all sections and teachers (READ ONCE)
+// 2. Map which teachers teach which subjects in which sections
+// 3. Generate timetables with constraint checking:
+//    - Teacher cannot teach multiple sections in same period
+//    - Teacher can only teach sections they're assigned to
+// 4. Display all timetables with workload analysis
+// 5. Save results
 void TimeTable(){
-    int numTimetables;
+    cout << "\n" << string(80, '=') << "\n";
+    cout << "INTELLIGENT TIMETABLE GENERATOR (With Conflict Detection)\n";
+    cout << string(80, '=') << "\n";
     
-    cout << "\n========== TIMETABLE GENERATOR ==========\n";
-    cout << "How many timetables do you want to generate? ";
-    cin >> numTimetables;
-    cin.ignore(); // Clear input buffer after reading integer
-
-    // Validate input - WHY: Prevent invalid operations like 0 or negative timetables
-    if (numTimetables <= 0) {
-        cout << "Invalid input. Number of timetables must be greater than 0.\n";
-        return;
+    // Step 1: Setup - get all sections and teachers ONCE
+    AllocationSetup setup = SetupGlobalAllocation();
+    
+    // Step 2: Generate all timetables with constraint checking
+    vector<TimeTableData> allTimetables = GenerateAllTimetables(setup);
+    
+    // Step 3: Display all timetables
+    cout << "\n" << string(80, '=') << "\n";
+    cout << "GENERATED TIMETABLES\n";
+    cout << string(80, '=') << "\n";
+    
+    for (const auto& timetable : allTimetables) {
+        DisplayTimeTable(timetable, setup);
     }
-
-    // Vector to store all generated timetables - WHY: Allows us to process multiple at once
-    vector<TimeTableData> allTimetables;
-
-    // Generate each timetable
-    for (int i = 0; i < numTimetables; i++) {
-        cout << "\n\n========== TIMETABLE " << (i + 1) << " ==========\n";
-        TimeTableData timetable = GenerateSingleTimeTable();
-        allTimetables.push_back(timetable);
+    
+    // Step 4: Display global teacher workload analysis
+    DisplayGlobalTeacherLoad(setup);
+    
+    // Step 5: Validate for conflicts
+    cout << string(80, '=') << "\n";
+    cout << "CONFLICT ANALYSIS\n";
+    cout << string(80, '=') << "\n";
+    
+    bool hasConflicts = false;
+    
+    // Check for unassigned slots
+    for (const auto& timetable : allTimetables) {
+        for (int d = 0; d < 5; d++) {
+            for (int p = 0; p < timetable.periodsPerDay; p++) {
+                if (timetable.tName[d][p] == "NO TEACHER") {
+                    cout << "⚠️  WARNING: No teacher assigned for Section " 
+                         << timetable.sectionName << ", Day " << d << ", Period " << p << "\n";
+                    hasConflicts = true;
+                }
+            }
+        }
     }
-
-    // Display all generated timetables - gives complete overview
-    cout << "\n\n========== SUMMARY: ALL GENERATED TIMETABLES ==========\n";
-    for (int i = 0; i < allTimetables.size(); i++) {
-        DisplayTimeTable(allTimetables[i], i + 1);
-        cout << "\n";
+    
+    if (!hasConflicts) {
+        cout << "✓ No conflicts detected! All slots filled properly.\n";
     }
-
-    // Option to save to file - WHY: Users can reference/print timetables later
-    cout << "Do you want to save all timetables to a file? (y/n): ";
+    cout << "\n";
+    
+    // Step 6: Option to save to file
+    cout << "Do you want to save timetables to a file? (y/n): ";
     char choice;
     cin >> choice;
+    cin.ignore();
     
     if (choice == 'y' || choice == 'Y') {
-        ofstream outFile("Timetables.txt", ios::app);
-        for (int i = 0; i < allTimetables.size(); i++) {
-            outFile << "\n========== TIMETABLE " << (i + 1) << " ==========\n";
-            outFile << "Section: " << allTimetables[i].sectionName << "\n\n";
-            outFile << "Teacher Load Summary:\n";
-            for (int j = 0; j < allTimetables[i].teacherNames.size(); j++) {
-                outFile << allTimetables[i].teacherNames[j] << " : " 
-                       << allTimetables[i].teacherLoads[j] << " periods\n";
+        ofstream outFile("Timetables_Global.txt", ios::app);
+        outFile << "\n" << string(80, '=') << "\n";
+        outFile << "TIMETABLE GENERATION - " << time(0) << "\n";
+        outFile << string(80, '=') << "\n\n";
+        
+        // Save each timetable
+        for (const auto& timetable : allTimetables) {
+            outFile << "SECTION: " << timetable.sectionName << "\n";
+            outFile << "Days: Mon, Tue, Wed, Thu, Fri\n";
+            outFile << "Periods: " << timetable.periodsPerDay << "\n\n";
+            
+            // Save detailed schedule
+            vector<string> dayNames = {"Mon", "Tue", "Wed", "Thu", "Fri"};
+            for (int d = 0; d < 5; d++) {
+                outFile << dayNames[d] << ": ";
+                for (int p = 0; p < timetable.periodsPerDay; p++) {
+                    outFile << "[" << timetable.tName[d][p] << "-" 
+                           << timetable.tSub[d][p] << "] ";
+                }
+                outFile << "\n";
             }
             outFile << "\n";
         }
+        
+        // Save global teacher load analysis
+        outFile << "\n" << string(80, '=') << "\n";
+        outFile << "GLOBAL TEACHER WORKLOAD\n";
+        outFile << string(80, '=') << "\n\n";
+        
+        for (const auto& teacher : setup.teachers) {
+            outFile << teacher.name << ":\n";
+            for (const auto& section : setup.sections) {
+                int count = 0;
+                for (const auto& alloc : teacher.allocation) {
+                    if (alloc.second == section) count++;
+                }
+                outFile << "  Section " << section << ": " << count << " periods\n";
+            }
+            outFile << "  TOTAL: " << teacher.totalLoad << " periods\n\n";
+        }
+        
         outFile.close();
-        cout << "Timetables saved to 'Timetables.txt'\n";
+        cout << "✓ Timetables saved to 'Timetables_Global.txt'\n";
     }
 }
 

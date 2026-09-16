@@ -21,14 +21,12 @@ export const ROLE_NAV = {
   faculty: [
     { to: "/faculty", label: "Dashboard" },
     { to: "/faculty/attendance", label: "Attendance" },
-    { to: "/faculty/grading", label: "Grading" },
     { to: "/timetable", label: "Timetable" },
     { to: "/settings", label: "Settings" },
   ],
   teacher: [
     { to: "/faculty", label: "Dashboard" },
     { to: "/faculty/attendance", label: "Attendance" },
-    { to: "/faculty/grading", label: "Grading" },
     { to: "/timetable", label: "Timetable" },
     { to: "/settings", label: "Settings" },
   ],

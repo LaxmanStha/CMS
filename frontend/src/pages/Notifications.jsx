@@ -29,7 +29,6 @@ export default function Notifications() {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-heading font-bold text-text-primary">Notifications</h1>
           <p className="text-text-secondary mt-1">
             {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'} · {notifications.length} total
           </p>

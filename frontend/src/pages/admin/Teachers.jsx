@@ -282,7 +282,6 @@ const AdminTeachers = () => {
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="text-text-primary">Teachers</h2>
         <div>
           {isAdmin && <button className="btn btn-primary me-2" onClick={() => handleOpenModal()}><Plus className="w-4 h-4 me-1" />Add Teacher</button>}
           {!isAdmin && <span className="text-sm text-text-secondary bg-white/[0.03] px-3 py-1.5 rounded-lg">Read-only (admin only)</span>}

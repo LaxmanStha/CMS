@@ -11,7 +11,6 @@ import {
   AreaChartBox,
   CHART_PALETTE,
 } from '@/components/charts/Charts';
-import PageHeader from '@/components/ui/PageHeader';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -101,14 +100,6 @@ const AccountantDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Accountant Dashboard"
-        subtitle="Financial overview and receivables"
-        breadcrumbs={[
-          { label: 'Home', to: '/dashboard' },
-          { label: 'Accountant Dashboard' },
-        ]}
-      />
       {isError && (
         <div className="alert alert-danger">
           Couldn't load dashboard data.{' '}

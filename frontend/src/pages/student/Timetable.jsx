@@ -53,8 +53,7 @@ const StudentTimetable = () => {
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="text-text-primary">My Timetable</h2>
-        
+        <div />
       </div>
       <div className="card">
         <div className="card-body p-0">

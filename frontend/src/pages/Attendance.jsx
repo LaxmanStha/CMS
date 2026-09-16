@@ -138,15 +138,6 @@ const Attendance = () => {
 
   return (
     <div className="space-y-6">
-      {/* Premium Page Header */}
-      <div className="page-header">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="page-header-title">Attendance</h1>
-          </div>
-        </div>
-      </div>
-
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">

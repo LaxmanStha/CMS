@@ -151,16 +151,9 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="page-header">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-          <div>
-            <h1 className="page-header-title">Admin Dashboard</h1>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-text-tertiary">
-            <Calendar className="h-4 w-4" />
-            <span>{today}</span>
-          </div>
-        </div>
+      <div className="flex items-center gap-2 text-sm text-text-tertiary">
+        <Calendar className="h-4 w-4" />
+        <span>{today}</span>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}

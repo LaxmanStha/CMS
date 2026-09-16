@@ -50,7 +50,7 @@ const MyFees = () => {
   return (
     <div className="container-fluid p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="text-text-primary">My Payments</h2>
+        <div />
       </div>
 
       <div className="row g-3 mb-4">

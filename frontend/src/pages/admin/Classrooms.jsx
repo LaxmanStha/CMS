@@ -117,20 +117,15 @@ const AdminClassrooms = () => {
 
   return (
     <div className="space-y-6">
-      <div className="page-header">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="page-header-title">Classrooms</h1>
-          </div>
-          {isAdmin ? (
-            <Button onClick={() => handleOpenModal()}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Classroom
-            </Button>
-          ) : (
-            <span className="text-sm text-text-secondary bg-white/[0.03] px-3 py-1.5 rounded-lg">Read-only (admin only)</span>
-          )}
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {isAdmin ? (
+          <Button onClick={() => handleOpenModal()}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Classroom
+          </Button>
+        ) : (
+          <span className="text-sm text-text-secondary bg-white/[0.03] px-3 py-1.5 rounded-lg">Read-only (admin only)</span>
+        )}
       </div>
 
       {/* Stats Summary */}

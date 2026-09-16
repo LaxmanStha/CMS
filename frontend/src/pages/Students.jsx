@@ -216,9 +216,6 @@ const Students = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Students</h1>
-        </div>
         {isAdmin ? (
           <Button onClick={() => handleOpenModal()} className="whitespace-nowrap">
             <UserPlus className="w-4 h-4 mr-1" />

@@ -105,6 +105,7 @@ const TopBar = memo(({ onMenuClick }) => {
     "relative flex items-center justify-center w-10 h-10 rounded-xl border border-transparent text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] hover:border-[var(--color-border)] transition-all duration-200";
 
   const handleLogout = () => {
+    if (!window.confirm("Are you sure you want to sign out?")) return;
     logout();
     setProfileOpen(false);
     navigate("/login");

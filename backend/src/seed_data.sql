@@ -15,6 +15,17 @@ INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
   VALUES (11, 'Dr. Robert Chen', 'chen@college.edu', 'Teacher', 'TCH-011');
 INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
   VALUES (12, 'Dr. Lisa Park', 'park@college.edu', 'Teacher', 'TCH-012');
+-- Additional teachers
+INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
+  VALUES (21, 'Dr. Sarah Williams', 'williams@college.edu', 'Teacher', 'TCH-021');
+INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
+  VALUES (22, 'Prof. Michael Brown', 'brown@college.edu', 'Teacher', 'TCH-022');
+INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
+  VALUES (23, 'Dr. Jennifer Davis', 'davis@college.edu', 'Teacher', 'TCH-023');
+INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
+  VALUES (24, 'Prof. David Miller', 'miller@college.edu', 'Teacher', 'TCH-024');
+INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
+  VALUES (25, 'Dr. Amanda Wilson', 'wilson@college.edu', 'Teacher', 'TCH-025');
 
 -- Student (login user)
 INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
@@ -98,6 +109,17 @@ INSERT OR IGNORE INTO Users (id, email, password, role, name)
   VALUES (15, 'ethan.wright@college.edu', 'ethan@2026', 'student', 'Ethan Wright');
 INSERT OR IGNORE INTO Users (id, email, password, role, name)
   VALUES (16, 'ava.thompson@college.edu', 'ava@2026', 'student', 'Ava Thompson');
+-- Additional teachers login
+INSERT OR IGNORE INTO Users (id, email, password, role, name)
+  VALUES (21, 'williams@college.edu', 'password123', 'faculty', 'Dr. Sarah Williams');
+INSERT OR IGNORE INTO Users (id, email, password, role, name)
+  VALUES (22, 'brown@college.edu', 'password123', 'faculty', 'Prof. Michael Brown');
+INSERT OR IGNORE INTO Users (id, email, password, role, name)
+  VALUES (23, 'davis@college.edu', 'password123', 'faculty', 'Dr. Jennifer Davis');
+INSERT OR IGNORE INTO Users (id, email, password, role, name)
+  VALUES (24, 'miller@college.edu', 'password123', 'faculty', 'Prof. David Miller');
+INSERT OR IGNORE INTO Users (id, email, password, role, name)
+  VALUES (25, 'wilson@college.edu', 'password123', 'faculty', 'Dr. Amanda Wilson');
 
 
 -- ============================================================
@@ -131,6 +153,17 @@ INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, a
   VALUES (11, 'BIM', '555-0111', 'chen@college.edu', '2018-01-10', 'active', 'Room 301', 'ENG110');
 INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
   VALUES (12, 'BCA', '555-0112', 'park@college.edu', '2020-09-01', 'active', 'Room 401', 'PHYS101');
+-- Additional teachers
+INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
+  VALUES (21, 'CSIT', '555-0121', 'williams@college.edu', '2019-03-15', 'active', 'Room 501', 'CS201');
+INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
+  VALUES (22, 'BCA', '555-0122', 'brown@college.edu', '2021-07-01', 'active', 'Room 502', 'MATH101');
+INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
+  VALUES (23, 'BIM', '555-0123', 'davis@college.edu', '2020-01-20', 'active', 'Room 503', 'BUS201');
+INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
+  VALUES (24, 'CSIT', '555-0124', 'miller@college.edu', '2022-09-10', 'active', 'Room 504', 'CS301');
+INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
+  VALUES (25, 'BCA', '555-0125', 'wilson@college.edu', '2023-02-28', 'active', 'Room 505', 'STAT101');
 
 -- ============================================================
 -- Classrooms (linked to teachers)
