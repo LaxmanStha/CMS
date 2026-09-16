@@ -24,7 +24,6 @@ const Reports = lazy(() => import('@/pages/Reports'));
 const Teachers = lazy(() => import('@/pages/Teachers'));
 const Students = lazy(() => import('@/pages/Students'));
 const Attendance = lazy(() => import('@/pages/Attendance'));
-const Exams = lazy(() => import('@/pages/Exams'));
 const InventoryDashboard = lazy(() => import('@/pages/InventoryDashboard'));
 const StoreInventory = lazy(() => import('@/components/StoreInventory'));
 const AdminStudents = lazy(() => import('@/pages/admin/Students'));
@@ -83,7 +82,6 @@ function App() {
                 <Route path="/admin/teachers" element={withBoundary(<AdminTeachers />)} />
                 <Route path="/students" element={withBoundary(<Students />)} />
                 <Route path="/attendance" element={withBoundary(<Attendance />)} />
-                <Route path="/exams" element={withBoundary(<Exams />)} />
               </Route>
 
               <Route element={<PrivateRoute allowedRoles={["faculty", "teacher"]} />}>

@@ -26,7 +26,6 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({ students: 0, faculty: 0, pending: 0 });
   const [students, setStudents] = useState([]);
   const [fees, setFees] = useState([]);
-  const [exams, setExams] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -81,11 +80,10 @@ const AdminDashboard = () => {
       setLoading(true);
       setError("");
       try {
-        const [s, f, fe, ex, notifs] = await Promise.all([
+        const [s, f, fe, notifs] = await Promise.all([
           api.get("/students"),
           api.get("/teachers"),
           api.get("/fees"),
-          api.get("/exams"),
           api.get("/notifications"),
         ]);
         const studentList = s.data || [];
@@ -96,7 +94,6 @@ const AdminDashboard = () => {
           pending: studentList.filter((st) => st.status === "pending").length,
         });
         setFees(fe.data || []);
-        setExams(ex.data || []);
         setNotifications(notifs.data || []);
       } catch (err) {
         setError("Failed to load dashboard data.");
@@ -130,15 +127,6 @@ const AdminDashboard = () => {
     });
     return Object.keys(buckets).map((k) => ({ name: k, value: buckets[k] }));
   }, [students]);
-
-  const examsByType = useMemo(() => {
-    const buckets = {};
-    exams.forEach((x) => {
-      const key = x.type || "Other";
-      buckets[key] = (buckets[key] || 0) + 1;
-    });
-    return Object.keys(buckets).map((k) => ({ type: k, Exams: buckets[k] }));
-  }, [exams]);
 
   const today = useMemo(
     () =>
@@ -267,13 +255,6 @@ const AdminDashboard = () => {
             colors={CHART_PALETTE}
             donut
             centerLabel={`${stats.students} total`}
-          />
-        </ChartCard>
-        <ChartCard title="Exams by Type" subtitle="Scheduled exams grouped by type" className="card-premium">
-          <BarChartBox
-            data={examsByType}
-            xKey="type"
-            bars={[{ key: "Exams", color: CHART_PALETTE[3] }]}
           />
         </ChartCard>
       </div>

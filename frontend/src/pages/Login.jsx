@@ -208,7 +208,7 @@ const validateForm = () => {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => { setPassword(e.target.value); if (errors.password) setErrors((prev) => ({ ...prev, password: "" })); }}
-              placeholder="Enter your password"
+              placeholder="password123"
               leftIcon={<Lock className="w-5 h-5" />}
               rightIcon={
                 <button

@@ -1,7 +1,7 @@
 import { memo, useMemo, useCallback } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Users, GraduationCap, CalendarCheck, FileText,
+  LayoutDashboard, Users, GraduationCap, CalendarCheck,
   CalendarDays, Building2, School, Wallet, BarChart3, Settings,
   ClipboardEdit, LogOut, X, ChevronRight
 } from "lucide-react";
@@ -11,7 +11,7 @@ import { cn, getInitials } from "@/lib/utils";
 
 const LABEL_ICONS = {
   Dashboard: LayoutDashboard, Students: Users, Faculty: GraduationCap, Teachers: GraduationCap,
-  Attendance: CalendarCheck, Exams: FileText, Timetable: CalendarDays,
+  Attendance: CalendarCheck, Timetable: CalendarDays,
   Departments: Building2, Classrooms: School, Fees: Wallet,
   Reports: BarChart3, Settings: Settings, Grading: ClipboardEdit,
   Schedule: CalendarDays,

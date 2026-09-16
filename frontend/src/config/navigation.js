@@ -13,7 +13,6 @@ export const ROLE_NAV = {
     { to: "/students", label: "Students" },
     { to: "/teachers", label: "Teachers" },
     { to: "/attendance", label: "Attendance" },
-    { to: "/exams", label: "Exams" },
     { to: "/timetable", label: "Timetable" },
     { to: "/fees", label: "Fees" },
     { to: "/reports", label: "Reports" },

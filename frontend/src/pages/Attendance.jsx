@@ -144,12 +144,6 @@ const Attendance = () => {
           <div>
             <h1 className="page-header-title">Attendance</h1>
           </div>
-          {isAdmin && (
-            <Button onClick={() => handleOpenModal()}>
-              <Plus className="w-4 h-4 mr-2" />
-              Mark Attendance
-            </Button>
-          )}
         </div>
       </div>
 
