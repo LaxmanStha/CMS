@@ -17,25 +17,26 @@ import {
   Cell,
 } from 'recharts';
 
+// Design system color palette using the accent color variations
 export const CHART_PALETTE = [
-  '#10B981', // emerald (primary)
-  '#8B5CF6', // violet (secondary)
+  '#66FCF1', // primary accent (cyan)
+  '#4DE8CD', // accent hover
+  '#38BDF8', // info (sky)
+  '#16A34A', // success (green)
+  '#CA8A04', // warning (amber)
+  '#DC2626', // danger (red)
+  '#8B5CF6', // violet
   '#EC4899', // pink
-  '#EF4444', // red
-  '#14B8A6', // teal
-  '#D946EF', // fuchsia
-  '#84CC16', // lime
-  '#64748B', // slate
 ];
 
-const AXIS_COLOR = '#64748B';
-const GRID_COLOR = 'rgba(30, 41, 61, 0.5)';
+const AXIS_COLOR = '#6B7280';
+const GRID_COLOR = 'rgba(255,255,255,0.08)';
 
 const tooltipStyle = {
-  backgroundColor: '#111827',
-  border: '1px solid rgba(245, 158, 11, 0.15)',
+  backgroundColor: '#14161C',
+  border: '1px solid rgba(255,255,255,0.08)',
   boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
-  color: '#F8FAFC',
+  color: '#FFFFFF',
   fontFamily: 'Inter, sans-serif',
   fontSize: '13px',
   borderRadius: '12px',
@@ -45,10 +46,10 @@ const tooltipStyle = {
 const EmptyState = ({ dark }) => (
   <div className="flex items-center justify-center h-full text-center">
     <div className="flex flex-col items-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.03] mb-4">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--color-bg-secondary)] mb-4">
         <span className="text-2xl opacity-40">📊</span>
       </div>
-      <p className="text-sm text-text-tertiary">No data available yet</p>
+      <p className="text-sm text-[var(--color-text-muted)]">No data available yet</p>
     </div>
   </div>
 );
@@ -60,11 +61,11 @@ export const ChartCard = ({
   dark = false,
   className = '',
 }) => (
-  <div className={`rounded-2xl bg-white border border-[var(--color-border)] shadow-sm overflow-hidden ${className}`}>
-    <div className="px-6 py-5 border-b border-white/[0.06]">
-      <h5 className="font-display text-base font-semibold text-text-primary">{title}</h5>
+  <div className={`rounded-2xl border overflow-hidden ${className}`} style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}>
+    <div className="px-6 py-5 border-b" style={{ borderColor: 'var(--color-border)' }}>
+      <h5 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>{title}</h5>
       {subtitle && (
-        <span className="text-xs text-text-tertiary mt-1 block">{subtitle}</span>
+        <span className="text-xs mt-1 block" style={{ color: 'var(--color-text-muted)' }}>{subtitle}</span>
       )}
     </div>
     <div className="p-6">
@@ -104,7 +105,7 @@ export const BarChartBox = ({
           axisLine={false}
           type={layout === 'horizontal' ? 'number' : 'category'}
         />
-        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgba(56,189,248,0.06)' }} />
+        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgba(102,252,241,0.06)' }} />
         <Legend wrapperStyle={{ fontSize: 12, color: AXIS_COLOR }} />
         {bars.map((b, i) => (
           <Bar
@@ -237,7 +238,7 @@ export const PieChartBox = ({
           innerRadius={donut ? '58%' : 0}
           outerRadius="82%"
           paddingAngle={2}
-          stroke="#151C2C"
+          stroke="#1A1D24"
           strokeWidth={2}
         >
           {data.map((entry, i) => (
@@ -252,7 +253,7 @@ export const PieChartBox = ({
             y="50%"
             textAnchor="middle"
             dominantBaseline="middle"
-            fill="#F8FAFC"
+            fill="#FFFFFF"
             style={{ fontSize: 14, fontWeight: 700, fontFamily: 'Inter, sans-serif' }}
           >
             {centerLabel}
@@ -262,4 +263,3 @@ export const PieChartBox = ({
     </ResponsiveContainer>
   );
 };
-

@@ -1,7 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '@/services/api';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Table } from '@/components/ui/Table';
 import Dropdown from '@/components/ui/Dropdown';
+import { formatCurrency, formatDate } from '@/lib/utils';
 
 const AccountantPayments = () => {
   const { user } = useAuth();
@@ -47,132 +53,104 @@ const AccountantPayments = () => {
     .filter(p => p.status === 'Completed' || p.status === 'Partial')
     .reduce((sum, p) => sum + p.amount, 0);
 
-  const methodColors = {
-    'Online': 'bg-primary',
-    'Card': 'bg-info',
-    'Cash': 'bg-success',
-    'Bank Transfer': 'bg-warning',
-    '-': 'bg-secondary'
+  const methodVariants = {
+    'Online': 'primary',
+    'Card': 'info',
+    'Cash': 'success',
+    'Bank Transfer': 'warning',
+    '-': 'default'
   };
 
-  if (loading) return <div className="container-fluid p-4"><div className="alert alert-info">Loading payments...</div></div>;
+  const statusVariants = {
+    'Completed': 'success',
+    'Partial': 'warning',
+    'Pending': 'default'
+  };
+
+  const columns = useMemo(() => [
+    { key: 'id', header: 'Payment ID', width: '100px' },
+    { key: 'student', header: 'Student' },
+    { key: 'studentId', header: 'Student ID', width: '120px' },
+    { key: 'invoiceId', header: 'Invoice', width: '100px' },
+    { key: 'amount', header: 'Amount', width: '120px', align: 'right', render: (v, row) => v > 0 ? <span className="font-bold" style={{ color: 'var(--color-success)' }}>{formatCurrency(v)}</span> : '-' },
+    { key: 'method', header: 'Method', width: '130px', render: (v) => <Badge variant={methodVariants[v] || 'default'}>{v}</Badge> },
+    { key: 'date', header: 'Date', width: '120px', render: (v) => formatDate(v) },
+    { key: 'status', header: 'Status', width: '100px', render: (v) => <Badge variant={statusVariants[v] || 'default'}>{v}</Badge> },
+    { key: 'actions', header: 'Actions', width: '140px', render: () => <Button variant="outline" size="sm">View Receipt</Button> },
+  ], []);
+
+  if (loading) return (
+    <div className="space-y-6">
+      <Card className="p-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+          <span className="ml-2" style={{ color: 'var(--color-text-muted)' }}>Loading payments...</span>
+        </div>
+      </Card>
+    </div>
+  );
 
   return (
-    <div className="container-fluid p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div />
-        <div className="d-flex gap-2">
-          <button className="btn btn-primary">Record Payment</button>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex gap-2">
+          <Button>Record Payment</Button>
         </div>
       </div>
-      <div className="row mb-4">
-        <div className="col-md-3">
-          <div className="card bg-success text-white">
-            <div className="card-body text-center">
-              <h5 className="card-title">Total Collected</h5>
-              <p className="display-4">${totalCollected.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-primary text-white">
-            <div className="card-body text-center">
-              <h5 className="card-title">Transactions</h5>
-              <p className="display-4">{filteredPayments.filter(p => p.amount > 0).length}</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-info text-white">
-            <div className="card-body text-center">
-              <h5 className="card-title">Completed</h5>
-              <p className="display-4">{filteredPayments.filter(p => p.status === 'Completed').length}</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-warning text-white">
-            <div className="card-body text-center">
-              <h5 className="card-title">Pending</h5>
-              <p className="display-4">{filteredPayments.filter(p => p.status === 'Pending').length}</p>
-            </div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-6 text-center" style={{ backgroundColor: 'rgba(22, 163, 74, 0.1)', border: '1px solid var(--color-success)' }}>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Total Collected</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-success)' }}>${totalCollected.toLocaleString()}</p>
+        </Card>
+        <Card className="p-6 text-center" style={{ backgroundColor: 'var(--color-accent-muted)', border: '1px solid var(--color-accent)' }}>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Transactions</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{filteredPayments.filter(p => p.amount > 0).length}</p>
+        </Card>
+        <Card className="p-6 text-center" style={{ backgroundColor: 'rgba(56, 189, 248, 0.1)', border: '1px solid var(--color-info)' }}>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Completed</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-info)' }}>{filteredPayments.filter(p => p.status === 'Completed').length}</p>
+        </Card>
+        <Card className="p-6 text-center" style={{ backgroundColor: 'rgba(202, 138, 4, 0.1)', border: '1px solid var(--color-warning)' }}>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Pending</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-warning)' }}>{filteredPayments.filter(p => p.status === 'Pending').length}</p>
+        </Card>
       </div>
-      <div className="row mb-4 g-2">
-        <div className="col-md-4">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search payments..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <Input
+          placeholder="Search payments..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          className="flex-1"
+        />
+        <Input
+          type="date"
+          placeholder="Filter by date"
+          value={filterDate}
+          onChange={e => setFilterDate(e.target.value)}
+          className="w-auto min-w-[160px]"
+        />
+        <Dropdown
+          value={filterMethod}
+          onChange={setFilterMethod}
+          options={[{ value: 'all', label: 'All Methods' }, 'Online', 'Card', 'Cash', 'Bank Transfer']}
+        />
+      </div>
+      <Card>
+        <Card.Content>
+          <Table
+            columns={columns}
+            data={filteredPayments}
+            keyField="id"
+            searchable={false}
+            filterable={false}
+            paginated
+            pageSize={10}
+            emptyMessage="No payments found"
           />
-        </div>
-        <div className="col-md-3">
-          <input
-            type="date"
-            className="form-control"
-            placeholder="Filter by date"
-            value={filterDate}
-            onChange={e => setFilterDate(e.target.value)}
-          />
-        </div>
-        <div className="col-md-3">
-          <Dropdown value={filterMethod} onChange={setFilterMethod} options={[{ value: 'all', label: 'All Methods' }, 'Online', 'Card', 'Cash', 'Bank Transfer']} />
-        </div>
-      </div>
-      <div className="card">
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>Payment ID</th>
-                  <th>Student</th>
-                  <th>Student ID</th>
-                  <th>Invoice</th>
-                  <th>Amount</th>
-                  <th>Method</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPayments.map(payment => (
-                  <tr key={payment.id}>
-                    <td>{payment.id}</td>
-                    <td>{payment.student}</td>
-                    <td>{payment.studentId}</td>
-                    <td>{payment.invoiceId}</td>
-                    <td className="fw-bold ${payment.amount > 0 ? 'text-success' : 'text-muted'}">
-                      {payment.amount > 0 ? `$${payment.amount.toLocaleString()}` : '-'}
-                    </td>
-                    <td>
-                      <span className={`badge ${methodColors[payment.method] || 'bg-secondary'}`}>
-                        {payment.method}
-                      </span>
-                    </td>
-                    <td>{payment.date}</td>
-                    <td>
-                      {payment.status === 'Completed' && <span className="badge bg-success">Completed</span>}
-                      {payment.status === 'Partial' && <span className="badge bg-warning">Partial</span>}
-                      {payment.status === 'Pending' && <span className="badge bg-secondary">Pending</span>}
-                    </td>
-                    <td>
-                      <button className="btn btn-sm btn-outline-primary">View Receipt</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+        </Card.Content>
+      </Card>
     </div>
   );
 };
 
 export default AccountantPayments;
-

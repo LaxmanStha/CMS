@@ -34,10 +34,10 @@ const Students = () => {
     { key: 'id', header: 'Student ID', width: '100px', render: (val) => val != null ? `STU${String(val).padStart(3, '0')}` : '-' },
     { key: 'name', header: 'Name', render: (val, row) => (
       <div className="flex items-center gap-3">
-        <div className="avatar avatar-sm bg-primary/10 text-primary">{getInitials(row.name || '?')}</div>
+        <div className="avatar avatar-sm" style={{ backgroundColor: 'var(--color-accent-muted)', color: 'var(--color-accent)' }}>{getInitials(row.name || '?')}</div>
         <div>
-          <p className="font-medium text-text-primary">{row.name}</p>
-          <p className="text-xs text-text-secondary">{row.email}</p>
+          <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{row.name}</p>
+          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{row.email}</p>
         </div>
       </div>
     )},
@@ -61,12 +61,13 @@ const Students = () => {
     width: '160px',
     render: (val, row) => (
       <div className="flex items-center gap-2">
-        <span className="font-mono text-sm">{revealed[row.id] ? (row.password || '—') : '••••••'}</span>
+        <span className="font-mono text-sm">{revealed[row.id] ? (row.password || '\u2014') : '\u2022\u2022\u2022\u2022\u2022\u2022'}</span>
         {row.password && (
           <button
             type="button"
-            className="text-xs text-primary hover:underline"
+            className="text-xs hover:underline"
             onClick={() => toggleReveal(row.id)}
+            style={{ color: 'var(--color-accent)' }}
           >
             {revealed[row.id] ? 'Hide' : 'Show'}
           </button>
@@ -149,7 +150,7 @@ const Students = () => {
       setFormData({
         name: student.name || '',
         email: student.email || '',
-        password: '', // never pre-fill password for security
+        password: '',
         phone: student.phone || '',
         program: student.program || '',
         section: student.section || '',
@@ -171,7 +172,7 @@ const Students = () => {
       const payload = {
         name: formData.name,
         email: formData.email,
-        password: formData.password, // send even if empty; backend handles fallback
+        password: formData.password,
         phone: formData.phone,
         program: formData.program,
         section: formData.classroom,
@@ -220,15 +221,15 @@ const Students = () => {
             Add Student
           </Button>
         ) : (
-          <span className="text-sm text-text-secondary">Read-only (admin only)</span>
+          <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Read-only (admin only)</span>
         )}
       </div>
 
       <Card>
         <Card.Header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-<div className="flex flex-col sm:flex-row gap-3 flex-1">
+          <div className="flex flex-col sm:flex-row gap-3 flex-1">
             <div className="relative flex-1 max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--color-text-muted)' }} />
               <input
                 type="text"
                 placeholder="Search students..."
@@ -261,13 +262,13 @@ const Students = () => {
         </Card.Header>
         <Card.Content>
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-12 text-text-secondary">
+            <div className="flex items-center justify-center gap-2 py-12" style={{ color: 'var(--color-text-muted)' }}>
               <Loader2 className="w-5 h-5 animate-spin" />
               Loading students...
             </div>
           ) : fetchError ? (
             <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-              <p className="text-danger">{fetchError}</p>
+              <p style={{ color: 'var(--color-danger)' }}>{fetchError}</p>
               <Button variant="outline" size="sm" onClick={fetchStudents}>
                 <RefreshCw className="w-4 h-4 mr-1" />
                 Retry
@@ -323,7 +324,7 @@ const Students = () => {
               {programs.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
             <Input label="Semester" type="number" value={formData.year} onChange={(e) => setFormData({...formData, year: parseInt(e.target.value) || 1})} min={1} max={5} required />
-            <label className="block text-sm font-medium text-text-primary">
+            <label className="block text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
               Classroom (Room No)
               <select
                 value={formData.classroom}
@@ -364,7 +365,7 @@ const Students = () => {
           </>
         }
       >
-        <p className="text-text-secondary">
+        <p style={{ color: 'var(--color-text-muted)' }}>
           Are you sure you want to delete <strong>{deleteConfirm?.name}</strong> (STU{String(deleteConfirm?.id).padStart(3, '0')})?
           This action cannot be undone.
         </p>

@@ -1,7 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '@/services/api';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import Dropdown from '@/components/ui/Dropdown';
+import { formatCurrency } from '@/lib/utils';
 
 const AccountantDues = () => {
   const { user } = useAuth();
@@ -40,78 +45,86 @@ const AccountantDues = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const summary = filteredDues.reduce((acc, due) => {
+  const summary = useMemo(() => filteredDues.reduce((acc, due) => {
     acc.totalFees += due.totalFees || 0;
     acc.totalPaid += due.paid || 0;
     acc.totalDue += due.due || 0;
     return acc;
-  }, { totalFees: 0, totalPaid: 0, totalDue: 0 });
+  }, { totalFees: 0, totalPaid: 0, totalDue: 0 }), [filteredDues]);
 
   const statusColors = {
-    Paid: 'bg-success',
-    Partial: 'bg-warning',
-    Unpaid: 'bg-danger'
+    Paid: 'success',
+    Partial: 'warning',
+    Unpaid: 'danger'
   };
 
-  if (loading) return <div className="container-fluid p-4"><div className="alert alert-info">Loading dues...</div></div>;
+  if (loading) return (
+    <div className="space-y-6">
+      <Card className="p-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+          <span className="ml-2" style={{ color: 'var(--color-text-muted)' }}>Loading dues...</span>
+        </div>
+      </Card>
+    </div>
+  );
+
+  const columns = [
+    { key: 'student', header: 'Student' },
+    { key: 'studentId', header: 'Student ID', width: '120px' },
+    { key: 'course', header: 'Course/Term', width: '140px' },
+    { key: 'totalFees', header: 'Total Fees', width: '120px', align: 'right', render: (v) => formatCurrency(v) },
+    { key: 'paid', header: 'Amount Paid', width: '120px', align: 'right', render: (v) => <span className="font-bold" style={{ color: 'var(--color-success)' }}>{formatCurrency(v)}</span> },
+    { key: 'due', header: 'Due Amount', width: '120px', align: 'right', render: (v) => <span className="font-bold" style={{ color: 'var(--color-danger)' }}>{formatCurrency(v)}</span> },
+    { key: 'status', header: 'Status', width: '100px', render: (v) => <Badge variant={statusColors[v] || 'default'}>{v}</Badge> },
+    { key: 'actions', header: 'Actions', width: '160px', render: (v, row) => (
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm">View</Button>
+        {row.due > 0 && <Button variant="success" size="sm">Collect Payment</Button>}
+      </div>
+    )},
+  ];
 
   return (
-    <div className="container-fluid p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-6 text-center" style={{ backgroundColor: 'var(--color-accent-muted)', border: '1px solid var(--color-accent)' }}>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Total Fees</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>${summary.totalFees.toLocaleString()}</p>
+        </Card>
+        <Card className="p-6 text-center" style={{ backgroundColor: 'rgba(22, 163, 74, 0.1)', border: '1px solid var(--color-success)' }}>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Total Paid</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-success)' }}>${summary.totalPaid.toLocaleString()}</p>
+        </Card>
+        <Card className="p-6 text-center" style={{ backgroundColor: 'rgba(202, 138, 4, 0.1)', border: '1px solid var(--color-warning)' }}>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Total Due</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-warning)' }}>${summary.totalDue.toLocaleString()}</p>
+        </Card>
+        <Card className="p-6 text-center" style={{ backgroundColor: 'rgba(56, 189, 248, 0.1)', border: '1px solid var(--color-info)' }}>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Collection Rate</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-info)' }}>{summary.totalFees > 0 ? ((summary.totalPaid / summary.totalFees) * 100).toFixed(1) : 0}%</p>
+        </Card>
       </div>
-      <div className="row mb-4">
-        <div className="col-md-3">
-          <div className="card bg-primary text-white">
-            <div className="card-body text-center">
-              <h5 className="card-title">Total Fees</h5>
-              <p className="display-4">${summary.totalFees.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-success text-white">
-            <div className="card-body text-center">
-              <h5 className="card-title">Total Paid</h5>
-              <p className="display-4">${summary.totalPaid.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-warning text-white">
-            <div className="card-body text-center">
-              <h5 className="card-title">Total Due</h5>
-              <p className="display-4">${summary.totalDue.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-info text-white">
-            <div className="card-body text-center">
-              <h5 className="card-title">Collection Rate</h5>
-              <p className="display-4">{summary.totalFees > 0 ? ((summary.totalPaid / summary.totalFees) * 100).toFixed(1) : 0}%</p>
-            </div>
-          </div>
-        </div>
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <Input
+          placeholder="Search students..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          className="flex-1"
+        />
+        <Dropdown
+          value={filterStatus}
+          onChange={setFilterStatus}
+          options={[{ value: 'all', label: 'All Status' }, 'Paid', 'Partial', 'Unpaid']}
+        />
       </div>
-      <div className="row mb-4">
-        <div className="col-md-6">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search students..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="col-md-3">
-          <Dropdown value={filterStatus} onChange={setFilterStatus} options={[{ value: 'all', label: 'All Status' }, 'Paid', 'Partial', 'Unpaid']} />
-        </div>
-      </div>
-      <div className="card">
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
+      <Card>
+        <Card.Header>
+          <Card.Title>Student Dues</Card.Title>
+        </Card.Header>
+        <Card.Content>
+          <div className="table-container">
+            <table className="table">
               <thead>
                 <tr>
                   <th>Student</th>
@@ -130,16 +143,14 @@ const AccountantDues = () => {
                     <td>{due.student}</td>
                     <td>{due.studentId}</td>
                     <td>{due.course}</td>
-                    <td className="fw-bold">${(due.totalFees || 0).toLocaleString()}</td>
-                    <td className="text-success fw-bold">${(due.paid || 0).toLocaleString()}</td>
-                    <td className="text-danger fw-bold">${(due.due || 0).toLocaleString()}</td>
-                    <td><span className={`badge ${statusColors[due.status] || 'bg-secondary'}`}>{due.status}</span></td>
+                    <td className="font-bold" style={{ color: 'var(--color-text-primary)' }}>${(due.totalFees || 0).toLocaleString()}</td>
+                    <td className="font-bold" style={{ color: 'var(--color-success)' }}>${(due.paid || 0).toLocaleString()}</td>
+                    <td className="font-bold" style={{ color: 'var(--color-danger)' }}>${(due.due || 0).toLocaleString()}</td>
+                    <td><Badge variant={statusColors[due.status] || 'default'}>{due.status}</Badge></td>
                     <td>
-                      <div className="btn-group btn-group-sm" role="group">
-                        <button className="btn btn-outline-primary">View</button>
-                        {due.due > 0 && (
-                          <button className="btn btn-outline-success">Collect Payment</button>
-                        )}
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">View</Button>
+                        {due.due > 0 && <Button variant="success" size="sm">Collect Payment</Button>}
                       </div>
                     </td>
                   </tr>
@@ -147,11 +158,10 @@ const AccountantDues = () => {
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
+        </Card.Content>
+      </Card>
     </div>
   );
 };
 
 export default AccountantDues;
-

@@ -11,7 +11,6 @@ import {
   AlertCircle,
   Info,
   Menu,
-  Search
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotificationsContext } from "@/context/NotificationsContext";
@@ -71,18 +70,15 @@ const TopBar = memo(({ onMenuClick }) => {
   } = useNotificationsContext();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [, setNow] = useState(Date.now());
 
   const profileRef = useRef(null);
   const notificationsRef = useRef(null);
-  const searchRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
       if (notificationsRef.current && !notificationsRef.current.contains(e.target)) setNotificationsOpen(false);
-      if (searchRef.current && !searchRef.current.contains(e.target)) setSearchOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -96,7 +92,6 @@ const TopBar = memo(({ onMenuClick }) => {
   useEffect(() => {
     setNotificationsOpen(false);
     setProfileOpen(false);
-    setSearchOpen(false);
   }, [location.pathname]);
 
   const notificationIcons = {
@@ -130,44 +125,6 @@ const TopBar = memo(({ onMenuClick }) => {
           <Menu className="h-6 w-6" />
         </button>
 
-        {/* Global Search */}
-        <div className="relative hidden md:block flex-1 max-w-md" ref={searchRef}>
-          <button
-            onClick={() => setSearchOpen(!searchOpen)}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors"
-            style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}
-            aria-label="Search"
-            aria-expanded={searchOpen}
-          >
-            <Search className="h-5 w-5 flex-shrink-0 text-[var(--color-text-muted)]" />
-            <span className="text-sm text-[var(--color-text-muted)] flex-1 text-left">Search...</span>
-            <ChevronDown className={cn("h-4 w-4 text-[var(--color-text-muted)] transition-transform", searchOpen && "rotate-180")} />
-          </button>
-
-          {searchOpen && (
-            <div className="absolute left-0 right-0 top-full mt-2 rounded-xl shadow-[var(--shadow-elevated)] z-50 overflow-hidden animate-slide-down" style={{ backgroundColor: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)' }}>
-              <div className="p-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
-                <input
-                  type="text"
-                  placeholder="Search students, teachers, courses..."
-                  className="w-full px-4 py-2.5 rounded-lg text-sm bg-[var(--color-bg-secondary)] border-0 focus:outline-none focus:ring-2"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)', '--tw-ring-color': 'var(--color-accent)' }}
-                  autoFocus
-                />
-              </div>
-              <div className="max-h-64 overflow-y-auto p-2">
-                <p className="px-3 py-4 text-center text-sm text-[var(--color-text-muted)]">No recent searches</p>
-              </div>
-              <div className="p-3 border-t" style={{ borderColor: 'var(--color-border)' }}>
-                <Link to="/search" className="flex items-center justify-center gap-2 text-sm font-medium text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors">
-                  View all results
-                  <ChevronDown className="h-4 w-4 -rotate-90" />
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Page Title */}
         <div className="hidden sm:block min-w-0">
           <h1 className="font-semibold text-[17px] text-[var(--color-text-primary)] leading-tight truncate">{title}</h1>
@@ -182,7 +139,6 @@ const TopBar = memo(({ onMenuClick }) => {
               onClick={() => {
                 setNotificationsOpen((o) => !o);
                 setProfileOpen(false);
-                setSearchOpen(false);
               }}
               className={cn(iconBtn, notificationsOpen && "bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] border-[var(--color-border)]")}
               aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
@@ -278,7 +234,6 @@ const TopBar = memo(({ onMenuClick }) => {
               onClick={() => {
                 setProfileOpen((o) => !o);
                 setNotificationsOpen(false);
-                setSearchOpen(false);
               }}
               className={cn(
                 "flex items-center gap-3 rounded-xl p-1.5 transition-all duration-200 hover:bg-[var(--color-bg-secondary)]",

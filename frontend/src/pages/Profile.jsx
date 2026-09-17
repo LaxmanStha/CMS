@@ -9,7 +9,7 @@ export default function Profile() {
     return (
       <div className="space-y-6">
         <Card className="p-6">
-          <p className="text-text-secondary">No user information available.</p>
+          <p style={{ color: 'var(--color-text-muted)' }}>No user information available.</p>
         </Card>
       </div>
     );
@@ -28,12 +28,12 @@ export default function Profile() {
     <div className="space-y-6">
       <Card className="p-6">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold" style={{ backgroundColor: 'var(--color-accent-muted)', color: 'var(--color-accent)' }}>
             {user.name ? user.name.charAt(0).toUpperCase() : '?'}
           </div>
           <div>
-            <p className="text-lg font-semibold text-text-primary">{user.name}</p>
-            <p className="text-text-secondary">{roleLabel}</p>
+            <p className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>{user.name}</p>
+            <p style={{ color: 'var(--color-text-muted)' }}>{roleLabel}</p>
           </div>
         </div>
 
@@ -41,12 +41,13 @@ export default function Profile() {
           {fields.map(({ icon: Icon, label, value }) => (
             <div
               key={label}
-              className="flex items-center gap-3 p-4 rounded-xl border border-border bg-surface"
+              className="flex items-center gap-3 p-4 rounded-xl"
+              style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}
             >
-              <Icon className="w-5 h-5 text-primary flex-shrink-0" />
+              <Icon className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--color-accent)' }} />
               <div className="min-w-0">
-                <p className="text-xs text-text-secondary uppercase tracking-wider">{label}</p>
-                <p className="font-medium text-text-primary truncate">{value ?? '-'}</p>
+                <p className="text-xs uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>{label}</p>
+                <p className="font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{value ?? '-'}</p>
               </div>
             </div>
           ))}

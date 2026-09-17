@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '@/services/api';
-import Dropdown from '@/components/ui/Dropdown';
+import { Card } from '@/components/ui/Card';
+import { Select } from '@/components/ui/Select';
+import { cn } from '@/lib/utils';
 
 const StudentTimetable = () => {
   const { user } = useAuth();
@@ -48,58 +50,71 @@ const StudentTimetable = () => {
     return timetable.find(c => c.day === day && c.time === time);
   };
 
-  if (loading) return <div className="container-fluid p-4"><div className="alert alert-info">Loading timetable...</div></div>;
+  const weekOptions = ['Week 1', 'Week 2', 'Week 3', 'Week 4'].map(w => ({ value: w, label: w }));
+
+  if (loading) return (
+    <div className="space-y-6">
+      <Card className="p-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+          <span className="ml-2" style={{ color: 'var(--color-text-muted)' }}>Loading timetable...</span>
+        </div>
+      </Card>
+    </div>
+  );
 
   return (
-    <div className="container-fluid p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div />
-      </div>
-      <div className="card">
-        <div className="card-body p-0">
-          <div className="table-responsive">
-            <table className="table table-bordered mb-0">
-              <thead className="table-dark">
-                <tr>
-                  <th style={{ width: '100px' }}>Time / Day</th>
-                  {days.map(day => (
-                    <th key={day} className="text-center">{day}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {timeSlots.map(time => (
-                  <tr key={time}>
-                    <td className="fw-bold table-active">{time}</td>
-                    {days.map(day => {
-                      const cls = getClassAt(day, time);
-                      return (
-                        <td key={day} className="align-middle">
-                          {cls ? (
-                            <div className="p-2 bg-[var(--bg-surface-alt)] border rounded">
-                              <div className="fw-bold small">{cls.course}</div>
-                              <div className="text-muted small">{cls.room}</div>
-                              <div className="text-muted small">{cls.faculty}</div>
-                            </div>
-                          ) : (
-                            <div className="text-muted small text-center py-3">Free</div>
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <Select
+            value={week}
+            onChange={setWeek}
+            options={weekOptions}
+            className="w-auto min-w-[180px]"
+          />
         </div>
       </div>
-      <div className="mt-3">
-        <small className="text-muted">* Timetable is subject to change. Please check regularly for updates.</small>
-      </div>
+      <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr style={{ backgroundColor: 'var(--color-bg-secondary)', borderBottom: '1px solid var(--color-border)' }}>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)', width: '100px' }}>Time / Day</th>
+                {days.map(day => (
+                  <th key={day} className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>{day}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {timeSlots.map(time => (
+                <tr key={time} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--color-text-primary)', backgroundColor: 'var(--color-bg-secondary)', width: '100px' }}>{time}</td>
+                  {days.map(day => {
+                    const cls = getClassAt(day, time);
+                    return (
+                      <td key={day} className="px-4 py-3 align-middle">
+                        {cls ? (
+                          <div className="p-2 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+                            <div className="font-bold text-sm" style={{ color: 'var(--color-text-primary)' }}>{cls.course}</div>
+                            <div className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{cls.room}</div>
+                            <div className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{cls.faculty}</div>
+                          </div>
+                        ) : (
+                          <div className="text-center py-3" style={{ color: 'var(--color-text-muted)' }}>Free</div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+      <p className="text-sm text-center" style={{ color: 'var(--color-text-muted)' }}>Timetable is subject to change. Please check regularly for updates.</p>
     </div>
   );
 };
 
 export default StudentTimetable;
-

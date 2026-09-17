@@ -18,7 +18,7 @@
 #include <numeric>
 #include <array>
 
-#include "timetable_validator.h"
+// #include "timetable_validator.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -770,8 +770,9 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
                     if (classroomRows.arr.empty()) return send(404, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Classroom not found")});return v;}());
                     string roomNumber = classroomRows.arr[0].strVal("room_number");
                     JsonVal rows = db.queryArray(
-                        "SELECT p.id, p.name, p.contactInfo, s.classroom FROM Person p JOIN Student s ON s.id=p.id JOIN ClassroomStudent cs ON cs.student_id=s.id WHERE cs.classroom_id=" + std::to_string(id) + " ORDER BY p.id",
-                        [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"name",JsonVal(readText(st,1))});o.obj.push_back({"email",JsonVal(readText(st,2))});o.obj.push_back({"classroom",JsonVal(readText(st,3))});return o;});
+                        "SELECT p.id, p.name, p.contactInfo, s.classroom FROM Person p JOIN Student s ON s.id=p.id WHERE s.classroom = ? ORDER BY p.id",
+                        [&](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"name",JsonVal(readText(st,1))});o.obj.push_back({"email",JsonVal(readText(st,2))});o.obj.push_back({"classroom",JsonVal(readText(st,3))});return o;},
+                        {roomNumber});
                     return send(200, rows);
                 }
             } catch (...) {}

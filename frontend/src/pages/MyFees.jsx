@@ -48,37 +48,27 @@ const MyFees = () => {
   }), [fees]);
 
   return (
-    <div className="container-fluid p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="p-6">
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Total Fees</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{formatCurrency(totals.total)}</p>
+        </Card>
+        <Card className="p-6">
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Total Paid</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-success)' }}>{formatCurrency(totals.paid)}</p>
+        </Card>
+        <Card className="p-6">
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Outstanding</p>
+          <p className="text-2xl font-bold" style={{ color: 'var(--color-warning)' }}>{formatCurrency(totals.due)}</p>
+        </Card>
       </div>
 
-      <div className="row g-3 mb-4">
-        <div className="col-md-4">
-          <Card>
-            <div className="text-sm text-text-secondary">Total Fees</div>
-            <div className="text-2xl font-bold">{formatCurrency(totals.total)}</div>
-          </Card>
-        </div>
-        <div className="col-md-4">
-          <Card>
-            <div className="text-sm text-text-secondary">Total Paid</div>
-            <div className="text-2xl font-bold text-success">{formatCurrency(totals.paid)}</div>
-          </Card>
-        </div>
-        <div className="col-md-4">
-          <Card>
-            <div className="text-sm text-text-secondary">Outstanding</div>
-            <div className="text-2xl font-bold text-warning">{formatCurrency(totals.due)}</div>
-          </Card>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="card-header">
-          <h5 className="card-title mb-0">My Invoices</h5>
-        </div>
-        <div className="card-body">
+      <Card>
+        <Card.Header>
+          <Card.Title>My Invoices</Card.Title>
+        </Card.Header>
+        <Card.Content>
           <Table
             columns={columns}
             data={fees}
@@ -86,8 +76,8 @@ const MyFees = () => {
             keyField="id"
             emptyMessage="No payments found for your account."
           />
-        </div>
-      </div>
+        </Card.Content>
+      </Card>
     </div>
   );
 };

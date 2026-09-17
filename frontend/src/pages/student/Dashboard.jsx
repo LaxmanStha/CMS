@@ -87,7 +87,7 @@ const StudentDashboard = () => {
         <StatCard
           title="Attendance"
           icon={CalendarCheck}
-          iconClass="bg-primary/10 text-primary"
+          iconClass="bg-[var(--color-accent-muted)] text-[var(--color-accent)]"
           description={attendancePct > 0 ? `Your attendance percentage is ${Math.round(attendancePct)}%.` : 'No attendance records yet.'}
           action={
             <Link to="/student/attendance" className="btn btn-primary btn-sm">
@@ -101,7 +101,7 @@ const StudentDashboard = () => {
         <StatCard
           title="Grades"
           icon={Award}
-          iconClass="bg-primary/10 text-primary"
+          iconClass="bg-[var(--color-info)]/10 text-[var(--color-info)]"
           description={recentGrades.length > 0 ? `You have ${recentGrades.length} grade record(s).` : 'No grades recorded yet.'}
           action={
             <Link to="/student/grades" className="btn btn-primary btn-sm">
@@ -114,7 +114,7 @@ const StudentDashboard = () => {
         <StatCard
           title="Fees"
           icon={Wallet}
-          iconClass="bg-warning/10 text-warning"
+          iconClass="bg-[var(--color-warning)]/10 text-[var(--color-warning)]"
           description={pendingFees > 0 ? `You have a pending fee of $${pendingFees.toFixed(2)}.` : 'No pending fees.'}
           action={
             <Link to="/fees" className="btn btn-primary btn-sm">
@@ -136,13 +136,13 @@ const StudentDashboard = () => {
             </Card.Header>
             <Card.Content>
               {upcomingExams.length === 0 ? (
-                <p className="text-sm text-text-secondary">No upcoming exams.</p>
+                <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>No upcoming exams.</p>
               ) : (
-                <ul className="list-group list-group-flush">
+                <ul className="space-y-2">
                   {upcomingExams.map((exam) => (
-                    <li key={exam.id} className="list-group-item d-flex justify-content-between bg-transparent border-border">
+                    <li key={exam.id} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
                       <span>{exam.name} ({exam.course})</span>
-                      <span className="text-sm text-text-secondary">{exam.date || 'TBD'}</span>
+                      <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{exam.date || 'TBD'}</span>
                     </li>
                   ))}
                 </ul>
@@ -157,11 +157,11 @@ const StudentDashboard = () => {
             </Card.Header>
             <Card.Content>
               {enrolledCourses.length === 0 ? (
-                <p className="text-sm text-text-secondary">No enrolled courses found.</p>
+                <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>No enrolled courses found.</p>
               ) : (
-                <ul className="list-group list-group-flush">
+                <ul className="space-y-2">
                   {enrolledCourses.map((course) => (
-                    <li key={course.id} className="list-group-item d-flex justify-content-between bg-transparent border-border">
+                    <li key={course.id} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
                       <span>{course.code} - {course.name}</span>
                     </li>
                   ))}

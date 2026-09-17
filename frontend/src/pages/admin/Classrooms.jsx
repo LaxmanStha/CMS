@@ -124,40 +124,37 @@ const AdminClassrooms = () => {
             Add Classroom
           </Button>
         ) : (
-          <span className="text-sm text-text-secondary bg-white/[0.03] px-3 py-1.5 rounded-lg">Read-only (admin only)</span>
+          <span className="text-sm px-3 py-1.5 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-muted)' }}>Read-only (admin only)</span>
         )}
       </div>
 
       {/* Stats Summary */}
       <div className="grid grid-cols-1 gap-4">
-        <div className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+        <Card className="p-4 flex items-center gap-4">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(22, 163, 74, 0.1)', color: 'var(--color-success)' }}>
             <Building2 className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-text-primary">{stats.total}</p>
-            <p className="text-xs text-text-tertiary">Total Classrooms</p>
+            <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.total}</p>
+            <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Total Classrooms</p>
           </div>
-        </div>
+        </Card>
       </div>
 
-      <div className="rounded-2xl bg-white border border-[var(--color-border)] shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-white/[0.06]">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
-              <input
-                type="text"
-                placeholder="Search classrooms..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full h-10 pl-10 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-violet-500/30 focus:ring-1 focus:ring-violet-500/20 transition-all duration-200"
-              />
-            </div>
+      <Card>
+        <Card.Header className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--color-text-muted)' }} />
+            <input
+              type="text"
+              placeholder="Search classrooms..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="input pl-10"
+            />
           </div>
-        </div>
-
-        <div className="p-5 pt-0">
+        </Card.Header>
+        <Card.Content>
           <Table
             columns={columns}
             data={filteredClassrooms}
@@ -173,8 +170,8 @@ const AdminClassrooms = () => {
             ] : []}
             emptyMessage={"No classrooms found"}
           />
-        </div>
-      </div>
+        </Card.Content>
+      </Card>
 
       {/* Add/Edit Classroom Modal */}
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setEditingClassroom(null); setFormData({ room_number: "", name: "" }); }} title={editingClassroom ? "Edit Classroom" : "Add Classroom"} size="lg"
@@ -192,7 +189,7 @@ const AdminClassrooms = () => {
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Delete Classroom" variant="danger" size="sm"
         footer={<><Button variant="ghost" onClick={() => setDeleteConfirm(null)}>Cancel</Button><Button variant="danger" onClick={confirmDelete}>Delete</Button></>}
       >
-        <p className="text-text-secondary">Delete <strong>{deleteConfirm?.room_number} ({deleteConfirm?.name})</strong>? This cannot be undone.</p>
+        <p style={{ color: 'var(--color-text-muted)' }}>Delete <strong>{deleteConfirm?.room_number} ({deleteConfirm?.name})</strong>? This cannot be undone.</p>
       </Modal>
     </div>
   );

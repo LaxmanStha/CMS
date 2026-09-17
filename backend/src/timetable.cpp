@@ -7,6 +7,8 @@
 #include <map>
 #include <climits>
 #include <ctime>
+#include <sqlite3.h>
+#include <cstdint>
 
 using namespace std;
 
@@ -199,7 +201,7 @@ bool IsTeacherFreeAt(const GlobalTeacher& teacher, int day, int period) {
 // ===== ALLOCATE TEACHER TO SLOT WITH CONSTRAINT CHECK =====
 // Returns true if allocation was successful
 bool AllocateTeacherToSlot(GlobalTeacher& teacher, int day, int period, 
-                          const string& section, const AllocationSetup& setup) {
+                          const string& section, [[maybe_unused]] const AllocationSetup& setup) {
     auto key = make_pair(day, period);
     
     // Check if teacher is already assigned to different section at this time
@@ -296,7 +298,7 @@ vector<TimeTableData> GenerateAllTimetables(AllocationSetup& setup) {
 }
 
 // ===== DISPLAY A TIMETABLE =====
-void DisplayTimeTable(const TimeTableData& data, const AllocationSetup& setup) {
+void DisplayTimeTable(const TimeTableData& data, [[maybe_unused]] const AllocationSetup& setup) {
     const int days = 5;
     vector<string> dayNames = {"Mon", "Tue", "Wed", "Thu", "Fri"};
 
@@ -331,7 +333,7 @@ void DisplayTimeTable(const TimeTableData& data, const AllocationSetup& setup) {
                 cell = "Free";
             }
             
-            if (cell.length() > colWidth - 1) {
+            if (static_cast<int>(cell.length()) > colWidth - 1) {
                 cell = cell.substr(0, colWidth - 4) + "...";
             }
             cout << left << setw(colWidth) << cell;
@@ -379,6 +381,222 @@ void DisplayGlobalTeacherLoad(const AllocationSetup& setup) {
     cout << "\n";
 }
 
+// ===== SAVE TIMETABLE TO DATABASE (COMPREHENSIVE) =====
+void SaveTimetableToDatabase(const vector<TimeTableData>& allTimetables, const AllocationSetup& setup) {
+    sqlite3* db;
+    int rc = sqlite3_open("college.db", &db);
+    if (rc != SQLITE_OK) {
+        cerr << "Cannot open database: " << sqlite3_errmsg(db) << endl;
+        sqlite3_close(db);
+        return;
+    }
+
+    // Enable foreign keys
+    sqlite3_exec(db, "PRAGMA foreign_keys = ON;", nullptr, nullptr, nullptr);
+
+    // Create comprehensive schema with transactions
+    const char* schemaSQL = 
+        "CREATE TABLE IF NOT EXISTS TimetableGeneration ("
+        "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "  generated_at DATETIME DEFAULT CURRENT_TIMESTAMP,"
+        "  periods_per_day INTEGER NOT NULL,"
+        "  total_sections INTEGER NOT NULL,"
+        "  total_teachers INTEGER NOT NULL,"
+        "  status TEXT DEFAULT 'completed'"
+        ");"
+        "CREATE TABLE IF NOT EXISTS TimetableSection ("
+        "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "  generation_id INTEGER NOT NULL REFERENCES TimetableGeneration(id) ON DELETE CASCADE,"
+        "  section_name TEXT NOT NULL,"
+        "  periods_per_day INTEGER NOT NULL"
+        ");"
+        "CREATE TABLE IF NOT EXISTS TimetableTeacher ("
+        "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "  generation_id INTEGER NOT NULL REFERENCES TimetableGeneration(id) ON DELETE CASCADE,"
+        "  teacher_name TEXT NOT NULL,"
+        "  total_load INTEGER DEFAULT 0"
+        ");"
+        "CREATE TABLE IF NOT EXISTS TimetableEntry ("
+        "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "  generation_id INTEGER NOT NULL REFERENCES TimetableGeneration(id) ON DELETE CASCADE,"
+        "  section_id INTEGER NOT NULL REFERENCES TimetableSection(id) ON DELETE CASCADE,"
+        "  teacher_id INTEGER REFERENCES TimetableTeacher(id) ON DELETE SET NULL,"
+        "  day TEXT NOT NULL,"
+        "  period TEXT NOT NULL,"
+        "  subject TEXT,"
+        "  status TEXT DEFAULT 'assigned'"
+        ");"
+        "CREATE TABLE IF NOT EXISTS TimetableTeacherLoad ("
+        "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "  generation_id INTEGER NOT NULL REFERENCES TimetableGeneration(id) ON DELETE CASCADE,"
+        "  teacher_id INTEGER NOT NULL REFERENCES TimetableTeacher(id) ON DELETE CASCADE,"
+        "  section_id INTEGER NOT NULL REFERENCES TimetableSection(id) ON DELETE CASCADE,"
+        "  periods_count INTEGER DEFAULT 0"
+        ");"
+        "CREATE TABLE IF NOT EXISTS TimetableConflict ("
+        "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "  generation_id INTEGER NOT NULL REFERENCES TimetableGeneration(id) ON DELETE CASCADE,"
+        "  section_id INTEGER REFERENCES TimetableSection(id) ON DELETE SET NULL,"
+        "  day TEXT,"
+        "  period TEXT,"
+        "  conflict_type TEXT NOT NULL,"
+        "  description TEXT"
+        ");"
+        "CREATE INDEX IF NOT EXISTS idx_entry_gen ON TimetableEntry(generation_id);"
+        "CREATE INDEX IF NOT EXISTS idx_entry_section ON TimetableEntry(section_id);"
+        "CREATE INDEX IF NOT EXISTS idx_entry_teacher ON TimetableEntry(teacher_id);"
+        "CREATE INDEX IF NOT EXISTS idx_load_gen ON TimetableTeacherLoad(generation_id);"
+        "CREATE INDEX IF NOT EXISTS idx_conflict_gen ON TimetableConflict(generation_id);";
+
+    char* errMsg = nullptr;
+    rc = sqlite3_exec(db, schemaSQL, nullptr, nullptr, &errMsg);
+    if (rc != SQLITE_OK) {
+        cerr << "Schema creation failed: " << errMsg << endl;
+        sqlite3_free(errMsg);
+        sqlite3_close(db);
+        return;
+    }
+
+    // Begin transaction
+    sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
+
+    // 1. Insert generation record
+    const char* genSQL = "INSERT INTO TimetableGeneration (periods_per_day, total_sections, total_teachers, status) VALUES (?, ?, ?, 'completed');";
+    sqlite3_stmt* genStmt;
+    sqlite3_prepare_v2(db, genSQL, -1, &genStmt, nullptr);
+    sqlite3_bind_int(genStmt, 1, setup.periodsPerDay);
+    sqlite3_bind_int(genStmt, 2, static_cast<int>(setup.sections.size()));
+    sqlite3_bind_int(genStmt, 3, static_cast<int>(setup.teachers.size()));
+    sqlite3_step(genStmt);
+    int64_t generationId = sqlite3_last_insert_rowid(db);
+    sqlite3_finalize(genStmt);
+
+    // 2. Insert sections and track IDs
+    vector<int64_t> sectionIds(setup.sections.size());
+    const char* secSQL = "INSERT INTO TimetableSection (generation_id, section_name, periods_per_day) VALUES (?, ?, ?);";
+    sqlite3_stmt* secStmt;
+    sqlite3_prepare_v2(db, secSQL, -1, &secStmt, nullptr);
+    for (size_t i = 0; i < setup.sections.size(); ++i) {
+        sqlite3_bind_int64(secStmt, 1, generationId);
+        sqlite3_bind_text(secStmt, 2, setup.sections[i].c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_int(secStmt, 3, setup.periodsPerDay);
+        sqlite3_step(secStmt);
+        sectionIds[i] = sqlite3_last_insert_rowid(db);
+        sqlite3_reset(secStmt);
+    }
+    sqlite3_finalize(secStmt);
+
+    // 3. Insert teachers and track IDs
+    vector<int64_t> teacherIds(setup.teachers.size());
+    vector<int> teacherTotalLoads(setup.teachers.size(), 0);
+    const char* teachSQL = "INSERT INTO TimetableTeacher (generation_id, teacher_name, total_load) VALUES (?, ?, ?);";
+    sqlite3_stmt* teachStmt;
+    sqlite3_prepare_v2(db, teachSQL, -1, &teachStmt, nullptr);
+    for (size_t t = 0; t < setup.teachers.size(); ++t) {
+        // Calculate total load
+        int totalLoad = 0;
+        for (const auto& alloc : setup.teachers[t].allocation) {
+            totalLoad++;
+        }
+        teacherTotalLoads[t] = totalLoad;
+        
+        sqlite3_bind_int64(teachStmt, 1, generationId);
+        sqlite3_bind_text(teachStmt, 2, setup.teachers[t].name.c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_int(teachStmt, 3, totalLoad);
+        sqlite3_step(teachStmt);
+        teacherIds[t] = sqlite3_last_insert_rowid(db);
+        sqlite3_reset(teachStmt);
+    }
+    sqlite3_finalize(teachStmt);
+
+    // 4. Insert teacher loads per section
+    const char* loadSQL = "INSERT INTO TimetableTeacherLoad (generation_id, teacher_id, section_id, periods_count) VALUES (?, ?, ?, ?);";
+    sqlite3_stmt* loadStmt;
+    sqlite3_prepare_v2(db, loadSQL, -1, &loadStmt, nullptr);
+    for (size_t t = 0; t < setup.teachers.size(); ++t) {
+        for (size_t s = 0; s < setup.sections.size(); ++s) {
+            int count = 0;
+            for (const auto& alloc : setup.teachers[t].allocation) {
+                if (alloc.second == setup.sections[s]) count++;
+            }
+            if (count > 0) {
+                sqlite3_bind_int64(loadStmt, 1, generationId);
+                sqlite3_bind_int64(loadStmt, 2, teacherIds[t]);
+                sqlite3_bind_int64(loadStmt, 3, sectionIds[s]);
+                sqlite3_bind_int(loadStmt, 4, count);
+                sqlite3_step(loadStmt);
+                sqlite3_reset(loadStmt);
+            }
+        }
+    }
+    sqlite3_finalize(loadStmt);
+
+    // 5. Insert timetable entries
+    const char* entrySQL = "INSERT INTO TimetableEntry (generation_id, section_id, teacher_id, day, period, subject, status) VALUES (?, ?, ?, ?, ?, ?, ?);";
+    sqlite3_stmt* entryStmt;
+    sqlite3_prepare_v2(db, entrySQL, -1, &entryStmt, nullptr);
+
+    vector<string> dayNames = {"Mon", "Tue", "Wed", "Thu", "Fri"};
+    for (size_t s = 0; s < allTimetables.size(); ++s) {
+        for (int d = 0; d < 5; ++d) {
+            for (int p = 0; p < allTimetables[s].periodsPerDay; ++p) {
+                string teacher = allTimetables[s].tName[d][p];
+                string subject = allTimetables[s].tSub[d][p];
+                
+                // Determine status
+                string status = "assigned";
+                if (teacher == "Unassigned" || teacher.empty()) status = "free";
+                else if (teacher == "NO TEACHER") status = "conflict";
+                
+                // Find teacher ID
+                int64_t teacherId = 0;
+                int teacherIdx = -1;
+                for (size_t t = 0; t < setup.teachers.size(); ++t) {
+                    if (setup.teachers[t].name == teacher) {
+                        teacherId = teacherIds[t];
+                        teacherIdx = static_cast<int>(t);
+                        break;
+                    }
+                }
+
+                sqlite3_bind_int64(entryStmt, 1, generationId);
+                sqlite3_bind_int64(entryStmt, 2, sectionIds[s]);
+                if (teacherId > 0) sqlite3_bind_int64(entryStmt, 3, teacherId);
+                else sqlite3_bind_null(entryStmt, 3);
+                sqlite3_bind_text(entryStmt, 4, dayNames[d].c_str(), -1, SQLITE_TRANSIENT);
+                string periodStr = "Period " + to_string(p + 1);
+                sqlite3_bind_text(entryStmt, 5, periodStr.c_str(), -1, SQLITE_TRANSIENT);
+                sqlite3_bind_text(entryStmt, 6, subject.c_str(), -1, SQLITE_TRANSIENT);
+                sqlite3_bind_text(entryStmt, 7, status.c_str(), -1, SQLITE_TRANSIENT);
+                sqlite3_step(entryStmt);
+                sqlite3_reset(entryStmt);
+
+                // Track conflicts
+                if (status == "conflict" || status == "free") {
+                    const char* conflictSQL = "INSERT INTO TimetableConflict (generation_id, section_id, day, period, conflict_type, description) VALUES (?, ?, ?, ?, ?, ?);";
+                    sqlite3_stmt* confStmt;
+                    sqlite3_prepare_v2(db, conflictSQL, -1, &confStmt, nullptr);
+                    sqlite3_bind_int64(confStmt, 1, generationId);
+                    sqlite3_bind_int64(confStmt, 2, sectionIds[s]);
+                    sqlite3_bind_text(confStmt, 3, dayNames[d].c_str(), -1, SQLITE_TRANSIENT);
+                    sqlite3_bind_text(confStmt, 4, ("Period " + to_string(p + 1)).c_str(), -1, SQLITE_TRANSIENT);
+                    sqlite3_bind_text(confStmt, 5, status.c_str(), -1, SQLITE_TRANSIENT);
+                    string desc = status == "conflict" ? "No teacher available" : "Period unassigned";
+                    sqlite3_bind_text(confStmt, 6, desc.c_str(), -1, SQLITE_TRANSIENT);
+                    sqlite3_step(confStmt);
+                    sqlite3_finalize(confStmt);
+                }
+            }
+        }
+    }
+    sqlite3_finalize(entryStmt);
+
+    // Commit transaction
+    sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
+    sqlite3_close(db);
+    cout << "✓ Complete timetable saved to database (generation #" << generationId << ")\n";
+}
+
 // ===== MAIN TIMETABLE FUNCTION - WITH GLOBAL CONSTRAINTS =====
 // HOW IT WORKS:
 // 1. Get all sections and teachers (READ ONCE)
@@ -411,7 +629,10 @@ void TimeTable(){
     // Step 4: Display global teacher workload analysis
     DisplayGlobalTeacherLoad(setup);
     
-    // Step 5: Validate for conflicts
+    // Step 5: Save to database
+    SaveTimetableToDatabase(allTimetables, setup);
+    
+    // Step 6: Validate for conflicts
     cout << string(80, '=') << "\n";
     cout << "CONFLICT ANALYSIS\n";
     cout << string(80, '=') << "\n";

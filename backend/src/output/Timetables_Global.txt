@@ -1,0 +1,45 @@
+
+================================================================================
+TIMETABLE GENERATION - 1789657147
+================================================================================
+
+SECTION: csit
+Days: Mon, Tue, Wed, Thu, Fri
+Periods: 2
+
+Mon: [1-sdf] [3-gfhj] 
+Tue: [2-dfb] [1-sdf] 
+Wed: [3-gfhj] [2-dfb] 
+Thu: [1-sdf] [3-gfhj] 
+Fri: [2-dfb] [1-sdf] 
+
+SECTION: nim
+Days: Mon, Tue, Wed, Thu, Fri
+Periods: 2
+
+Mon: [2-hjk] [1-dsv] 
+Tue: [3-ghj] [2-hjk] 
+Wed: [1-dsv] [3-ghj] 
+Thu: [2-hjk] [1-dsv] 
+Fri: [3-ghj] [2-hjk] 
+
+
+================================================================================
+GLOBAL TEACHER WORKLOAD
+================================================================================
+
+1:
+  Section csit: 4 periods
+  Section nim: 3 periods
+  TOTAL: 7 periods
+
+2:
+  Section csit: 3 periods
+  Section nim: 4 periods
+  TOTAL: 7 periods
+
+3:
+  Section csit: 3 periods
+  Section nim: 3 periods
+  TOTAL: 6 periods
+

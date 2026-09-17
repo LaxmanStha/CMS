@@ -1,6 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '@/services/api';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Table } from '@/components/ui/Table';
+import { formatCurrency, formatDate } from '@/lib/utils';
 
 const AccountantInvoices = () => {
   const { user } = useAuth();
@@ -36,79 +42,74 @@ const AccountantInvoices = () => {
     inv.studentId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const statusColors = {
-    Paid: 'bg-success',
-    Pending: 'bg-warning',
-    Overdue: 'bg-danger',
-    Cancelled: 'bg-secondary'
+  const statusVariants = {
+    Paid: 'success',
+    Pending: 'warning',
+    Overdue: 'danger',
+    Cancelled: 'default'
   };
 
-  if (loading) return <div className="container-fluid p-4"><div className="alert alert-info">Loading invoices...</div></div>;
+  const columns = useMemo(() => [
+    { key: 'id', header: 'Invoice ID', width: '100px' },
+    { key: 'student', header: 'Student' },
+    { key: 'studentId', header: 'Student ID', width: '120px' },
+    { key: 'course', header: 'Course/Term', width: '140px' },
+    { key: 'amount', header: 'Amount', width: '120px', align: 'right', render: (v) => formatCurrency(v) },
+    { key: 'status', header: 'Status', width: '100px', render: (v) => <Badge variant={statusVariants[v] || 'default'}>{v}</Badge> },
+    { key: 'date', header: 'Issue Date', width: '120px', render: (v) => formatDate(v) },
+    { key: 'dueDate', header: 'Due Date', width: '120px', render: (v) => formatDate(v) },
+    { key: 'actions', header: 'Actions', width: '180px', render: (v, row) => (
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm">View</Button>
+        <Button variant="ghost" size="sm">Edit</Button>
+        {row.status !== 'Paid' && <Button variant="success" size="sm">Mark Paid</Button>}
+      </div>
+    )},
+  ], []);
+
+  if (loading) return (
+    <div className="space-y-6">
+      <Card className="p-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+          <span className="ml-2" style={{ color: 'var(--color-text-muted)' }}>Loading invoices...</span>
+        </div>
+      </Card>
+    </div>
+  );
 
   return (
-    <div className="container-fluid p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div />
-        <button className="btn btn-primary">Generate Invoice</button>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <Button>Generate Invoice</Button>
       </div>
-      <div className="row mb-4">
-        <div className="col-md-6">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search invoices..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-      <div className="card">
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>Invoice ID</th>
-                  <th>Student</th>
-                  <th>Student ID</th>
-                  <th>Course/Term</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Issue Date</th>
-                  <th>Due Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredInvoices.map(invoice => (
-                  <tr key={invoice.id}>
-                    <td>{invoice.id}</td>
-                    <td>{invoice.student}</td>
-                    <td>{invoice.studentId}</td>
-                    <td>{invoice.course}</td>
-                    <td className="fw-bold">${invoice.amount.toLocaleString()}</td>
-                    <td><span className={`badge ${statusColors[invoice.status] || 'bg-secondary'}`}>{invoice.status}</span></td>
-                    <td>{invoice.date}</td>
-                    <td>{invoice.dueDate}</td>
-                    <td>
-                      <div className="btn-group btn-group-sm" role="group">
-                        <button className="btn btn-outline-primary">View</button>
-                        <button className="btn btn-outline-secondary">Edit</button>
-                        {invoice.status !== 'Paid' && (
-                          <button className="btn btn-outline-success">Mark Paid</button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <Card>
+        <Card.Header>
+          <div className="relative flex-1 max-w-sm">
+            <input
+              type="text"
+              placeholder="Search invoices..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="input pl-10"
+            />
           </div>
-        </div>
-      </div>
+        </Card.Header>
+        <Card.Content>
+          <Table
+            columns={columns}
+            data={filteredInvoices}
+            keyField="id"
+            searchable={false}
+            filterable={false}
+            paginated
+            pageSize={10}
+            emptyMessage="No invoices found"
+          />
+        </Card.Content>
+      </Card>
     </div>
   );
 };
 
 export default AccountantInvoices;
-

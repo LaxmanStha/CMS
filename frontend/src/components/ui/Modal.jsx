@@ -80,18 +80,12 @@ const Modal = ({
     full: 'max-w-[90vw]',
   };
 
-  const variants = {
-    default: 'bg-white',
-    danger: 'bg-white border-[var(--color-danger)]',
-    success: 'bg-white border-[var(--color-success)]',
-  };
-
   const isTopRight = anchor === 'top-right';
 
   return (
     <div className="fixed inset-0 z-[1000]">
       <div
-        className="fixed inset-0 bg-black/50"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
         aria-hidden="true"
       />
       <div
@@ -110,18 +104,17 @@ const Modal = ({
           aria-describedby={description ? 'modal-description' : undefined}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            'relative w-full my-4 max-h-[calc(100vh-2rem)] rounded-xl shadow-xl flex flex-col overflow-hidden',
+            'relative w-full my-4 max-h-[calc(100vh-2rem)] rounded-2xl shadow-[var(--shadow-elevated)] flex flex-col overflow-hidden animate-scale-in',
             sizes[size],
-            variants[variant],
-            'border border-[var(--color-border)]',
+            'bg-[var(--color-bg-card)] border border-[var(--color-border)]',
             className
           )}
         >
         {(title || showClose) && (
-          <div className="flex flex-shrink-0 items-start justify-between p-4 border-b border-[var(--color-border)]">
+          <div className="flex flex-shrink-0 items-start justify-between p-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
             <div>
               {title && (
-                <h2 id="modal-title" className="text-lg font-semibold text-[var(--color-text)]">
+                <h2 id="modal-title" className="text-lg font-semibold text-[var(--color-text-primary)]">
                   {title}
                 </h2>
               )}
@@ -134,7 +127,7 @@ const Modal = ({
             {showClose && (
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] transition-colors"
+                className="p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
@@ -146,7 +139,7 @@ const Modal = ({
           {children}
         </div>
         {footer && (
-          <div className="flex flex-shrink-0 items-center justify-end gap-3 p-4 border-t border-[var(--color-border)]">
+          <div className="flex flex-shrink-0 items-center justify-end gap-3 p-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
             {footer}
           </div>
         )}
@@ -170,7 +163,7 @@ const ConfirmDialog = ({
   const variants = {
     danger: { icon: AlertTriangle, iconColor: 'text-[var(--color-warning)]', btnColor: 'btn-danger' },
     success: { icon: Check, iconColor: 'text-[var(--color-success)]', btnColor: 'btn-primary' },
-    info: { icon: Info, iconColor: 'text-[var(--color-primary)]', btnColor: 'btn-primary' },
+    info: { icon: Info, iconColor: 'text-[var(--color-info)]', btnColor: 'btn-primary' },
     warning: { icon: AlertCircle, iconColor: 'text-[var(--color-warning)]', btnColor: 'btn-primary' },
   };
 

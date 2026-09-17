@@ -44,11 +44,11 @@ const FacultyDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="My Courses"
           icon={BookOpen}
-          iconClass="bg-primary/10 text-primary"
+          iconClass="bg-[var(--color-accent-muted)] text-[var(--color-accent)]"
           description={courses.length > 0 ? `You are teaching ${courses.length} course(s) this semester.` : 'No courses assigned yet.'}
           action={
             <Link to="/faculty/attendance" className="btn btn-primary btn-sm">
@@ -61,7 +61,7 @@ const FacultyDashboard = () => {
         <StatCard
           title="Total Students"
           icon={Users}
-          iconClass="bg-emerald-500/10 text-emerald-500"
+          iconClass="bg-[var(--color-info)]/10 text-[var(--color-info)]"
           description={totalStudents > 0 ? `${totalStudents} students across your courses.` : 'No students enrolled.'}
           action={
             <Link to="/faculty/attendance" className="btn btn-primary btn-sm">
@@ -74,7 +74,7 @@ const FacultyDashboard = () => {
         <StatCard
           title="Attendance Entry"
           icon={CalendarCheck}
-          iconClass="bg-success/10 text-success"
+          iconClass="bg-[var(--color-success)]/10 text-[var(--color-success)]"
           description={todayAttendance.total > 0 ? `Today: ${todayAttendance.present}/${todayAttendance.total} present.` : 'No attendance recorded today.'}
           action={
             <Link to="/faculty/attendance" className="btn btn-primary btn-sm">
@@ -88,7 +88,7 @@ const FacultyDashboard = () => {
         <StatCard
           title="Schedule"
           icon={Calendar}
-          iconClass="bg-warning/10 text-warning"
+          iconClass="bg-[var(--color-warning)]/10 text-[var(--color-warning)]"
           description={upcomingClasses.length > 0 ? `You have ${upcomingClasses.length} upcoming class(es).` : 'No upcoming classes.'}
           action={
             <Link to="/timetable" className="btn btn-primary btn-sm">
@@ -102,7 +102,7 @@ const FacultyDashboard = () => {
 
       {courses.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <ChartCard title="Students per Course" subtitle="Enrollment distribution across your courses" className="card-premium">
+          <ChartCard title="Students per Course" subtitle="Enrollment distribution across your courses">
             <PieChartBox
               data={studentsByCourse}
               nameKey="name"
@@ -113,13 +113,13 @@ const FacultyDashboard = () => {
             />
           </ChartCard>
 
-          <ChartCard title="Attendance Overview" subtitle="Present vs Absent by course" className="card-premium">
+          <ChartCard title="Attendance Overview" subtitle="Present vs Absent by course">
             <BarChartBox
               data={attendanceByCourse}
               xKey="name"
               bars={[
                 { key: "Present", color: CHART_PALETTE[0] },
-                { key: "Absent", color: CHART_PALETTE[1] },
+                { key: "Absent", color: CHART_PALETTE[3] },
               ]}
             />
           </ChartCard>
@@ -133,11 +133,11 @@ const FacultyDashboard = () => {
             <Card.Description>Your next scheduled classes</Card.Description>
           </Card.Header>
           <Card.Content>
-            <ul className="list-group list-group-flush">
+            <ul className="space-y-2">
               {upcomingClasses.map((cls) => (
-                <li key={cls.id} className="list-group-item d-flex justify-content-between bg-transparent border-border">
+                <li key={cls.id} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
                   <span>{cls.course}</span>
-                  <span className="text-sm text-text-secondary">{cls.day} at {cls.time} - {cls.room}</span>
+                  <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{cls.day} at {cls.time} - {cls.room}</span>
                 </li>
               ))}
             </ul>

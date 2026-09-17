@@ -217,10 +217,10 @@ const Teachers = () => {
     { key: "id", header: "Teacher ID", width: "100px", render: (value) => value != null ? `TCH${String(value).padStart(3, "0")}` : "-" },
     { key: "name", header: "Name", render: (value, row) => (
       <div className="flex items-center gap-3">
-        <div className="avatar avatar-sm bg-primary/10 text-primary">{getInitials(row.name || "?")}</div>
+        <div className="avatar avatar-sm" style={{ backgroundColor: 'var(--color-accent-muted)', color: 'var(--color-accent)' }}>{getInitials(row.name || "?")}</div>
         <div>
-          <p className="font-medium text-text-primary">{row.name || "-"}</p>
-          <p className="text-xs text-text-secondary">{row.email || "-"}</p>
+          <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{row.name || "-"}</p>
+          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{row.email || "-"}</p>
         </div>
       </div>
     )},
@@ -239,13 +239,13 @@ const Teachers = () => {
     ...baseColumns.slice(0, -1),
     { key: "password", header: "Password", width: "150px", render: (value, row) => (
       <div className="flex items-center gap-2">
-        <span className="font-mono text-xs text-text-secondary">
-          {revealedPasswords[row.id] ? (value || "-") : "••••••"}
+        <span className="font-mono text-xs" style={{ color: 'var(--color-text-muted)' }}>
+          {revealedPasswords[row.id] ? (value || "-") : "\u2022\u2022\u2022\u2022\u2022\u2022"}
         </span>
         {value && (
           <button
             type="button"
-            className="p-1 rounded-lg text-text-secondary hover:bg-hover hover:text-text-primary transition-colors"
+            className="p-1 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
             onClick={(event) => { event.stopPropagation(); togglePassword(row.id); }}
             title={revealedPasswords[row.id] ? "Hide password" : "Show password"}
             aria-label={revealedPasswords[row.id] ? "Hide password" : "Show password"}
@@ -267,7 +267,7 @@ const Teachers = () => {
             Add Teacher
           </Button>
         ) : (
-          <span className="text-sm text-text-secondary">Read-only (admin only)</span>
+          <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Read-only (admin only)</span>
         )}
       </div>
 
@@ -275,7 +275,7 @@ const Teachers = () => {
         <Card.Header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-col sm:flex-row gap-3 flex-1">
             <div className="relative flex-1 max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--color-text-muted)' }} />
               <input
                 type="text"
                 placeholder="Search teachers..."
@@ -284,15 +284,15 @@ const Teachers = () => {
                 className="input pl-10"
               />
             </div>
-            <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)} className="input w-auto min-w-[150px]">
+            <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)} className="select-themed w-auto min-w-[150px]">
               <option value="">All Departments</option>
               {departmentOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
-            <select value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)} className="input w-auto min-w-[150px]">
+            <select value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)} className="select-themed w-auto min-w-[150px]">
               <option value="">All Courses</option>
               {courseOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="input w-auto min-w-[150px]">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="select-themed w-auto min-w-[150px]">
               <option value="">All Status</option>
               {STATUSES.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
             </select>
@@ -335,10 +335,10 @@ const Teachers = () => {
               {courseOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-text-primary mb-2">Assigned Classrooms</label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3">
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Assigned Classrooms</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl p-3" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
                 {roomNumbers.map((roomNumber) => (
-                  <label key={roomNumber} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-text-secondary hover:bg-white/[0.04] cursor-pointer">
+                  <label key={roomNumber} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-[var(--color-bg-secondary)] cursor-pointer" style={{ color: 'var(--color-text-muted)' }}>
                     <input
                       type="checkbox"
                       checked={formData.assignedClassrooms.includes(roomNumber)}
@@ -348,13 +348,13 @@ const Teachers = () => {
                           ? [...previous.assignedClassrooms, roomNumber]
                           : previous.assignedClassrooms.filter((room) => room !== roomNumber),
                       }))}
-                      className="h-4 w-4 accent-primary"
+                      className="h-4 w-4" style={{ accentColor: 'var(--color-accent)' }}
                       disabled={classroomsLoading || !!classroomsError}
                     />
                     <span>{roomNumber}</span>
                   </label>
                 ))}
-                {!roomNumbers.length && <span className="text-sm text-text-tertiary">{classroomsLoading ? 'Loading rooms...' : classroomsError || 'No rooms available'}</span>}
+                {!roomNumbers.length && <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{classroomsLoading ? 'Loading rooms...' : classroomsError || 'No rooms available'}</span>}
               </div>
             </div>
             <select className="select-themed" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
@@ -368,14 +368,10 @@ const Teachers = () => {
       <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Delete Teacher" variant="danger" size="sm"
         footer={<><Button variant="ghost" onClick={() => setDeleteConfirm(null)}>Cancel</Button><Button variant="danger" onClick={confirmDelete}>Delete</Button></>}
       >
-        <p className="text-text-secondary">Delete <strong>{deleteConfirm?.name}</strong> (TCH{String(deleteConfirm?.id).padStart(3, '0')})? This cannot be undone.</p>
+        <p style={{ color: 'var(--color-text-muted)' }}>Delete <strong>{deleteConfirm?.name}</strong> (TCH{String(deleteConfirm?.id).padStart(3, '0')})? This cannot be undone.</p>
       </Modal>
     </div>
   );
 };
 
 export default Teachers;
-
-
-
-

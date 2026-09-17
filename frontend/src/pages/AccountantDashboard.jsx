@@ -11,6 +11,7 @@ import {
   AreaChartBox,
   CHART_PALETTE,
 } from '@/components/charts/Charts';
+import { Card } from '@/components/ui/Card';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -62,10 +63,10 @@ const AccountantDashboard = () => {
 
   const cards = useMemo(
     () => [
-      { title: 'Fee Collection', value: collected, format: fmt, icon: Wallet, iconClass: 'bg-primary/10 text-primary' },
-      { title: 'Pending Fees', value: pending, format: fmt, icon: Clock, iconClass: 'bg-warning/10 text-warning' },
-      { title: 'Total Invoices', value: totalInvoices, icon: FileText, iconClass: 'bg-primary/10 text-primary' },
-      { title: 'Paid Invoices', value: paidInvoices, icon: CheckCircle2, iconClass: 'bg-success/10 text-success' },
+      { title: 'Fee Collection', value: collected, format: fmt, icon: Wallet, iconClass: 'bg-[var(--color-accent-muted)] text-[var(--color-accent)]' },
+      { title: 'Pending Fees', value: pending, format: fmt, icon: Clock, iconClass: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' },
+      { title: 'Total Invoices', value: totalInvoices, icon: FileText, iconClass: 'bg-[var(--color-info)]/10 text-[var(--color-info)]' },
+      { title: 'Paid Invoices', value: paidInvoices, icon: CheckCircle2, iconClass: 'bg-[var(--color-success)]/10 text-[var(--color-success)]' },
     ],
     [collected, pending, totalInvoices, paidInvoices, fmt]
   );
@@ -101,7 +102,7 @@ const AccountantDashboard = () => {
   return (
     <div className="space-y-6">
       {isError && (
-        <div className="alert alert-danger">
+        <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.3)', color: 'var(--color-danger)' }}>
           Couldn't load dashboard data.{' '}
           <Button variant="outline" size="sm" onClick={refetch}>Retry</Button>
         </div>
@@ -149,19 +150,19 @@ const AccountantDashboard = () => {
         />
       </ChartCard>
 
-      <div className="card">
-        <div className="card-header border-b border-border">
-          <h5 className="card-title">Recent Invoices</h5>
+      <Card>
+        <div className="px-6 py-5 border-b" style={{ borderColor: 'var(--color-border)' }}>
+          <h5 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>Recent Invoices</h5>
         </div>
-        <div className="card-body">
+        <div className="p-6">
           {fees.length === 0 ? (
-            <p className="mb-0 text-text-secondary">No invoices found.</p>
+            <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>No invoices found.</p>
           ) : (
-            <ul className="list-group list-group-flush">
+            <ul className="space-y-2">
               {fees.slice(0, 6).map((f) => (
-                <li className="list-group-item d-flex justify-content-between bg-transparent border-border" key={f.id}>
+                <li key={f.id} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
                   <span>{f.student} - {f.course}</span>
-                  <span className={`badge bg-${f.status === 'paid' ? 'success' : f.status === 'overdue' ? 'danger' : 'warning'}`}>
+                  <span className={`badge ${f.status === 'paid' ? 'badge-success' : f.status === 'overdue' ? 'badge-danger' : 'badge-warning'}`}>
                     {f.status}
                   </span>
                 </li>
@@ -169,7 +170,7 @@ const AccountantDashboard = () => {
             </ul>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

@@ -19,8 +19,8 @@ const columns = [
   { key: 'id', header: 'ID', width: '80px', sortable: true },
   { key: 'student', header: 'Student', render: (v, row) => (
     <div>
-      <p className="font-medium text-text-primary">{v}</p>
-      <p className="text-xs text-text-secondary">{row.studentId}</p>
+      <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{v}</p>
+      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{row.studentId}</p>
     </div>
   )},
   { key: 'course', header: 'Course', width: '120px', sortable: true },
@@ -29,7 +29,7 @@ const columns = [
     <Badge variant={statusColors[v]} size="sm">{v.charAt(0).toUpperCase() + v.slice(1)}</Badge>
   )},
   { key: 'time', header: 'Time', width: '100px' },
-  { key: 'notes', header: 'Notes', render: (v) => v || <span className="text-text-tertiary">-</span> },
+  { key: 'notes', header: 'Notes', render: (v) => v || <span style={{ color: 'var(--color-text-muted)' }}>-</span> },
 ];
 
 const Attendance = () => {
@@ -140,70 +140,70 @@ const Attendance = () => {
     <div className="space-y-6">
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(22, 163, 74, 0.1)', color: 'var(--color-success)' }}>
             <CheckCircle className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xl font-bold text-text-primary">{stats.present}</p>
-            <p className="text-[11px] text-text-tertiary">Present</p>
+            <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.present}</p>
+            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Present</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
+        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', color: 'var(--color-danger)' }}>
             <XCircle className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xl font-bold text-text-primary">{stats.absent}</p>
-            <p className="text-[11px] text-text-tertiary">Absent</p>
+            <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.absent}</p>
+            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Absent</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500">
+        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(202, 138, 4, 0.1)', color: 'var(--color-warning)' }}>
             <Clock className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xl font-bold text-text-primary">{stats.late}</p>
-            <p className="text-[11px] text-text-tertiary">Late</p>
+            <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.late}</p>
+            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Late</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(56, 189, 248, 0.1)', color: 'var(--color-info)' }}>
             <Calendar className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xl font-bold text-text-primary">{stats.excused}</p>
-            <p className="text-[11px] text-text-tertiary">Excused</p>
+            <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.excused}</p>
+            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Excused</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-500/10 text-pink-500">
+        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(102, 252, 241, 0.1)', color: 'var(--color-accent)' }}>
             <BarChart3 className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xl font-bold text-text-primary">{stats.rate}%</p>
-            <p className="text-[11px] text-text-tertiary">Rate</p>
+            <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.rate}%</p>
+            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Rate</p>
           </div>
         </div>
       </div>
 
       {/* Table Card */}
-      <div className="rounded-2xl bg-white border border-[var(--color-border)] shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-white/[0.06]">
+      <Card>
+        <Card.Header>
           <div className="relative max-w-sm">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--color-text-muted)' }} />
             <input
               type="text"
               placeholder="Search students or courses..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-10 pl-10 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-violet-500/30 focus:ring-1 focus:ring-violet-500/20 transition-all duration-200"
+              className="input pl-10"
             />
           </div>
-        </div>
-        <div className="p-5 pt-0">
+        </Card.Header>
+        <Card.Content>
           {apiError && (
-            <div className="mt-4 p-3 rounded-xl border border-border bg-background/50 text-sm text-text-secondary">
+            <div className="mt-4 p-3 rounded-xl" style={{ border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-muted)' }}>
               {apiError}
             </div>
           )}
@@ -221,8 +221,8 @@ const Attendance = () => {
             ] : []}
             emptyMessage="No attendance records found"
           />
-        </div>
-      </div>
+        </Card.Content>
+      </Card>
 
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setEditingRecord(null); }} title={editingRecord ? 'Edit Attendance Record' : 'Mark Attendance'} size="md"
         footer={

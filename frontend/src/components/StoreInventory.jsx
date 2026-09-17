@@ -1,9 +1,13 @@
 ﻿import { useMemo, useState } from 'react';
 import { Package, Boxes, Shirt, Apple, BookOpen, AlertTriangle, Plus } from 'lucide-react';
-import {
-  DarkCard, CategoryItem, BarChart, DataTable, AlertBadge,
-  SectionHeader, StatCard, SearchInput, Select, ExportButton, Modal,
-} from '@/components/ui';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Badge } from '@/components/ui/Badge';
+import { Table } from '@/components/ui/Table';
+import { Modal } from '@/components/ui/Modal';
+import { Select } from '@/components/ui/Select';
+import { formatCurrency } from '@/lib/utils';
 
 const CATEGORIES = [
   { id: 'electronics', label: 'Electronics', icon: Package, alert: false, count: 42 },
@@ -31,9 +35,9 @@ const SALES = [
 ];
 
 const STATUS_META = {
-  'In Stock': { cls: 'text-emerald-400', badge: null },
-  'Low Stock': { cls: 'text-amber-400', badge: 'alert' },
-  'Out of Stock': { cls: 'text-red-400', badge: 'danger' },
+  'In Stock': { cls: 'text-[var(--color-success)]', badge: 'success' },
+  'Low Stock': { cls: 'text-[var(--color-warning)]', badge: 'warning' },
+  'Out of Stock': { cls: 'text-[var(--color-danger)]', badge: 'danger' },
 };
 
 const COLUMNS = [
@@ -41,15 +45,11 @@ const COLUMNS = [
   { key: 'name', label: 'Product' },
   {
     key: 'stock', label: 'Stock',
-    render: (r) => <span className={STATUS_META[r.status].cls}>{r.stock}</span>,
+    render: (r) => <span style={{ color: `var(--color-${STATUS_META[r.status].cls.split('-')[1] || 'success'})` }}>{r.stock}</span>,
   },
   {
     key: 'status', label: 'Status',
-    render: (r) => (
-      STATUS_META[r.status].badge
-        ? <AlertBadge variant={STATUS_META[r.status].badge} pulse>{r.status}</AlertBadge>
-        : <span className="text-emerald-400">{r.status}</span>
-    ),
+    render: (r) => <Badge variant={STATUS_META[r.status].badge || 'default'}>{r.status}</Badge>,
   },
 ];
 
@@ -69,37 +69,47 @@ export default function StoreInventory() {
   const exportData = rows.map(({ id, ...rest }) => rest);
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] p-4 text-[var(--color-text)]">
+    <div className="min-h-screen p-4" style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
       <div className="flex flex-col gap-6 md:flex-row">
         {/* Sidebar */}
         <aside className="w-full shrink-0 md:w-72">
-          <DarkCard className="flex flex-col gap-1">
-            <SectionHeader title="Categories" className="mb-2" />
-            <nav className="stagger-fade flex flex-col gap-1" aria-label="Categories">
+          <Card className="flex flex-col gap-1">
+            <div className="mb-2">
+              <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>Categories</h3>
+            </div>
+            <nav className="flex flex-col gap-1" aria-label="Categories">
               {CATEGORIES.map((c) => (
-                <CategoryItem
+                <button
                   key={c.id}
-                  label={c.label}
-                  icon={c.icon}
-                  alert={c.alert}
-                  count={c.count}
-                  selected={active === c.id}
+                  type="button"
                   onClick={() => setActive(c.id)}
-                />
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    active === c.id
+                      ? 'bg-[var(--color-accent-muted)] text-[var(--color-accent)]'
+                      : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)]'
+                  }`}
+                >
+                  {c.icon && <c.icon className="h-4 w-4 shrink-0 opacity-80 hover:opacity-100" />}
+                  <span className="flex-1 text-left">{c.label}</span>
+                  {c.alert && <span className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-semibold uppercase tracking-wide" style={{ backgroundColor: 'rgba(202, 138, 4, 0.2)', color: 'var(--color-warning)' }}>Alert</span>}
+                  {typeof c.count === 'number' && !c.alert && (
+                    <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{c.count}</span>
+                  )}
+                </button>
               ))}
             </nav>
-            <button className="btn btn-primary mt-3 inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600">
-              <Plus className="h-4 w-4" /> Add Category
-            </button>
-          </DarkCard>
+            <Button className="mt-3 w-full" variant="primary">
+              <Plus className="h-4 w-4 mr-2" /> Add Category
+            </Button>
+          </Card>
         </aside>
 
         {/* Main */}
         <main className="flex-1 space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-semibold text-text-primary">Store Inventory</h1>
-              <p className="text-sm text-text-secondary">Live stock & sales overview</p>
+              <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>Store Inventory</h1>
+              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Live stock & sales overview</p>
             </div>
             <div className="flex items-center gap-2">
               <Select
@@ -108,55 +118,90 @@ export default function StoreInventory() {
                 onChange={setCatFilter}
                 options={[{ value: 'all', label: 'All categories' }, ...CATEGORIES.map((c) => ({ value: c.id, label: c.label }))]}
               />
-              <ExportButton data={exportData} fileName="inventory.csv" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <StatCard label="Total SKUs" value="87" icon={Package} trend={12} />
-            <StatCard label="Low / Out" value="3" icon={AlertTriangle} trend={-8} />
-            <StatCard label="Revenue" value="$4.2k" icon={Boxes} trend={5} />
+            <Card className="p-6 text-center">
+              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Total SKUs</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>87</p>
+            </Card>
+            <Card className="p-6 text-center">
+              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Low / Out</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--color-warning)' }}>3</p>
+            </Card>
+            <Card className="p-6 text-center">
+              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Revenue</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--color-success)' }}>$4.2k</p>
+            </Card>
           </div>
 
-          <DarkCard>
-            <SectionHeader
-              title="Weekly Sales"
-              subtitle="Units sold per day"
-              actions={<AlertBadge variant="info">Live</AlertBadge>}
-            />
-            <BarChart data={SALES} height={220} />
-          </DarkCard>
+          <Card>
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>Weekly Sales</h3>
+                <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Units sold per day</p>
+              </div>
+              <Badge variant="info">Live</Badge>
+            </div>
+            <div className="flex items-end gap-3 h-[220px]" style={{ backgroundColor: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-xl)', padding: '1.5rem' }}>
+              {SALES.map((d, i) => (
+                <div key={d.label} className="flex-1 flex flex-col items-center gap-2">
+                  <div className="flex w-full flex-1 items-end">
+                    <div
+                      className="chart-bar w-full rounded-t-sm"
+                      style={{
+                        height: `${(d.value / 720) * 100}%`,
+                        background: 'linear-gradient(to top, var(--color-accent), var(--color-accent-hover))',
+                        opacity: 0.8,
+                        animationDelay: `${i * 50}ms`,
+                      }}
+                      title={`${d.label}: ${d.value}`}
+                    />
+                  </div>
+                  <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{d.label}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
 
-          <DarkCard>
-            <SectionHeader
-              title="Inventory"
-              actions={
-                <SearchInput
-                  className="w-56"
+          <Card>
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>Inventory</h3>
+              </div>
+              <div className="relative flex-1 max-w-xs">
+                <input
+                  type="text"
+                  placeholder="Search products..."
                   value={query}
-                  onChange={setQuery}
-                  onClear={() => setQuery('')}
-                  placeholder="Search products…"
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="input pl-10"
                 />
-              }
+              </div>
+            </div>
+            <Table
+              columns={COLUMNS}
+              data={rows}
+              keyField="id"
+              searchable={false}
+              filterable={false}
+              paginated={false}
+              emptyMessage="No products found"
             />
-            <DataTable columns={COLUMNS} data={rows} animated onRowClick={() => setModal(true)} />
-          </DarkCard>
+          </Card>
         </main>
       </div>
 
-<Modal
+      <Modal
         open={modal}
         onClose={() => setModal(false)}
         title="Product details"
         footer={
-          <button onClick={() => setModal(false)} className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600">
-            Close
-          </button>
+          <Button variant="primary" onClick={() => setModal(false)}>Close</Button>
         }
       >
-        Select a row to inspect product details. This dialog demonstrates the
-        reusable <code className="text-indigo-400">Modal</code> component.
+        Select a row to inspect product details. This dialog demonstrates the reusable Modal component.
       </Modal>
     </div>
   );

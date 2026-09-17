@@ -10,9 +10,9 @@ import { useStudentDashboard } from '@/hooks/useDashboard';
 import { cn } from '@/lib/utils';
 
 const getPercentageClass = (percentage) => {
-  if (percentage >= 90) return 'bg-success/10 text-success';
-  if (percentage >= 75) return 'bg-warning/10 text-warning';
-  return 'bg-danger/10 text-danger';
+  if (percentage >= 90) return 'bg-[var(--color-success)]/10 text-[var(--color-success)]';
+  if (percentage >= 75) return 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]';
+  return 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]';
 };
 
 const columns = [
@@ -22,10 +22,10 @@ const columns = [
   { key: 'total', header: 'Total', width: '100px' },
   { key: 'percentage', header: 'Attendance', render: (v) => (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-2 rounded-full bg-background overflow-hidden">
+      <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
         <div className={cn('h-full rounded-full transition-all duration-500', getPercentageClass(v))} style={{ width: `${v}%` }} />
       </div>
-      <span className="text-sm font-medium text-text-primary w-10 text-right">{v}%</span>
+      <span className="text-sm font-medium w-10 text-right" style={{ color: 'var(--color-text-primary)' }}>{v}%</span>
     </div>
   ), width: '200px' },
   { key: 'status', header: 'Status', render: (v) => (
@@ -81,23 +81,23 @@ const StudentAttendance = () => {
 
   if (dashLoading || recordsLoading) return (
     <div className="flex items-center justify-center py-12">
-      <Loader2 className="w-6 h-6 animate-spin text-primary" />
-      <span className="ml-2 text-text-secondary">Loading attendance...</span>
+      <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--color-accent)' }} />
+      <span className="ml-2" style={{ color: 'var(--color-text-muted)' }}>Loading attendance...</span>
     </div>
   );
 
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-text-secondary mt-1">Track your class attendance and participation</p>
-        {classroom && <p className="text-sm text-text-secondary mt-1">Classroom: <span className="font-medium text-text-primary">{classroom}</span></p>}
+        <p style={{ color: 'var(--color-text-muted)' }}>Track your class attendance and participation</p>
+        {classroom && <p className="text-sm mt-1">Classroom: <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{classroom}</span></p>}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Overall Attendance"
           icon={CalendarCheck}
-          iconClass="bg-primary/10 text-primary"
+          iconClass="bg-[var(--color-accent-muted)] text-[var(--color-accent)]"
           loading={dashLoading}
           value={overallPercentage > 0 ? Math.round(overallPercentage) : 0}
           format={(v) => `${v}%`}
@@ -105,21 +105,21 @@ const StudentAttendance = () => {
         <StatCard
           title="Classes Attended"
           icon={CheckCircle}
-          iconClass="bg-success/10 text-success"
+          iconClass="bg-[var(--color-success)]/10 text-[var(--color-success)]"
           loading={recordsLoading}
           value={totalAttended}
         />
         <StatCard
           title="Total Classes"
           icon={BookOpen}
-          iconClass="bg-info/10 text-info"
+          iconClass="bg-[var(--color-info)]/10 text-[var(--color-info)]"
           loading={recordsLoading}
           value={totalClasses}
         />
         <StatCard
           title="Absences"
           icon={XCircle}
-          iconClass="bg-danger/10 text-danger"
+          iconClass="bg-[var(--color-danger)]/10 text-[var(--color-danger)]"
           loading={recordsLoading}
           value={totalClasses - totalAttended}
         />
@@ -132,8 +132,8 @@ const StudentAttendance = () => {
         </Card.Header>
         <Card.Content className="p-0">
           {courseStats.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-text-secondary">
-              <CalendarCheck className="w-12 h-12 mb-3 text-border" />
+            <div className="flex flex-col items-center justify-center py-12" style={{ color: 'var(--color-text-muted)' }}>
+              <CalendarCheck className="w-12 h-12 mb-3" style={{ color: 'var(--color-border)' }} />
               <p className="text-lg font-medium">No attendance records yet</p>
               <p className="text-sm">Your course attendance will appear here once recorded.</p>
             </div>

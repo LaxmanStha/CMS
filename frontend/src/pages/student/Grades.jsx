@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '@/services/api';
-import Dropdown from '@/components/ui/Dropdown';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Table } from '@/components/ui/Table';
+import { Select } from '@/components/ui/Select';
 
 const StudentGrades = () => {
   const { user } = useAuth();
@@ -37,80 +40,70 @@ const StudentGrades = () => {
     return (total / grades.length / 25).toFixed(2);
   };
 
-  if (loading) return <div className="container-fluid p-4"><div className="alert alert-info">Loading grades...</div></div>;
+  const stats = useMemo(() => [
+    { title: 'Current GPA', value: calculateGPA(), iconClass: 'bg-[var(--color-accent-muted)] text-[var(--color-accent)]' },
+    { title: 'Credits Completed', value: grades.reduce((sum, g) => sum + 3, 0), iconClass: 'bg-[var(--color-success)]/10 text-[var(--color-success)]' },
+    { title: 'Courses This Semester', value: grades.length, iconClass: 'bg-[var(--color-info)]/10 text-[var(--color-info)]' },
+  ], [grades]);
+
+  if (loading) return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-center py-12">
+        <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+        <span className="ml-2" style={{ color: 'var(--color-text-muted)' }}>Loading grades...</span>
+      </div>
+    </div>
+  );
+
+  const columns = [
+    { key: 'course', header: 'Course' },
+    { key: 'code', header: 'Code', width: '100px' },
+    { key: 'midterm', header: 'Midterm', width: '100px', render: (v) => `${v}%` },
+    { key: 'final', header: 'Final', width: '100px', render: (v) => `${v}%` },
+    { key: 'assignment', header: 'Assignments', width: '120px', render: (v) => `${v}%` },
+    { key: 'overall', header: 'Overall', width: '100px', render: (v) => <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{v}%</span> },
+    { key: 'letter', header: 'Letter Grade', width: '120px', render: (v) => <Badge variant="primary" size="sm">{v}</Badge> },
+  ];
 
   return (
-    <div className="container-fluid p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <label className="me-2">Semester:</label>
-          <Dropdown value={semester} onChange={setSemester} options={['Fall 2025', 'Spring 2025', 'Fall 2024']} />
+          <label className="mr-2" style={{ color: 'var(--color-text-muted)' }}>Semester:</label>
+          <Select
+            value={semester}
+            onChange={setSemester}
+            options={['Fall 2025', 'Spring 2025', 'Fall 2024']}
+            className="w-auto min-w-[180px]"
+          />
         </div>
       </div>
-      <div className="row mb-4">
-        <div className="col-md-4">
-          <div className="card bg-primary text-white">
-            <div className="card-body text-center">
-              <h5 className="card-title">Current GPA</h5>
-              <p className="display-3">{calculateGPA()}</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card bg-success text-white">
-            <div className="card-body text-center">
-              <h5 className="card-title">Credits Completed</h5>
-              <p className="display-3">{grades.reduce((sum, g) => sum + 3, 0)}</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card bg-info text-white">
-            <div className="card-body text-center">
-              <h5 className="card-title">Courses This Semester</h5>
-              <p className="display-3">{grades.length}</p>
-            </div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {stats.map((stat, index) => (
+          <Card key={stat.title} className="p-6 text-center" style={{ border: '1px solid var(--color-border)' }}>
+            <p className="text-sm mb-1" style={{ color: 'var(--color-text-muted)' }}>{stat.title}</p>
+            <p className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stat.value}</p>
+          </Card>
+        ))}
       </div>
-      <div className="card">
-        <div className="card-header">
-          <h5 className="card-title mb-0">Grade Details</h5>
-        </div>
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>Course</th>
-                  <th>Code</th>
-                  <th>Midterm</th>
-                  <th>Final</th>
-                  <th>Assignments</th>
-                  <th>Overall</th>
-                  <th>Letter Grade</th>
-                </tr>
-              </thead>
-              <tbody>
-                {grades.map((grade, index) => (
-                  <tr key={index}>
-                    <td>{grade.course}</td>
-                    <td>{grade.code}</td>
-                    <td>{grade.midterm}%</td>
-                    <td>{grade.final}%</td>
-                    <td>{grade.assignment}%</td>
-                    <td className="fw-bold">{grade.overall}%</td>
-                    <td><span className="badge bg-primary">{grade.letter}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      <Card>
+        <Card.Header>
+          <Card.Title>Grade Details</Card.Title>
+        </Card.Header>
+        <Card.Content>
+          <Table
+            columns={columns}
+            data={grades}
+            keyField="course"
+            searchable={false}
+            filterable={false}
+            paginated={false}
+            emptyMessage="No grades available"
+          />
+        </Card.Content>
+      </Card>
     </div>
   );
 };
 
 export default StudentGrades;
-
