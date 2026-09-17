@@ -162,7 +162,7 @@ const Table = memo(({
                     onClick={() => setFilterOpen(filterOpen === col.key ? null : col.key)}
                     className={cn(
                       'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                      'hover:bg-[var(--color-surface)]',
+                      'hover:bg-[var(--color-bg-secondary)]',
                       filters[col.key] ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20' : 'text-[var(--color-text-muted)] border border-[var(--color-border)]'
                     )}
                   >
@@ -180,7 +180,7 @@ const Table = memo(({
                         autoFocus
                       />
                       {col.filterOptions?.map(opt => (
-                        <label key={opt.value} className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--color-surface)] cursor-pointer">
+                        <label key={opt.value} className="flex items-center gap-2 px-3 py-2 hover:bg-[var(--color-bg-secondary)] cursor-pointer">
                           <input
                             type="checkbox"
                             checked={Array.isArray(filters[col.key]) && filters[col.key].includes(opt.value)}
@@ -207,7 +207,7 @@ const Table = memo(({
 
       <div className="table-container overflow-x-auto">
         <table className="table">
-          <thead className={cn('sticky top-0 z-10', stickyHeader && 'bg-[var(--color-surface)]')}>
+          <thead className={cn('sticky top-0 z-10', stickyHeader && 'bg-[var(--color-bg-secondary)]')}>
             <tr>
               {selectable && (
                 <th className="px-4 py-3 w-12">
@@ -242,7 +242,7 @@ const Table = memo(({
                     {sortable && column.sortable !== false && (
                       <button
                         onClick={() => handleSort(column.key)}
-                        className="p-1 rounded-full hover:bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+                        className="p-1 rounded-full hover:bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
                         aria-label={`Sort by ${column.header}`}
                       >
                         {getSortIcon(column.key)}
@@ -286,8 +286,8 @@ const Table = memo(({
                   onClick={() => onRowClick?.(row)}
                   className={cn(
                     'transition-colors',
-                    hoverable && 'hover:bg-[var(--color-surface)]',
-                    striped && rowIndex % 2 === 1 && 'bg-[var(--color-surface)]/50',
+                    hoverable && 'hover:bg-[var(--color-bg-secondary)]',
+                    striped && rowIndex % 2 === 1 && 'bg-[var(--color-bg-secondary)]/50',
                     rowClassName,
                     typeof rowClassName === 'function' ? rowClassName(row) : '',
                     onRowClick && 'cursor-pointer'
@@ -371,7 +371,7 @@ const Table = memo(({
                               'p-2 rounded-full transition-colors',
                               action.variant === 'danger' ? 'text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10' :
                               action.variant === 'primary' ? 'text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10' :
-                              'text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]'
+                              'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)]'
                             )}
                             title={action.label}
                             aria-label={action.label}
@@ -385,7 +385,7 @@ const Table = memo(({
                               e.stopPropagation();
                               actions.onClick(row);
                             }}
-                            className="p-2 rounded-full text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] transition-colors"
+                            className="p-2 rounded-full text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text)] transition-colors"
                             aria-label="More actions"
                           >
                             <MoreHorizontal className="w-5 h-5" />
@@ -423,7 +423,7 @@ const Table = memo(({
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-label="Previous page"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -448,7 +448,7 @@ const Table = memo(({
                       'w-10 h-10 rounded-lg font-medium transition-colors',
                       currentPage === pageNum
                         ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                        : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]'
+                        : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text)]'
                     )}
                     aria-label={`Page ${pageNum}`}
                     aria-current={currentPage === pageNum ? 'page' : undefined}
@@ -461,7 +461,7 @@ const Table = memo(({
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-label="Next page"
             >
               <ChevronRight className="w-5 h-5" />

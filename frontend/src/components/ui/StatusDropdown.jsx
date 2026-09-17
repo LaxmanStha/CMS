@@ -1,18 +1,20 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-/**
- * A status filter that stays visually quiet until the user hovers it:
- *  - No chevron/arrow is shown by default.
- *  - Hovering the control reveals the list of all status options.
- *  - Moving the pointer away hides it again.
- *
- * `options` may be an array of strings or `{ value, label }` objects.
- */
-const StatusDropdown = ({ options = [], value, onChange, placeholder = 'All Status', className }) => {
+const StatusDropdown = ({ options = [], value, onChange, placeholder = 'All Status', className, disabled = false }) => {
   const [open, setOpen] = useState(false);
-  const leaveTimer = useRef(null);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const normalized = options.map((o) =>
     typeof o === 'string'
@@ -21,55 +23,50 @@ const StatusDropdown = ({ options = [], value, onChange, placeholder = 'All Stat
   );
   const selected = normalized.find((o) => o.value === value);
 
-  const handleEnter = () => {
-    if (leaveTimer.current) clearTimeout(leaveTimer.current);
-    setOpen(true);
-  };
-  const handleLeave = () => {
-    leaveTimer.current = setTimeout(() => setOpen(false), 120);
-  };
-
   return (
     <div
       className={cn('relative inline-block', className)}
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
+      ref={dropdownRef}
     >
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="select-themed select-control w-auto min-w-[140px] flex items-center justify-between gap-2 cursor-pointer select-none"
+        onClick={() => !disabled && setOpen((v) => !v)}
+        disabled={disabled}
+        className={cn(
+          'select-themed select-control w-auto min-w-[140px] flex items-center justify-between gap-2 cursor-pointer select-none',
+          disabled && 'opacity-50 cursor-not-allowed'
+        )}
       >
-        <span className={cn('truncate', !selected && 'text-text-secondary')}>{selected ? selected.label : placeholder}</span>
+        <span className={cn('truncate', !selected && 'text-[var(--color-text-muted)]')}>{selected ? selected.label : placeholder}</span>
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1.5 w-full glass rounded-xl shadow-lg border border-border py-1.5 animate-dropdown max-h-64 overflow-auto">
+        <div className="absolute z-50 mt-1.5 w-full bg-[var(--color-bg-elevated)] rounded-xl shadow-lg border border-[var(--color-border)] py-1.5 max-h-64 overflow-auto animate-dropdown">
           <button
             type="button"
-            onClick={() => onChange('')}
+            onClick={() => { onChange(''); setOpen(false); }}
             className={cn(
-              'w-full px-4 py-2 text-left text-sm transition-colors flex items-center justify-between',
-              !value ? 'text-primary font-medium bg-primary/5' : 'text-text-primary hover:bg-hover'
+              'w-full px-4 py-2 text-left text-sm flex items-center justify-between',
+              !value ? 'text-[var(--color-accent)] font-medium bg-[var(--color-accent-muted)]' : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
             )}
           >
             {placeholder}
-            {!value && <Check className="w-4 h-4" />}
+            {!value && <Check className="w-4 h-4 text-[var(--color-accent)]" />}
           </button>
           {normalized.map((o) => (
             <button
               key={o.value}
               type="button"
-              onClick={() => onChange(o.value)}
+              onClick={() => { onChange(o.value); setOpen(false); }}
               className={cn(
-                'w-full px-4 py-2 text-left text-sm transition-colors flex items-center justify-between',
+                'w-full px-4 py-2 text-left text-sm flex items-center justify-between',
                 value === o.value
-                  ? 'text-primary font-medium bg-primary/5'
-                  : 'text-text-primary hover:bg-hover'
+                  ? 'text-[var(--color-accent)] font-medium bg-[var(--color-accent-muted)]'
+                  : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
               )}
             >
               {o.label}
-              {value === o.value && <Check className="w-4 h-4" />}
+              {value === o.value && <Check className="w-4 h-4 text-[var(--color-accent)]" />}
             </button>
           ))}
         </div>

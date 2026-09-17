@@ -226,11 +226,11 @@ const AnimatedSelect = ({
   const triggerClasses = cn(
     'select-themed select-control flex items-center justify-between text-left cursor-pointer',
     'transition-all duration-200 ease-out min-h-[42px] px-3.5 py-2.5 rounded-xl border',
-    'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)]',
-    'hover:border-[var(--color-primary)]/60 hover:shadow-sm',
-    'focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20',
-    isOpen && 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20 shadow-md',
-    disabled && 'cursor-not-allowed opacity-50 bg-[var(--color-surface-2)]/50',
+    'bg-[var(--color-bg-secondary)] border-[var(--color-border)] text-[var(--color-text-primary)]',
+    'hover:border-[var(--color-accent)]/60 hover:shadow-sm',
+    'focus:outline-none focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20',
+    isOpen && 'border-[var(--color-accent)] ring-2 ring-[var(--color-accent)]/20 shadow-md',
+    disabled && 'cursor-not-allowed opacity-50 bg-[var(--color-bg-surface-2)]/50',
     error && 'border-[var(--color-danger)] focus:ring-[var(--color-danger)]/20',
     triggerClassName,
     className
@@ -264,7 +264,7 @@ const AnimatedSelect = ({
                   return (
                     <span
                       key={v}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--color-primary)]/15 text-[var(--color-primary)] text-xs font-medium"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--color-accent-muted)] text-[var(--color-accent)] text-xs font-medium"
                     >
                       {opt ? opt.label : String(v)}
                       <span
@@ -273,7 +273,7 @@ const AnimatedSelect = ({
                           e.stopPropagation();
                           handleSelect(opt || { value: v });
                         }}
-                        className="p-0.5 rounded hover:bg-[var(--color-primary)]/20 cursor-pointer transition-colors"
+                        className="p-0.5 rounded hover:bg-[var(--color-accent-muted)] cursor-pointer transition-colors"
                         tabIndex={-1}
                       >
                         <X className="w-3 h-3" />
@@ -283,7 +283,7 @@ const AnimatedSelect = ({
                 })}
               </div>
             ) : hasValue ? (
-              <span className="truncate font-medium text-sm text-[var(--color-text)]">
+              <span className="truncate font-medium text-sm text-[var(--color-text-primary)]">
                 {selectedOption?.icon && <span className="mr-2 inline-block">{selectedOption.icon}</span>}
                 {displayLabel}
               </span>
@@ -297,7 +297,7 @@ const AnimatedSelect = ({
               <span
                 role="button"
                 onClick={handleClear}
-                className="p-1 rounded-md text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)] transition-colors cursor-pointer"
+                className="p-1 rounded-md text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
                 title="Clear selection"
                 tabIndex={-1}
               >
@@ -306,12 +306,12 @@ const AnimatedSelect = ({
             )}
 
             {loading ? (
-              <Loader2 className="w-4 h-4 text-[var(--color-primary)] animate-spin" />
+              <Loader2 className="w-4 h-4 text-[var(--color-accent)] animate-spin" />
             ) : (
               <ChevronDown
                 className={cn(
                   'w-4 h-4 text-[var(--color-text-muted)] transition-transform duration-200 ease-out',
-                  isOpen && 'rotate-180 text-[var(--color-primary)]'
+                  isOpen && 'rotate-180 text-[var(--color-accent)]'
                 )}
               />
             )}
@@ -331,7 +331,7 @@ const AnimatedSelect = ({
               zIndex: 9999,
             }}
             className={cn(
-              'rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]',
+              'rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)]',
               'shadow-xl shadow-black/30 overflow-hidden flex flex-col',
               'animate-dropdown-enter'
             )}
@@ -339,7 +339,7 @@ const AnimatedSelect = ({
             tabIndex={-1}
           >
             {searchable && (
-              <div className="p-2 border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-10">
+              <div className="p-2 border-b border-[var(--color-border)] bg-[var(--color-bg-elevated)] sticky top-0 z-10">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
                   <input
@@ -350,7 +350,7 @@ const AnimatedSelect = ({
                       setFocusedIndex(0);
                     }}
                     onClick={(e) => e.stopPropagation()}
-                    className="input w-full pl-8 pr-3 py-1.5 rounded-lg text-xs bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none"
+                    className="input w-full pl-8 pr-3 py-1.5 rounded-lg text-xs bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] border border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none"
                     placeholder="Search options..."
                     autoFocus
                   />
@@ -361,7 +361,7 @@ const AnimatedSelect = ({
             <div ref={listRef} className="overflow-y-auto max-h-[240px] py-1.5 scrollbar-thin">
               {loading ? (
                 <div className="flex items-center justify-center gap-2 px-4 py-6 text-sm text-[var(--color-text-muted)]">
-                  <Loader2 className="w-4 h-4 text-[var(--color-primary)] animate-spin" />
+                  <Loader2 className="w-4 h-4 text-[var(--color-accent)] animate-spin" />
                   <span>{loadingText}</span>
                 </div>
               ) : filteredOptions.length === 0 ? (
@@ -390,10 +390,10 @@ const AnimatedSelect = ({
                         'w-full px-3.5 py-2.5 text-left text-sm transition-all duration-150 ease-out',
                         'flex items-center justify-between gap-3 group',
                         isSelected
-                          ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-semibold'
-                          : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]',
-                        isFocused && !isSelected && 'bg-[var(--color-surface-2)] font-medium',
-                        isFocused && isSelected && 'bg-[var(--color-primary)]/20'
+                          ? 'bg-[var(--color-accent-muted)] text-[var(--color-accent)] font-semibold'
+                          : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]',
+                        isFocused && !isSelected && 'bg-[var(--color-bg-secondary)] font-medium',
+                        isFocused && isSelected && 'bg-[var(--color-accent-muted)]'
                       )}
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -402,7 +402,7 @@ const AnimatedSelect = ({
                             className={cn(
                               'w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors',
                               isSelected
-                                ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white'
+                                ? 'bg-[var(--color-accent)] border-[var(--color-accent)] text-white'
                                 : 'border-[var(--color-border)] text-transparent group-hover:border-[var(--color-text-muted)]'
                             )}
                           >
@@ -421,7 +421,7 @@ const AnimatedSelect = ({
                       </div>
 
                       {!multiple && isSelected && option.value !== '' && (
-                        <Check className="w-4 h-4 text-[var(--color-primary)] flex-shrink-0 stroke-[2.5]" />
+                        <Check className="w-4 h-4 text-[var(--color-accent)] flex-shrink-0 stroke-[2.5]" />
                       )}
                     </button>
                   );

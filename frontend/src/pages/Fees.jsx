@@ -59,27 +59,6 @@ const Fees = () => {
     overdue: filteredFees.filter(f => f.status === 'overdue').reduce((sum, f) => sum + (f.amount - f.paid), 0),
   };
 
-  const handleOpenModal = (fee = null) => {
-    if (fee) {
-      setEditingFee(fee);
-      setSelectedInvoice(null);
-      setFormData({
-        studentId: fee.studentId || '',
-        student: fee.student || '',
-        course: fee.course || '',
-        amount: fee.amount || '',
-        semester: fee.semester || '',
-        dueDate: fee.dueDate || '',
-        status: fee.status || 'pending',
-      });
-    } else {
-      setEditingFee(null);
-      setSelectedInvoice(null);
-      setFormData({ studentId: '', student: '', course: '', amount: '', semester: '', dueDate: '', status: 'pending' });
-    }
-    setShowModal(true);
-  };
-
   const submitFee = async () => {
     const payload = {
       studentId: formData.studentId,
@@ -126,14 +105,7 @@ const Fees = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        {isAdmin ? (
-          <Button onClick={() => handleOpenModal()}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Invoice
-          </Button>
-        ) : (
-          <span className="text-sm text-text-secondary bg-white/[0.03] px-3 py-1.5 rounded-lg">Read-only (admin only)</span>
-        )}
+        <span className="text-sm text-text-secondary bg-white/[0.03] px-3 py-1.5 rounded-lg">Read-only (admin only)</span>
       </div>
 
       {/* Stats Grid */}
@@ -224,7 +196,6 @@ const Fees = () => {
             <Button variant="ghost" onClick={() => { setShowModal(false); setEditingFee(null); setSelectedInvoice(null); }}>Close</Button>
             {isAdmin && editingFee && <Button onClick={submitFee}>Update</Button>}
             {isAdmin && selectedInvoice && selectedInvoice.status !== 'paid' && <Button onClick={recordPayment}>Record Payment</Button>}
-            {isAdmin && !editingFee && !selectedInvoice && <Button onClick={submitFee}>Create</Button>}
           </>
         }
       >

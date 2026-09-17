@@ -12,7 +12,7 @@ const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-bg)] font-sans antialiased" data-role={user?.role}>
+    <div className="flex min-h-screen font-sans antialiased" data-role={user?.role} style={{ backgroundColor: 'var(--color-bg-primary)' }}>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex min-w-0 flex-1 flex-col">

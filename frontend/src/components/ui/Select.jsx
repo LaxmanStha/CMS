@@ -116,7 +116,7 @@ const Select = ({
           disabled={disabled}
           className={cn(
             'select-themed select-control flex items-center justify-between text-left',
-            'hover:border-[var(--color-primary)]/50 disabled:cursor-not-allowed disabled:opacity-50',
+            'hover:border-[var(--color-accent)]/50 disabled:cursor-not-allowed disabled:opacity-50',
             error && 'border-[var(--color-danger)]',
             (multiple || clearable || searchable) && 'pr-12',
             className
@@ -132,7 +132,7 @@ const Select = ({
                 {value.map(v => {
                   const option = options.find(o => o.value === v);
                   return option && (
-                    <span key={v} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs">
+                    <span key={v} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--color-accent-muted)] text-[var(--color-accent)] text-xs">
                       {option.label}
                       <span
                         role="button"
@@ -140,7 +140,7 @@ const Select = ({
                           e.stopPropagation();
                           handleSelect(option);
                         }}
-                        className="p-0.5 rounded hover:bg-[var(--color-primary)]/20 cursor-pointer"
+                        className="p-0.5 rounded hover:bg-[var(--color-accent-muted)] cursor-pointer"
                         tabIndex={-1}
                       >
                         <X className="w-3 h-3" />
@@ -150,7 +150,7 @@ const Select = ({
                 })}
               </div>
             ) : displayValue ? (
-              <span className="text-[var(--color-text)]">{displayValue}</span>
+              <span className="text-[var(--color-text-primary)]">{displayValue}</span>
             ) : (
               <span className="text-[var(--color-text-muted)]">{placeholder}</span>
             )}
@@ -170,7 +170,7 @@ const Select = ({
                 <span
                   role="button"
                   onClick={handleClear}
-                  className="p-1 rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-text-muted)] transition-colors cursor-pointer"
+                  className="p-1 rounded-lg hover:bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] transition-colors cursor-pointer"
                   tabIndex={-1}
                 >
                   <X className="w-4 h-4" />
@@ -187,7 +187,7 @@ const Select = ({
         {isOpen && menuPosition && createPortal(
           <div
             ref={menuRef}
-            className="fixed z-[1100] rounded-xl bg-white shadow-lg border border-[var(--color-border)] py-2 overflow-auto"
+            className="fixed z-[1100] rounded-xl bg-[var(--color-bg-elevated)] shadow-lg border border-[var(--color-border)] py-2 overflow-auto"
             style={menuPosition}
           >
             {searchable && (
@@ -219,8 +219,8 @@ const Select = ({
                   className={cn(
                     'w-full px-4 py-3 text-left text-sm transition-colors flex items-center gap-3',
                     value.includes(option.value)
-                      ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
-                      : 'text-[var(--color-text)] hover:bg-[var(--color-surface)]'
+                      ? 'bg-[var(--color-accent-muted)] text-[var(--color-accent)]'
+                      : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
                   )}
                   tabIndex={-1}
                 >
@@ -228,7 +228,7 @@ const Select = ({
                     <div className={cn(
                       'w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors',
                       value.includes(option.value)
-                        ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white'
+                        ? 'bg-[var(--color-accent)] border-[var(--color-accent)] text-white'
                         : 'border-[var(--color-border)] text-transparent'
                     )}>
                       {value.includes(option.value) && (

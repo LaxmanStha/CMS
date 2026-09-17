@@ -10,8 +10,8 @@ export const ROLE_NAV = {
   admin: [
     { to: "/admin", label: "Dashboard" },
     { to: "/classrooms", label: "Classrooms" },
-    { to: "/students", label: "Students" },
-    { to: "/teachers", label: "Teachers" },
+    { to: "/admin/students", label: "Students" },
+    { to: "/admin/teachers", label: "Teachers" },
     { to: "/attendance", label: "Attendance" },
     { to: "/timetable", label: "Timetable" },
     { to: "/fees", label: "Fees" },

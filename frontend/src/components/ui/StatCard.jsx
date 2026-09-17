@@ -7,7 +7,7 @@ const StatCard = memo(({
   title,
   value,
   icon: Icon,
-  iconClass = 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]',
+  iconClass = 'bg-[var(--color-accent-muted)] text-[var(--color-accent)]',
   trend,
   trendUp = true,
   trendLabel,
@@ -16,12 +16,12 @@ const StatCard = memo(({
   loading = false,
   format,
 }) => (
-  <Card className="p-6">
+  <Card className="p-6 hover:shadow-[var(--shadow-card)] transition-shadow duration-200">
     <div className="flex items-start justify-between gap-4">
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-[var(--color-text-muted)]">{title}</p>
         {value !== undefined && (
-          <p className="dashboard-number mt-2 text-3xl font-extrabold leading-tight text-[var(--color-text)]">
+          <p className="dashboard-number mt-2 text-3xl font-extrabold leading-tight text-[var(--color-text-primary)]">
             {loading ? <span className="text-[var(--color-text-muted)]">—</span> : format ? format(value) : value}
           </p>
         )}

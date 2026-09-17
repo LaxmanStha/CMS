@@ -21,6 +21,8 @@ const Button = ({
     danger: 'btn-danger',
     outline: 'btn-outline',
     ghost: 'btn-ghost',
+    success: 'btn-success',
+    warning: 'btn-warning',
   };
 
   const sizes = {
@@ -28,8 +30,8 @@ const Button = ({
     sm: 'btn-sm',
     md: '',
     lg: 'btn-lg',
-    xl: 'px-9 py-4 text-lg gap-3',
-    icon: 'p-2.5 rounded-full',
+    xl: 'btn-xl',
+    icon: 'btn-icon',
   };
 
   return (
@@ -42,7 +44,7 @@ const Button = ({
         variants[variant],
         sizes[size],
         fullWidth && 'w-full',
-        ripple && 'btn-ripple relative overflow-hidden',
+        ripple && 'relative overflow-hidden',
         className
       )}
       {...props}

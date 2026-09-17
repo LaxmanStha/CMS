@@ -5,15 +5,15 @@ const Card = memo(({
   className,
   children,
   hover = false,
+  elevated = false,
   padding = 'p-6',
   border = true,
-  shadow = true,
   ...props
 }) => {
   return (
     <div
       className={cn(
-        'card',
+        elevated ? 'card-elevated' : 'card',
         hover && 'card-hover',
         padding,
         className
@@ -34,7 +34,7 @@ const CardHeader = memo(({ className, children, ...props }) => (
 CardHeader.displayName = 'CardHeader';
 
 const CardTitle = memo(({ className, children, ...props }) => (
-  <h3 className={cn('text-lg font-semibold text-[var(--color-text)]', className)} {...props}>
+  <h3 className={cn('text-lg font-semibold text-[var(--color-text-primary)]', className)} {...props}>
     {children}
   </h3>
 ));
@@ -55,7 +55,7 @@ const CardContent = memo(({ className, children, ...props }) => (
 CardContent.displayName = 'CardContent';
 
 const CardFooter = memo(({ className, children, ...props }) => (
-  <div className={cn('mt-4 pt-4 border-t border-[var(--color-border)] flex items-center gap-3', className)} {...props}>
+  <div className={cn('mt-4 pt-4 border-t flex items-center gap-3', className)} style={{ borderColor: 'var(--color-border)' }} {...props}>
     {children}
   </div>
 ));

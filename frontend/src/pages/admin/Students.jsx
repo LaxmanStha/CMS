@@ -1,288 +1,376 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import api from '@/services/api';
-import { useAuth } from '@/context/AuthContext';
-import { Modal } from '@/components/ui/Modal';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import {
+  Search, UserPlus, Edit, Trash2,
+  Loader2, RefreshCw
+} from 'lucide-react';
+import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Badge } from '@/components/ui/Badge';
+import { Table } from '@/components/ui/Table';
+import { Modal } from '@/components/ui/Modal';
+import { cn, formatDate, getInitials } from '@/lib/utils';
 import { useToast } from '@/context/ToastContext';
+import { useAuth } from '@/context/AuthContext';
+import api from '@/services/api';
 
-const EMPTY_FORM = {
-  name: '',
-  email: '',
-  phone: '',
-  program: '',
-  classroom: '',
-  year: 1,
-  status: 'active',
-  password: '',
-};
+const STATUSES = ['active', 'inactive', 'pending', 'graduated'];
 
-const AdminStudents = () => {
+const Students = () => {
+  const { success, error: showError } = useToast();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
-  const { success, error: showError } = useToast();
+  const showErrorRef = useRef(showError);
+  showErrorRef.current = showError;
   const [students, setStudents] = useState([]);
   const [classrooms, setClassrooms] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [classroomsLoading, setClassroomsLoading] = useState(true);
+  const [classroomsError, setClassroomsError] = useState('');
   const [revealed, setRevealed] = useState({});
-  const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [saving, setSaving] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [classFilter, setClassFilter] = useState('');
 
-  const loadClassrooms = async () => {
-    try {
-      const res = await api.get('/classrooms');
-      setClassrooms(Array.isArray(res.data) ? res.data : []);
-    } catch {
-      setClassrooms([]);
-    }
+  const toggleReveal = (id) => setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const baseColumns = [
+    { key: 'id', header: 'Student ID', width: '100px', render: (val) => val != null ? `STU${String(val).padStart(3, '0')}` : '-' },
+    { key: 'name', header: 'Name', render: (val, row) => (
+      <div className="flex items-center gap-3">
+        <div className="avatar avatar-sm bg-primary/10 text-primary">{getInitials(row.name || '?')}</div>
+        <div>
+          <p className="font-medium text-text-primary">{row.name}</p>
+          <p className="text-xs text-text-secondary">{row.email}</p>
+        </div>
+      </div>
+    )},
+    { key: 'program', header: 'Department', width: '180px', render: (val) => val || '-' },
+    { key: 'phone', header: 'Phone', width: '140px', render: (val) => val || '-' },
+    { key: 'classroom', header: 'Classroom', width: '120px', render: (val, row) => (val || row?.section || '-') },
+    { key: 'year', header: 'Semester', width: '80px', render: (val) => val ? `Semester ${val}` : '-' },
+    { key: 'status', header: 'Status', width: '120px', render: (val) => {
+      const status = val || 'active';
+      return (
+        <Badge variant={status === 'active' ? 'success' : status === 'graduated' ? 'info' : status === 'pending' ? 'warning' : 'default'}>
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </Badge>
+      );
+    }},
+  ];
+
+  const passwordColumn = {
+    key: 'password',
+    header: 'Password',
+    width: '160px',
+    render: (val, row) => (
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-sm">{revealed[row.id] ? (row.password || '—') : '••••••'}</span>
+        {row.password && (
+          <button
+            type="button"
+            className="text-xs text-primary hover:underline"
+            onClick={() => toggleReveal(row.id)}
+          >
+            {revealed[row.id] ? 'Hide' : 'Show'}
+          </button>
+        )}
+      </div>
+    ),
   };
 
-  const loadStudents = async () => {
+  const columns = isAdmin ? [...baseColumns, passwordColumn] : baseColumns;
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [programFilter, setProgramFilter] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [editingStudent, setEditingStudent] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '', program: '', section: '', classroom: '', year: 1, status: 'active' });
+
+  const fetchStudents = useCallback(async () => {
     try {
+      setLoading(true);
+      setFetchError('');
       const res = await api.get('/students');
-      setStudents(res.data || []);
+      setStudents(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      setStudents([]);
+      setFetchError(err.response?.data?.message || err.response?.data || 'Failed to load students');
+      showErrorRef.current('Failed to load students');
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    loadStudents();
-    loadClassrooms();
   }, []);
 
-  const openEditModal = (student) => {
-    setEditing(student);
-    setForm({
-      name: student.name || '',
-      email: student.email || '',
-      phone: student.phone || '',
-      program: student.program || '',
-      classroom: student.classroom || student.section || '',
-      year: student.year || 1,
-      status: student.status || 'active',
-      password: '',
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadClassrooms = async () => {
+      try {
+        setClassroomsLoading(true);
+        setClassroomsError('');
+        const res = await api.get('/classrooms');
+        if (!cancelled) setClassrooms(Array.isArray(res.data) ? res.data : []);
+      } catch {
+        if (!cancelled) {
+          setClassrooms([]);
+          setClassroomsError('Unable to load rooms');
+        }
+      } finally {
+        if (!cancelled) setClassroomsLoading(false);
+      }
+    };
+    loadClassrooms();
+    return () => { cancelled = true; };
+  }, []);
+
+  const programs = useMemo(() => [...new Set(students.map(s => s.program).filter(Boolean))], [students]);
+  const roomNumbers = useMemo(() => (
+    [...new Set(classrooms.map((classroom) => String(classroom.room_number || '').trim()).filter(Boolean))]
+  ), [classrooms]);
+
+  const filteredStudents = useMemo(() => {
+    return students.filter(student => {
+      const matchesSearch = !searchTerm ||
+        student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(student.id).toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = !statusFilter || (student.status || 'active') === statusFilter;
+      const matchesProgram = !programFilter || student.program === programFilter;
+      return matchesSearch && matchesStatus && matchesProgram;
     });
-    setShowModal(true);
-  };
+  }, [students, searchTerm, statusFilter, programFilter]);
 
-  const handleDelete = async (student) => {
-    if (!window.confirm(`Delete student "${student.name}"?`)) return;
-    try {
-      await api.delete(`/students/${student.id}`);
-      success('Student deleted successfully');
-      await loadStudents();
-    } catch (err) {
-      const msg = err?.response?.data?.message;
-      showError(msg || 'Failed to delete student.');
+  const handleOpenModal = (student = null) => {
+    if (student) {
+      setEditingStudent(student);
+      setFormData({
+        name: student.name || '',
+        email: student.email || '',
+        password: '', // never pre-fill password for security
+        phone: student.phone || '',
+        program: student.program || '',
+        section: student.section || '',
+        classroom: student.classroom || '',
+        year: student.year || 1,
+        status: student.status || 'active',
+      });
+    } else {
+      setEditingStudent(null);
+      setFormData({ name: '', email: '', password: '', phone: '', program: '', section: '', classroom: '', year: 1, status: 'active' });
     }
-  };
-
-  const toggleReveal = (id) =>
-    setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
-  const revealAll = () => {
-    const next = {};
-    if (students.some((s) => !revealed[s.id])) students.forEach((s) => (next[s.id] = true));
-    setRevealed(next);
-  };
-
-  const openModal = () => {
-    setEditing(null);
-    setForm(EMPTY_FORM);
     setShowModal(true);
   };
-
-  const closeModal = () => { setShowModal(false); setEditing(null); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.program.trim()) {
-      showError('Please fill in all required fields.');
-      return;
-    }
-    setSaving(true);
     try {
+      setSaving(true);
       const payload = {
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        program: form.program,
-        classroom: form.classroom,
-        year: Number(form.year),
-        status: form.status,
+        name: formData.name,
+        email: formData.email,
+        password: formData.password, // send even if empty; backend handles fallback
+        phone: formData.phone,
+        program: formData.program,
+        section: formData.classroom,
+        classroom: formData.classroom,
+        year: Number(formData.year),
+        status: formData.status,
       };
-      if (form.password) payload.password = form.password;
-      if (editing) {
-        await api.put(`/students/${editing.id}`, payload);
+      if (editingStudent) {
+        await api.put(`/students/${editingStudent.id}`, payload);
         success('Student updated successfully');
       } else {
         await api.post('/students', payload);
-        success('Student added successfully');
+        success('New student added successfully');
       }
       setShowModal(false);
-      setEditing(null);
-      await loadStudents();
+      await fetchStudents();
     } catch (err) {
-      const msg = err?.response?.data?.message;
-      showError(msg || 'Failed to save student.');
+      showError(err.response?.data?.message || err.response?.data || 'Failed to save student');
     } finally {
       setSaving(false);
     }
   };
 
-  const classroomOptions = useMemo(() => {
-    const seen = new Set();
-    return classrooms
-      .filter((c) => {
-        const roomNum = c.room_number || `Room ${c.id}`;
-        if (seen.has(roomNum)) return false;
-        seen.add(roomNum);
-        return true;
-      })
-      .map((c) => ({
-        value: String(c.id),
-        label: `${c.room_number || 'Room ' + c.id} - ${c.name}`,
-      }));
-  }, [classrooms]);
+  const handleDelete = (student) => {
+    setDeleteConfirm(student);
+  };
 
-  const tableClassroomOptions = React.useMemo(() => {
-    const unique = new Set();
-    students.forEach((s) => {
-      const val = s.classroom || s.section || '';
-      if (val) unique.add(val);
-    });
-    return Array.from(unique).map((val) => ({ value: val, label: val }));
-  }, [students]);
-
-  const filteredStudents = React.useMemo(() => {
-    if (!classFilter) return students;
-    return students.filter((s) => (s.classroom || s.section || '') === classFilter);
-  }, [students, classFilter]);
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
+    try {
+      await api.delete(`/students/${deleteConfirm.id}`);
+      success(`${deleteConfirm.name} has been removed`);
+      setDeleteConfirm(null);
+      await fetchStudents();
+    } catch (err) {
+      showError(err.response?.data?.message || err.response?.data || 'Failed to delete student');
+    }
+  };
 
   return (
-    <div className="container-fluid p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <button className="btn btn-primary me-2" onClick={() => {
-    setEditing(null);
-    setForm(EMPTY_FORM);
-    setShowModal(true);
-  }}>Add Student</button>
-          {isAdmin && (
-            <button className="btn btn-outline-secondary" onClick={revealAll}>
-              {students.some((s) => !revealed[s.id]) ? 'Show All Passwords' : 'Hide All Passwords'}
-            </button>
-          )}
-        </div>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {isAdmin ? (
+          <Button onClick={() => handleOpenModal()} className="whitespace-nowrap">
+            <UserPlus className="w-4 h-4 mr-1" />
+            Add Student
+          </Button>
+        ) : (
+          <span className="text-sm text-text-secondary">Read-only (admin only)</span>
+        )}
       </div>
-      <div className="card">
-        <div className="card-header">
-          <div className="d-flex justify-content-between align-items-center">
-            <h5 className="card-title mb-0">Student List</h5>
-            <Select
-              value={classFilter}
-              onChange={setClassFilter}
-              options={[{ value: '', label: 'All Classrooms' }, ...tableClassroomOptions]}
-              placeholder="Filter by classroom"
-              className="w-auto min-w-[180px]"
-            />
-          </div>
-        </div>
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead>
-                 <tr>
-                   <th>ID</th>
-                   <th>Name</th>
-                   <th>Email</th>
-                   <th>Phone</th>
-                   <th>Program</th>
-                   <th>Class Room No</th>
-                   <th>Status</th>
-                   {isAdmin && <th>Password</th>}
-                   <th>Actions</th>
-                 </tr>
-               </thead>
-               <tbody>
-                 {filteredStudents.length === 0 ? (
-                   <tr>
-                      <td colSpan={isAdmin ? 9 : 8} className="text-center text-muted">
-                     {loading ? 'Loading...' : 'No students found.'}
-                   </td>
-                   </tr>
-                 ) : (
-                   filteredStudents.map((s) => (
-                     <tr key={s.id}>
-                       <td>{s.id}</td>
-                       <td>{s.name}</td>
-                        <td>{s.email}</td>
-                        <td>{s.phone || '-'}</td>
-                        <td>{s.program}</td>
-                        <td>{s.classroom || s.section || '-'}</td>
-                       <td><span className={`badge bg-${s.status === 'active' ? 'success' : s.status === 'graduated' ? 'info' : s.status === 'pending' ? 'warning' : 'secondary'}`}>{s.status}</span></td>
-                       {isAdmin && (
-                         <td>
-                           <span className="me-1 font-monospace">{revealed[s.id] ? (s.password || '—') : '••••••'}</span>
-                           <button
-                             className="btn btn-sm btn-outline-secondary"
-                             onClick={() => toggleReveal(s.id)}
-                             disabled={!s.password}
-                           >
-                             {revealed[s.id] ? 'Hide' : 'Show'}
-                           </button>
-                         </td>
-                       )}
-                        <td>
-                          <button className="btn btn-sm btn-outline-primary me-1" onClick={() => openEditModal(s)}>Edit</button>
-                          <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(s)}>Delete</button>
-                        </td>
-                     </tr>
-                   ))
-                 )}
-               </tbody>
-             </table>
-           </div>
-         </div>
-       </div>
 
-      <Modal isOpen={showModal} onClose={() => { setShowModal(false); setEditing(null); }} title={editing ? 'Edit Student' : 'Add Student'} size="lg"
-        footer={<><Button variant="ghost" onClick={() => { setShowModal(false); setEditing(null); }} disabled={saving}>Cancel</Button><Button onClick={handleSubmit} loading={saving}>Save Student</Button></>}
+      <Card>
+        <Card.Header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+<div className="flex flex-col sm:flex-row gap-3 flex-1">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search students..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input pl-10"
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="select-themed w-auto min-w-[140px]"
+              >
+                <option value="">All Statuses</option>
+                {STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+              </select>
+              <select
+                value={programFilter}
+                onChange={(e) => setProgramFilter(e.target.value)}
+                className="select-themed w-auto min-w-[140px]"
+              >
+                <option value="">All Programs</option>
+                {programs.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+          </div>
+        </Card.Header>
+        <Card.Content>
+          {loading ? (
+            <div className="flex items-center justify-center gap-2 py-12 text-text-secondary">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Loading students...
+            </div>
+          ) : fetchError ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+              <p className="text-danger">{fetchError}</p>
+              <Button variant="outline" size="sm" onClick={fetchStudents}>
+                <RefreshCw className="w-4 h-4 mr-1" />
+                Retry
+              </Button>
+            </div>
+          ) : (
+          <Table
+            columns={columns}
+            data={filteredStudents}
+            keyField="id"
+            searchable={false}
+            filterable={false}
+            paginated
+            pageSize={10}
+            rowActions={isAdmin ? [
+              { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: (row) => handleOpenModal(row), variant: 'ghost' },
+              { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: handleDelete, variant: 'danger' },
+            ] : [
+            ]}
+            emptyMessage="No students found matching your criteria"
+          />
+          )}
+        </Card.Content>
+      </Card>
+
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingStudent ? 'Edit Student' : 'Add New Student'}
+        size="lg"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setShowModal(false)} disabled={saving}>Cancel</Button>
+            {isAdmin && (
+              <Button onClick={handleSubmit} loading={saving}>{editingStudent ? 'Update' : 'Create'}</Button>
+            )}
+          </>
+        }
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Full Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Full name" required />
-          <Input label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@example.com" required />
-          <Input label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="e.g. 555-1234" />
-          <Input label="Program" value={form.program} onChange={(e) => setForm({ ...form, program: e.target.value })} placeholder="e.g. BIM" required />
-          <Select
-            label="Classroom"
-            value={form.classroom}
-            onChange={(e) => setForm({ ...form, classroom: e.target.value })}
-            options={classroomOptions}
-            placeholder="Select Classroom"
-          />
-          <Input label="Year" type="number" value={form.year} onChange={(e) => setForm({ ...form, year: parseInt(e.target.value) || 1 })} min={1} max={5} />
-          <select
-            value={form.status}
-            onChange={(e) => setForm({ ...form, status: e.target.value })}
-            className="select-themed"
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="pending">Pending</option>
-            <option value="graduated">Graduated</option>
-          </select>
-          <Input label="Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Set initial password" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input label="Full Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
+            <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} required />
+            <Input label="Password" type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="Login password (optional)" />
+            <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+            <select
+              value={formData.program}
+              onChange={(e) => setFormData({...formData, program: e.target.value})}
+              className="select-themed"
+              required
+            >
+              <option value="">Select Department</option>
+              {programs.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+            <Input label="Semester" type="number" value={formData.year} onChange={(e) => setFormData({...formData, year: parseInt(e.target.value) || 1})} min={1} max={5} required />
+            <label className="block text-sm font-medium text-text-primary">
+              Classroom (Room No)
+              <select
+                value={formData.classroom}
+                onChange={(e) => setFormData({...formData, classroom: e.target.value})}
+                className="select-themed mt-1.5 w-full"
+                disabled={classroomsLoading || !!classroomsError}
+              >
+                <option value="">
+                  {classroomsLoading ? 'Loading rooms...' : classroomsError ? classroomsError : roomNumbers.length ? 'Select Room Number' : 'No rooms available'}
+                </option>
+                {roomNumbers.map((roomNumber) => (
+                  <option key={roomNumber} value={roomNumber}>{roomNumber}</option>
+                ))}
+              </select>
+            </label>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({...formData, status: e.target.value})}
+              className="select-themed"
+              required
+            >
+              {STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+            </select>
+          </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        title="Delete Student"
+        variant="danger"
+        size="sm"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+            <Button variant="danger" onClick={confirmDelete}>Delete</Button>
+          </>
+        }
+      >
+        <p className="text-text-secondary">
+          Are you sure you want to delete <strong>{deleteConfirm?.name}</strong> (STU{String(deleteConfirm?.id).padStart(3, '0')})?
+          This action cannot be undone.
+        </p>
       </Modal>
     </div>
   );
 };
 
-export default AdminStudents;
+export default Students;

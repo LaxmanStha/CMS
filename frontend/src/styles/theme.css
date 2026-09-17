@@ -1,16 +1,54 @@
 :root {
-  --color-bg: #f8fafc;
-  --color-surface: #ffffff;
-  --color-border: #e2e8f0;
-  --color-text: #1e293b;
-  --color-text-muted: #64748b;
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
+  /* Primary background - darkest */
+  --color-bg-primary: #0B0C10;
+  /* Secondary background - slightly lighter */
+  --color-bg-secondary: #101218;
+  /* Card background */
+  --color-bg-card: #14161C;
+  /* Elevated surface */
+  --color-bg-elevated: #1A1D24;
+  /* Surface 2 - slightly lighter than elevated for hover states */
+  --color-bg-surface-2: #1F2230;
+  /* Border color */
+  --color-border: rgba(255,255,255,0.08);
+  /* Border light */
+  --color-border-light: rgba(255,255,255,0.12);
+
+  /* Text colors */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #9CA3AF;
+  --color-text-muted: #6B7280;
+  --color-text-tertiary: #6B7280;
+
+  /* Accent - primary brand color (cyan) */
+  --color-accent: #66FCF1;
+  --color-accent-hover: #4DE8CD;
+  --color-accent-muted: rgba(102, 252, 241, 0.1);
+
+  /* Primary alias */
+  --color-primary: #66FCF1;
+  --color-primary-hover: #4DE8CD;
+
+  /* Semantic colors */
   --color-success: #16a34a;
+  --color-success-hover: #15803d;
   --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
   --color-warning: #ca8a04;
-  --radius: 8px;
-  --radius-lg: 12px;
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --color-warning-hover: #a16207;
+  --color-info: #38bdf8;
+
+  /* Border radius */
+  --radius: 10px;
+  --radius-sm: 8px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+
+  /* Shadows */
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 20px rgba(102, 252, 241, 0.15);
 }
