@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', className, disabled = false }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const hoverTimeoutRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -24,17 +25,31 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
   const list = allOption && !hasAll ? [allOption, ...normalized] : normalized;
   const selected = list.find((o) => o.value === value);
 
+  const handleMouseEnter = () => {
+    if (disabled) return;
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => setOpen(true), 100);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => setOpen(false), 100);
+  };
+
   return (
     <div
       className={cn('relative inline-block', className)}
       ref={dropdownRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <button
         type="button"
-        onClick={() => !disabled && setOpen((v) => !v)}
         disabled={disabled}
         className={cn(
-          'select-themed select-control w-auto min-w-[140px] flex items-center justify-between gap-2 cursor-pointer select-none',
+          'w-auto min-w-[140px] flex items-center gap-2 cursor-pointer select-none px-4 py-3 bg-[var(--color-bg-secondary)] rounded-lg',
+          'border border-[var(--color-border)] text-[var(--color-text-primary)]',
+          'hover:border-[rgba(255,255,255,0.15)] transition-all duration-150',
           disabled && 'opacity-50 cursor-not-allowed'
         )}
       >
