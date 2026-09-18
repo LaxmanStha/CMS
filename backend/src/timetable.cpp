@@ -495,7 +495,7 @@ void SaveTimetableToDatabase(const vector<TimeTableData>& allTimetables, const A
     for (size_t t = 0; t < setup.teachers.size(); ++t) {
         // Calculate total load
         int totalLoad = 0;
-        for (const auto& alloc : setup.teachers[t].allocation) {
+        for (const auto& [[maybe_unused]] alloc : setup.teachers[t].allocation) {
             totalLoad++;
         }
         teacherTotalLoads[t] = totalLoad;
@@ -550,7 +550,7 @@ void SaveTimetableToDatabase(const vector<TimeTableData>& allTimetables, const A
                 
                 // Find teacher ID
                 int64_t teacherId = 0;
-                int teacherIdx = -1;
+                int [[maybe_unused]] teacherIdx = -1;
                 for (size_t t = 0; t < setup.teachers.size(); ++t) {
                     if (setup.teachers[t].name == teacher) {
                         teacherId = teacherIds[t];

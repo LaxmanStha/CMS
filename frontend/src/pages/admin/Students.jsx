@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Table } from '@/components/ui/Table';
 import { Modal } from '@/components/ui/Modal';
+import Dropdown from '@/components/ui/Dropdown';
+import StatusDropdown from '@/components/ui/StatusDropdown';
 import { cn, formatDate, getInitials } from '@/lib/utils';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
@@ -239,22 +241,18 @@ const Students = () => {
               />
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <select
+              <Dropdown
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="select-themed w-auto min-w-[140px]"
-              >
-                <option value="">All Statuses</option>
-                {STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-              </select>
-              <select
+                onChange={setStatusFilter}
+                options={STATUSES.map(s => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1) }))}
+                placeholder="All Statuses"
+              />
+              <Dropdown
                 value={programFilter}
-                onChange={(e) => setProgramFilter(e.target.value)}
-                className="select-themed w-auto min-w-[140px]"
-              >
-                <option value="">All Programs</option>
-                {programs.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
+                onChange={setProgramFilter}
+                options={programs.map(p => ({ value: p, label: p }))}
+                placeholder="All Programs"
+              />
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -314,40 +312,30 @@ const Students = () => {
             <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} required />
             <Input label="Password" type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="Login password (optional)" />
             <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
-            <select
+            <Dropdown
               value={formData.program}
-              onChange={(e) => setFormData({...formData, program: e.target.value})}
-              className="select-themed"
+              onChange={(e) => setFormData({...formData, program: e})}
+              options={programs.map(p => ({ value: p, label: p }))}
+              placeholder="Select Department"
               required
-            >
-              <option value="">Select Department</option>
-              {programs.map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
+            />
             <Input label="Semester" type="number" value={formData.year} onChange={(e) => setFormData({...formData, year: parseInt(e.target.value) || 1})} min={1} max={5} required />
             <label className="block text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
               Classroom (Room No)
-              <select
+              <Dropdown
                 value={formData.classroom}
-                onChange={(e) => setFormData({...formData, classroom: e.target.value})}
-                className="select-themed mt-1.5 w-full"
+                onChange={(e) => setFormData({...formData, classroom: e})}
+                options={roomNumbers.map(roomNumber => ({ value: roomNumber, label: roomNumber }))}
+                placeholder={classroomsLoading ? 'Loading rooms...' : classroomsError ? classroomsError : roomNumbers.length ? 'Select Room Number' : 'No rooms available'}
                 disabled={classroomsLoading || !!classroomsError}
-              >
-                <option value="">
-                  {classroomsLoading ? 'Loading rooms...' : classroomsError ? classroomsError : roomNumbers.length ? 'Select Room Number' : 'No rooms available'}
-                </option>
-                {roomNumbers.map((roomNumber) => (
-                  <option key={roomNumber} value={roomNumber}>{roomNumber}</option>
-                ))}
-              </select>
+              />
             </label>
-            <select
+            <StatusDropdown
               value={formData.status}
-              onChange={(e) => setFormData({...formData, status: e.target.value})}
-              className="select-themed"
+              onChange={(e) => setFormData({...formData, status: e})}
+              options={STATUSES.map(s => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1) }))}
               required
-            >
-              {STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-            </select>
+            />
           </div>
         </form>
       </Modal>
