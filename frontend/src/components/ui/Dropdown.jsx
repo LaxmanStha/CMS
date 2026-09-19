@@ -38,7 +38,7 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
 
   return (
     <div
-      className={cn('relative inline-block', className)}
+      className={cn('relative inline-block w-full', className)}
       ref={dropdownRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -47,7 +47,7 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
         type="button"
         disabled={disabled}
         className={cn(
-          'w-auto min-w-[140px] flex items-center gap-2 cursor-pointer select-none px-4 py-3 bg-[var(--color-bg-secondary)] rounded-lg',
+          'w-full min-w-[140px] flex items-center gap-2 cursor-pointer select-none px-4 py-3 bg-[var(--color-bg-secondary)] rounded-lg',
           'border border-[var(--color-border)] text-[var(--color-text-primary)]',
           'hover:border-[rgba(255,255,255,0.15)] transition-all duration-150',
           disabled && 'opacity-50 cursor-not-allowed'

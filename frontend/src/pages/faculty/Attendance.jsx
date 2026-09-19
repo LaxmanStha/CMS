@@ -3,7 +3,7 @@ import { CalendarCheck, Users, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
+import Dropdown from '@/components/ui/Dropdown';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
@@ -160,21 +160,27 @@ const FacultyAttendance = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-          <Select
-            label="Classroom"
-            value={selectedClassroomId}
-            onChange={setSelectedClassroomId}
-            options={classroomOptions}
-            placeholder={classroomsLoading ? 'Loading rooms...' : classroomsError ? classroomsError : classroomOptions.length ? 'Select Room Number' : 'No rooms available'}
-            disabled={classroomsLoading || !!classroomsError}
-          />
-          <Input
-            label="Date"
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
+        <div className="flex flex-col sm:flex-row gap-2 mb-5">
+          <div className="flex-1 min-w-0">
+            <label className="label">Classroom</label>
+            <Dropdown
+              value={selectedClassroomId}
+              onChange={setSelectedClassroomId}
+              options={classroomOptions}
+              placeholder={classroomsLoading ? 'Loading rooms...' : classroomsError ? classroomsError : classroomOptions.length ? 'Select Room Number' : 'No rooms available'}
+              disabled={classroomsLoading || !!classroomsError}
+              className="w-full"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <Input
+              label="Date"
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="input-date w-full"
+            />
+          </div>
         </div>
 
         {!selectedClassroomId ? (
@@ -212,7 +218,7 @@ const FacultyAttendance = () => {
                         <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{s.id}</div>
                       </td>
                       <td className="px-4 py-2.5">
-                        <Select
+                        <Dropdown
                           value={rosterStatus[String(s.id)] || 'present'}
                           onChange={(val) => setStudentStatus(String(s.id), val)}
                           options={statusOptions}

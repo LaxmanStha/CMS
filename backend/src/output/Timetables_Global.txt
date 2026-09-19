@@ -43,3 +43,58 @@ GLOBAL TEACHER WORKLOAD
   Section nim: 3 periods
   TOTAL: 6 periods
 
+
+================================================================================
+TIMETABLE GENERATION - 1789785834
+================================================================================
+
+SECTION: csit
+Days: Mon, Tue, Wed, Thu, Fri
+Periods: 3
+
+Mon: [1-math] [3-byy] [5-cpp] 
+Tue: [2-as] [4-micro] [1-math] 
+Wed: [3-byy] [5-cpp] [2-as] 
+Thu: [4-micro] [1-math] [3-byy] 
+Fri: [5-cpp] [2-as] [4-micro] 
+
+SECTION: bca
+Days: Mon, Tue, Wed, Thu, Fri
+Periods: 3
+
+Mon: [2-as] [4-micro] [1-math] 
+Tue: [3-byy] [5-cpp] [2-as] 
+Wed: [4-micro] [1-math] [3-byy] 
+Thu: [5-cpp] [2-as] [4-micro] 
+Fri: [1-math] [3-byy] [5-cpp] 
+
+
+================================================================================
+GLOBAL TEACHER WORKLOAD
+================================================================================
+
+1:
+  Section csit: 3 periods
+  Section bca: 3 periods
+  TOTAL: 6 periods
+
+2:
+  Section csit: 3 periods
+  Section bca: 3 periods
+  TOTAL: 6 periods
+
+3:
+  Section csit: 3 periods
+  Section bca: 3 periods
+  TOTAL: 6 periods
+
+4:
+  Section csit: 3 periods
+  Section bca: 3 periods
+  TOTAL: 6 periods
+
+5:
+  Section csit: 3 periods
+  Section bca: 3 periods
+  TOTAL: 6 periods
+

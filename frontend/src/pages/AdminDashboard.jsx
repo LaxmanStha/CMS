@@ -11,6 +11,8 @@ import {
   CHART_PALETTE,
 } from "@/components/charts/Charts";
 import { useToast } from "@/context/ToastContext";
+import { useAuth } from "@/context/AuthContext";
+import { useApiData } from "@/hooks/useApiData";
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -23,12 +25,16 @@ const monthKey = (dateStr) => {
 
 const AdminDashboard = () => {
   const { success } = useToast();
-  const [stats, setStats] = useState({ students: 0, faculty: 0, pending: 0 });
-  const [students, setStudents] = useState([]);
-  const [fees, setFees] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  
+  const { data: students, loading: studentsLoading, error: studentsError } = useApiData('/students');
+  const { data: teachers, loading: teachersLoading, error: teachersError } = useApiData('/teachers');
+  const { data: fees, loading: feesLoading, error: feesError } = useApiData('/fees');
+  const { data: notifications, loading: notificationsLoading } = useApiData('/notifications');
+  
+  const loading = studentsLoading || teachersLoading || feesLoading;
+  const error = studentsError || teachersError || feesError;
 
   // Timetable generation state
   const [generating, setGenerating] = useState(false);
@@ -75,38 +81,20 @@ const AdminDashboard = () => {
     }
   };
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const [s, f, fe, notifs] = await Promise.all([
-          api.get("/students"),
-          api.get("/teachers"),
-          api.get("/fees"),
-          api.get("/notifications"),
-        ]);
-        const studentList = s.data || [];
-        setStudents(studentList);
-        setStats({
-          students: studentList.length,
-          faculty: (f.data || []).length,
-          pending: studentList.filter((st) => st.status === "pending").length,
-        });
-        setFees(fe.data || []);
-        setNotifications(notifs.data || []);
-      } catch (err) {
-        setError("Failed to load dashboard data.");
-      } finally {
-        setLoading(false);
-      }
+  const stats = useMemo(() => {
+    const studentList = students || [];
+    const teacherList = teachers || [];
+    return {
+      students: studentList.length,
+      faculty: teacherList.length,
+      pending: studentList.filter((st) => st.status === "pending").length,
     };
-    load();
-  }, []);
+  }, [students, teachers]);
 
   const revenueByMonth = useMemo(() => {
+    const feeList = fees || [];
     const buckets = {};
-    fees.forEach((fee) => {
+    feeList.forEach((fee) => {
       const k = monthKey(fee.paidDate);
       if (!k) return;
       buckets[k] = (buckets[k] || 0) + (Number(fee.paid) || 0);
@@ -120,8 +108,9 @@ const AdminDashboard = () => {
   }, [fees]);
 
   const studentsByProgram = useMemo(() => {
+    const studentList = students || [];
     const buckets = {};
-    students.forEach((s) => {
+    studentList.forEach((s) => {
       const key = s.program || "Unspecified";
       buckets[key] = (buckets[key] || 0) + 1;
     });
@@ -140,7 +129,7 @@ const AdminDashboard = () => {
   );
 
   const recentNotifications = useMemo(
-    () => notifications.slice(0, 5),
+    () => (notifications || []).slice(0, 5),
     [notifications]
   );
 
@@ -221,14 +210,14 @@ const AdminDashboard = () => {
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h5 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>System Notifications</h5>
-          {notifications.length > 0 && (
+          {notifications && notifications.length > 0 && (
             <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(22, 163, 74, 0.15)', color: 'var(--color-success)' }}>
               {notifications.length}
             </span>
           )}
         </div>
         <div>
-          {notifications.length === 0 ? (
+          {notifications && notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
                 <Calendar className="h-6 w-6" style={{ color: 'var(--color-text-muted)' }} />
