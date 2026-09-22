@@ -4,8 +4,8 @@ import api from '@/services/api';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import Dropdown from '@/components/ui/Dropdown';
+import { Search } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 const AccountantDues = () => {
@@ -106,12 +106,16 @@ const AccountantDues = () => {
         </Card>
       </div>
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <Input
-          placeholder="Search students..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          className="flex-1"
-        />
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--color-text-muted)' }} />
+          <input
+            type="text"
+            placeholder="Search students..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="input pl-10"
+          />
+        </div>
         <Dropdown
           value={filterStatus}
           onChange={setFilterStatus}

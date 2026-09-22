@@ -2,11 +2,10 @@
 import { Package, Boxes, Shirt, Apple, BookOpen, AlertTriangle, Plus } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Table } from '@/components/ui/Table';
 import { Modal } from '@/components/ui/Modal';
-import { Select } from '@/components/ui/Select';
+import Dropdown from '@/components/ui/Dropdown';
 import { formatCurrency } from '@/lib/utils';
 
 const CATEGORIES = [
@@ -112,7 +111,7 @@ export default function StoreInventory() {
               <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Live stock & sales overview</p>
             </div>
             <div className="flex items-center gap-2">
-              <Select
+              <Dropdown
                 className="w-44"
                 value={catFilter}
                 onChange={setCatFilter}

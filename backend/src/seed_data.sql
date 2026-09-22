@@ -26,6 +26,12 @@ INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
   VALUES (24, 'Prof. David Miller', 'miller@college.edu', 'Teacher', 'TCH-024');
 INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
   VALUES (25, 'Dr. Amanda Wilson', 'wilson@college.edu', 'Teacher', 'TCH-025');
+INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
+  VALUES (50, 'Dr. Priya Sharma', 'priya.sharma@college.edu', 'Teacher', 'TCH-050');
+INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
+  VALUES (51, 'Prof. Daniel Lee', 'daniel.lee@college.edu', 'Teacher', 'TCH-051');
+INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
+  VALUES (52, 'Dr. Grace Thompson', 'grace.thompson@college.edu', 'Teacher', 'TCH-052');
 
 -- Student (login user)
 INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
@@ -120,6 +126,12 @@ INSERT OR IGNORE INTO Users (id, email, password, role, name)
   VALUES (24, 'miller@college.edu', 'password123', 'faculty', 'Prof. David Miller');
 INSERT OR IGNORE INTO Users (id, email, password, role, name)
   VALUES (25, 'wilson@college.edu', 'password123', 'faculty', 'Dr. Amanda Wilson');
+INSERT OR IGNORE INTO Users (id, email, password, role, name)
+  VALUES (50, 'priya.sharma@college.edu', 'password123', 'faculty', 'Dr. Priya Sharma');
+INSERT OR IGNORE INTO Users (id, email, password, role, name)
+  VALUES (51, 'daniel.lee@college.edu', 'password123', 'faculty', 'Prof. Daniel Lee');
+INSERT OR IGNORE INTO Users (id, email, password, role, name)
+  VALUES (52, 'grace.thompson@college.edu', 'password123', 'faculty', 'Dr. Grace Thompson');
 
 
 -- ============================================================
@@ -164,6 +176,12 @@ INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, a
   VALUES (24, 'CSIT', '555-0124', 'miller@college.edu', '2022-09-10', 'active', 'Room 504', 'CS301');
 INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
   VALUES (25, 'BCA', '555-0125', 'wilson@college.edu', '2023-02-28', 'active', 'Room 505', 'STAT101');
+INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
+  VALUES (50, 'CSIT', '555-0150', 'priya.sharma@college.edu', '2021-08-16', 'active', 'Room 506', 'CS201');
+INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
+  VALUES (51, 'BCA', '555-0151', 'daniel.lee@college.edu', '2020-01-20', 'active', 'Room 507', 'MATH101');
+INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, assignedClassroom, assignedCourse)
+  VALUES (52, 'BIM', '555-0152', 'grace.thompson@college.edu', '2022-08-22', 'active', 'Room 508', 'BUS201');
 
 -- ============================================================
 -- Classrooms (linked to teachers)

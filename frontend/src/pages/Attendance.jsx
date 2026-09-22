@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Table } from '@/components/ui/Table';
 import { Modal, ConfirmDialog } from '@/components/ui/Modal';
-import { Select } from '@/components/ui/Select';
+import Dropdown from '@/components/ui/Dropdown';
 import { cn, formatDate } from '@/lib/utils';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
@@ -234,14 +234,14 @@ const Attendance = () => {
       >
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Select
+            <Dropdown
               label="Student"
               value={formData.studentId}
               onChange={(val) => setFormData({ ...formData, studentId: val })}
               options={studentOptions}
               placeholder="Select Student"
             />
-            <Select
+            <Dropdown
               label="Course"
               value={formData.course}
               onChange={(val) => setFormData({ ...formData, course: val })}
@@ -249,7 +249,7 @@ const Attendance = () => {
               placeholder="Select Course"
             />
             <Input label="Date" type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
-            <Select
+            <Dropdown
               label="Status"
               value={formData.status}
               onChange={(val) => setFormData({ ...formData, status: val })}

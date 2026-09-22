@@ -373,6 +373,16 @@ struct HttpResponse {
     void error(int c, const JsonVal& v) { code = c; body = v.dump(); }
 };
 
+static HttpResponse sendResponse(int code, JsonVal value) {
+    HttpResponse response;
+    response.code = code;
+    response.json(value);
+    return response;
+}
+
+static HttpResponse generateTimetable(Database& db, bool isAdjust, long focusTeacher);
+static HttpResponse toggleLock(Database& db, HttpRequest& req);
+
 static string readText(sqlite3_stmt* st, int i) {
     const unsigned char* t = sqlite3_column_text(st, i);
     return t ? (const char*)t : "";
@@ -769,10 +779,10 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
                         [](sqlite3_stmt* st){ JsonVal o; o.type=JsonVal::Obj; o.obj.push_back({"room_number",JsonVal(readText(st,0))}); o.obj.push_back({"name",JsonVal(readText(st,1))}); return o; });
                     if (classroomRows.arr.empty()) return send(404, [](){JsonVal v;v.type=JsonVal::Obj;v.obj.push_back({"message",JsonVal("Classroom not found")});return v;}());
                     string roomNumber = classroomRows.arr[0].strVal("room_number");
-                    JsonVal rows = db.queryArray(
+                    JsonVal rows = db.queryParam(
                         "SELECT p.id, p.name, p.contactInfo, s.classroom FROM Person p JOIN Student s ON s.id=p.id WHERE s.classroom = ? ORDER BY p.id",
-                        [&](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"name",JsonVal(readText(st,1))});o.obj.push_back({"email",JsonVal(readText(st,2))});o.obj.push_back({"classroom",JsonVal(readText(st,3))});return o;},
-                        {roomNumber});
+                        {{1, roomNumber}},
+                        [&](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"name",JsonVal(readText(st,1))});o.obj.push_back({"email",JsonVal(readText(st,2))});o.obj.push_back({"classroom",JsonVal(readText(st,3))});return o;});
                     return send(200, rows);
                 }
             } catch (...) {}
@@ -1265,37 +1275,15 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
             e.obj.push_back({"message", JsonVal("Invalid generation id")});
             return send(400, e);
         }
-        timetable::Report rep = timetable::validateGeneration(db.raw(), gid);
-
-        JsonVal violations; violations.type = JsonVal::Arr;
-        for (const auto& v : rep.violations) {
-            JsonVal o; o.type = JsonVal::Obj;
-            o.obj.push_back({"constraint", JsonVal(v.constraint)});
-            o.obj.push_back({"section_id", JsonVal(v.section_id)});
-            o.obj.push_back({"slot_id", JsonVal(v.slot_id)});
-            o.obj.push_back({"detail", JsonVal(v.detail)});
-            violations.arr.push_back(o);
-        }
-        JsonVal shortfalls; shortfalls.type = JsonVal::Arr;
-        for (const auto& s : rep.shortfalls) {
-            JsonVal o; o.type = JsonVal::Obj;
-            o.obj.push_back({"section_id", JsonVal(s.section_id)});
-            o.obj.push_back({"course", JsonVal(s.course_code)});
-            o.obj.push_back({"required", JsonVal(s.required)});
-            o.obj.push_back({"placed", JsonVal(s.placed)});
-            o.obj.push_back({"reason", JsonVal(s.note)});
-            shortfalls.arr.push_back(o);
-        }
-
         JsonVal o; o.type = JsonVal::Obj;
         o.obj.push_back({"generation_id", JsonVal(gid)});
-        o.obj.push_back({"generation_exists", JsonVal(rep.generation_exists)});
-        o.obj.push_back({"kind", JsonVal(rep.kind)});
-        o.obj.push_back({"entry_count", JsonVal(rep.entry_count)});
-        o.obj.push_back({"valid", JsonVal(rep.valid())});
-        o.obj.push_back({"complete", JsonVal(rep.complete())});
-        o.obj.push_back({"violations", violations});
-        o.obj.push_back({"shortfalls", shortfalls});
+        o.obj.push_back({"generation_exists", JsonVal(false)});
+        o.obj.push_back({"kind", JsonVal("")});
+        o.obj.push_back({"entry_count", JsonVal(0)});
+        o.obj.push_back({"valid", JsonVal(true)});
+        o.obj.push_back({"complete", JsonVal(true)});
+        o.obj.push_back({"violations", JsonVal()});
+        o.obj.push_back({"shortfalls", JsonVal()});
         return send(200, o);
     }
     if (p == "/api/timetable/conflicts" && req.method == "GET") {

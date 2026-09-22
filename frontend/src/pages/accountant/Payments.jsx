@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Table } from '@/components/ui/Table';
 import Dropdown from '@/components/ui/Dropdown';
+import { Search } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
 const AccountantPayments = () => {
@@ -116,12 +117,16 @@ const AccountantPayments = () => {
         </Card>
       </div>
       <div className="flex flex-col sm:flex-row gap-2 mb-4">
-        <Input
-          placeholder="Search payments..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          className="flex-1"
-        />
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--color-text-muted)' }} />
+          <input
+            type="text"
+            placeholder="Search payments..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="input pl-10"
+          />
+        </div>
         <Input
           type="date"
           placeholder="Filter by date"

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '@/services/api';
 import { Card } from '@/components/ui/Card';
-import { Select } from '@/components/ui/Select';
+import Dropdown from '@/components/ui/Dropdown';
 import { cn } from '@/lib/utils';
 
 const StudentTimetable = () => {
@@ -67,7 +67,7 @@ const StudentTimetable = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <Select
+          <Dropdown
             value={week}
             onChange={setWeek}
             options={weekOptions}

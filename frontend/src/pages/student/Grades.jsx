@@ -4,7 +4,7 @@ import api from '@/services/api';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Table } from '@/components/ui/Table';
-import { Select } from '@/components/ui/Select';
+import Dropdown from '@/components/ui/Dropdown';
 
 const StudentGrades = () => {
   const { user } = useAuth();
@@ -70,10 +70,10 @@ const StudentGrades = () => {
       <div className="flex items-center justify-between">
         <div>
           <label className="mr-2" style={{ color: 'var(--color-text-muted)' }}>Semester:</label>
-          <Select
+          <Dropdown
             value={semester}
             onChange={setSemester}
-            options={['Fall 2025', 'Spring 2025', 'Fall 2024']}
+            options={['Fall 2025', 'Spring 2025', 'Fall 2024'].map(s => ({ value: s, label: s }))}
             className="w-auto min-w-[180px]"
           />
         </div>
