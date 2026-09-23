@@ -13,7 +13,9 @@ const StatusDropdown = ({ options = [], value, onChange, placeholder = 'All Stat
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      const clickedInsideDropdown = dropdownRef.current && dropdownRef.current.contains(event.target);
+      const clickedInsideMenu = menuRef.current && menuRef.current.contains(event.target);
+      if (!clickedInsideDropdown && !clickedInsideMenu) {
         setOpen(false);
       }
     };
@@ -70,6 +72,11 @@ const StatusDropdown = ({ options = [], value, onChange, placeholder = 'All Stat
     hoverTimeoutRef.current = setTimeout(() => setOpen(false), 100);
   };
 
+  const handleItemClick = (itemValue) => {
+    onChange(itemValue);
+    setOpen(false);
+  };
+
   const dropdownMenu = open && (
     createPortal(
       <div
@@ -85,7 +92,7 @@ const StatusDropdown = ({ options = [], value, onChange, placeholder = 'All Stat
       >
         <button
           type="button"
-          onClick={() => { onChange(''); setOpen(false); }}
+          onClick={() => handleItemClick('')}
           className={cn(
             'w-full px-4 py-2 text-left text-sm flex items-center justify-between',
             !value ? 'text-[var(--color-accent)] font-medium bg-[var(--color-accent-muted)]' : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
@@ -98,7 +105,7 @@ const StatusDropdown = ({ options = [], value, onChange, placeholder = 'All Stat
           <button
             key={o.value}
             type="button"
-            onClick={() => { onChange(o.value); setOpen(false); }}
+            onClick={() => handleItemClick(o.value)}
             className={cn(
               'w-full px-4 py-2 text-left text-sm flex items-center justify-between',
               value === o.value

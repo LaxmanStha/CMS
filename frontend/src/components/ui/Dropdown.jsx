@@ -13,7 +13,9 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      const clickedInsideDropdown = dropdownRef.current && dropdownRef.current.contains(event.target);
+      const clickedInsideMenu = menuRef.current && menuRef.current.contains(event.target);
+      if (!clickedInsideDropdown && !clickedInsideMenu) {
         setOpen(false);
       }
     };
@@ -71,6 +73,11 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
     hoverTimeoutRef.current = setTimeout(() => setOpen(false), 100);
   };
 
+  const handleItemClick = (itemValue) => {
+    onChange(itemValue);
+    setOpen(false);
+  };
+
   const dropdownMenu = open && (
     createPortal(
       <div
@@ -88,7 +95,7 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
           <button
             key={o.value}
             type="button"
-            onClick={() => { onChange(o.value); setOpen(false); }}
+            onClick={() => handleItemClick(o.value)}
             className={cn(
               'w-full px-4 py-2 text-left text-sm transition-colors flex items-center justify-between',
               value === o.value
