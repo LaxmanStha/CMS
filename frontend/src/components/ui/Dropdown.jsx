@@ -1,11 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { createPortal } from 'react-dom';
 
 const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', className, disabled = false }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const menuRef = useRef(null);
+  const buttonRef = useRef(null);
   const hoverTimeoutRef = useRef(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 });
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -25,21 +29,81 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
   const list = allOption && !hasAll ? [allOption, ...normalized] : normalized;
   const selected = list.find((o) => o.value === value);
 
+  const updateMenuPosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  };
+
   const handleMouseEnter = () => {
     if (disabled) return;
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    hoverTimeoutRef.current = setTimeout(() => setOpen(true), 100);
+    hoverTimeoutRef.current = setTimeout(() => {
+      updateMenuPosition();
+      setOpen(true);
+    }, 100);
   };
 
   const handleMouseLeave = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    hoverTimeoutRef.current = setTimeout(() => setOpen(false), 100);
+    hoverTimeoutRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 100);
   };
 
   const handleClick = () => {
     if (disabled) return;
+    updateMenuPosition();
     setOpen(prev => !prev);
   };
+
+  const handleMenuMouseEnter = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+  };
+
+  const handleMenuMouseLeave = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => setOpen(false), 100);
+  };
+
+  const dropdownMenu = open && (
+    createPortal(
+      <div
+        ref={menuRef}
+        className="fixed z-[9999] bg-[var(--color-bg-elevated)] rounded-xl shadow-lg border border-[var(--color-border)] py-1.5 max-h-64 overflow-auto animate-dropdown"
+        style={{
+          top: menuPosition.top,
+          left: menuPosition.left,
+          minWidth: menuPosition.width,
+        }}
+        onMouseEnter={handleMenuMouseEnter}
+        onMouseLeave={handleMenuMouseLeave}
+      >
+        {list.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => { onChange(o.value); setOpen(false); }}
+            className={cn(
+              'w-full px-4 py-2 text-left text-sm transition-colors flex items-center justify-between',
+              value === o.value
+                ? 'text-[var(--color-accent)] font-medium bg-[var(--color-accent-muted)]'
+                : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
+            )}
+          >
+            {o.label}
+            {value === o.value && <Check className="w-4 h-4 text-[var(--color-accent)]" />}
+          </button>
+        ))}
+      </div>,
+      document.body
+    )
+  );
 
   return (
     <div
@@ -49,6 +113,7 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
       onMouseLeave={handleMouseLeave}
     >
       <button
+        ref={buttonRef}
         type="button"
         disabled={disabled}
         onClick={handleClick}
@@ -62,26 +127,7 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
         <span className={cn('truncate', !selected && 'text-[var(--color-text-muted)]')}>{selected ? selected.label : placeholder}</span>
       </button>
 
-      {open && (
-        <div className="absolute z-50 mt-1.5 w-full bg-[var(--color-bg-elevated)] rounded-xl shadow-lg border border-[var(--color-border)] py-1.5 max-h-64 overflow-auto animate-dropdown">
-          {list.map((o) => (
-            <button
-              key={o.value}
-              type="button"
-              onClick={() => { onChange(o.value); setOpen(false); }}
-              className={cn(
-                'w-full px-4 py-2 text-left text-sm transition-colors flex items-center justify-between',
-                value === o.value
-                  ? 'text-[var(--color-accent)] font-medium bg-[var(--color-accent-muted)]'
-                  : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
-              )}
-            >
-              {o.label}
-              {value === o.value && <Check className="w-4 h-4 text-[var(--color-accent)]" />}
-            </button>
-          ))}
-        </div>
-      )}
+      {dropdownMenu}
     </div>
   );
 };
