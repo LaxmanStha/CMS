@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { CalendarCheck, BookOpen, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Table } from '@/components/ui/Table';
@@ -96,30 +95,22 @@ const StudentAttendance = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Overall Attendance"
-          icon={CalendarCheck}
-          iconClass="bg-[var(--color-accent-muted)] text-[var(--color-accent)]"
           loading={dashLoading}
           value={overallPercentage > 0 ? Math.round(overallPercentage) : 0}
           format={(v) => `${v}%`}
         />
         <StatCard
           title="Classes Attended"
-          icon={CheckCircle}
-          iconClass="bg-[var(--color-success)]/10 text-[var(--color-success)]"
           loading={recordsLoading}
           value={totalAttended}
         />
         <StatCard
           title="Total Classes"
-          icon={BookOpen}
-          iconClass="bg-[var(--color-info)]/10 text-[var(--color-info)]"
           loading={recordsLoading}
           value={totalClasses}
         />
         <StatCard
           title="Absences"
-          icon={XCircle}
-          iconClass="bg-[var(--color-danger)]/10 text-[var(--color-danger)]"
           loading={recordsLoading}
           value={totalClasses - totalAttended}
         />

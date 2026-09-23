@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Search, Edit, Trash2, Building2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -132,9 +132,6 @@ const AdminClassrooms = () => {
         {/* Stats Summary - Side */}
         <div className="lg:col-span-1">
           <Card className="p-4 flex items-center gap-4 sticky top-24" style={{ height: 'fit-content' }}>
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(22, 163, 74, 0.1)', color: 'var(--color-success)' }}>
-              <Building2 className="h-5 w-5" />
-            </div>
             <div>
               <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.total}</p>
               <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Total Classrooms</p>

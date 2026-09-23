@@ -16,8 +16,6 @@ import {
   Bell,
   Menu,
   X,
-  TrendingUp,
-  TrendingDown,
   Plus,
 } from "lucide-react";
 
@@ -75,14 +73,12 @@ const KPIS = [
 ];
 
 function KpiCard({ kpi }) {
-  const DeltaIcon = kpi.up ? TrendingUp : TrendingDown;
   const deltaColor = kpi.good ? "text-emerald-500" : "text-amber-400";
   return (
     <div className="rounded-2xl p-6 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-600/50 hover:shadow-lg hover:-translate-y-0.5 transition-all">
       <div className="text-xs font-semibold uppercase tracking-[0.05em] text-slate-400">{kpi.label}</div>
       <div className="text-[32px] font-bold text-white mt-2">{kpi.value}</div>
       <div className="mt-2 flex items-center gap-1">
-        <DeltaIcon size={14} className={deltaColor} />
         <span className={`text-xs font-medium ${deltaColor}`}>{kpi.pct}</span>
         {kpi.note && <span className="text-xs text-slate-500">{kpi.note}</span>}
       </div>

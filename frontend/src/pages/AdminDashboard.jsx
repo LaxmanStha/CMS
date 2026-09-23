@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { Users, GraduationCap, Clock, TrendingUp, BookOpen, Calendar, Award, UserPlus, RotateCcw, RefreshCw, AlertTriangle, Grid, Loader2 } from "lucide-react";
+import { Calendar, UserPlus, RotateCcw, RefreshCw, AlertTriangle, Grid, Loader2 } from "lucide-react";
 import api from "@/services/api";
 import StatCard from "@/components/ui/StatCard";
 import { Button } from "@/components/ui/Button";
@@ -170,8 +170,6 @@ const AdminDashboard = () => {
             title="Total Students"
             value={loading ? 0 : stats.students}
             loading={loading}
-            icon={Users}
-            iconClass="bg-[var(--color-accent-muted)] text-[var(--color-accent)]"
             format={formatNumber}
             trend="+12%"
             trendUp={true}
@@ -180,8 +178,6 @@ const AdminDashboard = () => {
             title="Total Teachers"
             value={loading ? 0 : stats.faculty}
             loading={loading}
-            icon={GraduationCap}
-            iconClass="bg-[var(--color-info)]/10 text-[var(--color-info)]"
             format={formatNumber}
             trend="+5%"
             trendUp={true}
@@ -190,8 +186,6 @@ const AdminDashboard = () => {
             title="Pending Applications"
             value={loading ? 0 : stats.pending}
             loading={loading}
-            icon={Clock}
-            iconClass="bg-[var(--color-warning)]/10 text-[var(--color-warning)]"
             format={formatNumber}
             trend="-8%"
             trendUp={false}
@@ -220,7 +214,6 @@ const AdminDashboard = () => {
           {notifications && notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
-                <Calendar className="h-6 w-6" style={{ color: 'var(--color-text-muted)' }} />
               </div>
               <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>No notifications at this time</p>
             </div>
@@ -229,7 +222,6 @@ const AdminDashboard = () => {
               {recentNotifications.map((notif) => (
                 <li key={notif.id} className="flex items-start gap-3 p-3 rounded-xl transition-colors hover:bg-[var(--color-bg-secondary)]" style={{ border: '1px solid var(--color-border)' }}>
                   <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: 'rgba(22, 163, 74, 0.1)', color: 'var(--color-success)' }}>
-                    <TrendingUp className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{notif.title || notif.message || JSON.stringify(notif)}</p>

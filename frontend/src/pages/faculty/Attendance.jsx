@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { CalendarCheck, Users, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -146,9 +146,6 @@ const FacultyAttendance = () => {
     <div className="space-y-6">
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2.5 rounded-xl" style={{ backgroundColor: 'var(--color-accent-muted)', color: 'var(--color-accent)' }}>
-            <Users className="w-5 h-5" />
-          </div>
           <div>
             <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>Session</h3>
             <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
@@ -185,7 +182,6 @@ const FacultyAttendance = () => {
 
         {!selectedClassroomId ? (
           <div className="flex flex-col items-center justify-center py-12" style={{ color: 'var(--color-text-muted)' }}>
-            <Users className="w-10 h-10 mb-3" style={{ opacity: 0.5 }} />
             <p className="text-sm font-medium">Select a classroom to view students</p>
             <p className="text-xs mt-1">You need to choose a classroom before marking attendance.</p>
           </div>

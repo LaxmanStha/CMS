@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, Check, CheckCheck, Trash2, X } from 'lucide-react';
+import { Check, CheckCheck, Trash2, X } from 'lucide-react';
 import { useNotificationsContext } from '@/context/NotificationsContext';
 import { cn, relativeTime } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
@@ -67,7 +67,6 @@ export default function Notifications() {
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center py-20" style={{ color: 'var(--color-text-muted)' }}>
-          <Bell className="w-12 h-12 mb-3" style={{ color: 'var(--color-border)' }} />
           <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>No notifications</p>
           <p className="text-sm mt-1">
             {filter === 'unread' ? 'You have no unread notifications.' : 'You are all caught up.'}

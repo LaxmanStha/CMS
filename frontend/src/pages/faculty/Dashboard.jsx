@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, CalendarCheck, ClipboardList, Calendar, Users, TrendingUp } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import { Card } from '@/components/ui/Card';
 import {
@@ -47,8 +46,6 @@ const FacultyDashboard = () => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="My Courses"
-          icon={BookOpen}
-          iconClass="bg-[var(--color-accent-muted)] text-[var(--color-accent)]"
           description={courses.length > 0 ? `You are teaching ${courses.length} course(s) this semester.` : 'No courses assigned yet.'}
           action={
             <Link to="/faculty/attendance" className="btn btn-primary btn-sm">
@@ -60,8 +57,6 @@ const FacultyDashboard = () => {
         />
         <StatCard
           title="Total Students"
-          icon={Users}
-          iconClass="bg-[var(--color-info)]/10 text-[var(--color-info)]"
           description={totalStudents > 0 ? `${totalStudents} students across your courses.` : 'No students enrolled.'}
           action={
             <Link to="/faculty/attendance" className="btn btn-primary btn-sm">
@@ -73,8 +68,6 @@ const FacultyDashboard = () => {
         />
         <StatCard
           title="Attendance Entry"
-          icon={CalendarCheck}
-          iconClass="bg-[var(--color-success)]/10 text-[var(--color-success)]"
           description={todayAttendance.total > 0 ? `Today: ${todayAttendance.present}/${todayAttendance.total} present.` : 'No attendance recorded today.'}
           action={
             <Link to="/faculty/attendance" className="btn btn-primary btn-sm">
@@ -87,8 +80,6 @@ const FacultyDashboard = () => {
         />
         <StatCard
           title="Schedule"
-          icon={Calendar}
-          iconClass="bg-[var(--color-warning)]/10 text-[var(--color-warning)]"
           description={upcomingClasses.length > 0 ? `You have ${upcomingClasses.length} upcoming class(es).` : 'No upcoming classes.'}
           action={
             <Link to="/timetable" className="btn btn-primary btn-sm">

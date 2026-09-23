@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { DollarSign, CreditCard, AlertTriangle, CheckCircle, Clock, Plus, Search, Filter, Edit, Trash2, FileText, Receipt, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, FileText, Receipt, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -111,36 +111,24 @@ const Fees = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8B5CF6' }}>
-            <DollarSign className="h-5 w-5" />
-          </div>
           <div>
             <p className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{formatCurrency(totals.total)}</p>
             <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Total Invoiced</p>
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(22, 163, 74, 0.1)', color: 'var(--color-success)' }}>
-            <CheckCircle className="h-5 w-5" />
-          </div>
           <div>
             <p className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{formatCurrency(totals.collected)}</p>
             <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Collected</p>
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8B5CF6' }}>
-            <Clock className="h-5 w-5" />
-          </div>
           <div>
             <p className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{formatCurrency(totals.pending)}</p>
             <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Pending</p>
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', color: 'var(--color-danger)' }}>
-            <AlertTriangle className="h-5 w-5" />
-          </div>
           <div>
             <p className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{formatCurrency(totals.overdue)}</p>
             <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Overdue</p>

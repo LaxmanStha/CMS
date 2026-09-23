@@ -1,4 +1,3 @@
-import { User, Mail, IdCard, Shield } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { useAuth } from '@/context/AuthContext';
 
@@ -18,10 +17,10 @@ export default function Profile() {
   const roleLabel = (user.role || '').charAt(0).toUpperCase() + (user.role || '').slice(1);
 
   const fields = [
-    { icon: IdCard, label: 'User ID', value: user.id },
-    { icon: User, label: 'Name', value: user.name },
-    { icon: Mail, label: 'Email', value: user.email },
-    { icon: Shield, label: 'Role', value: roleLabel },
+    { label: 'User ID', value: user.id },
+    { label: 'Name', value: user.name },
+    { label: 'Email', value: user.email },
+    { label: 'Role', value: roleLabel },
   ];
 
   return (
@@ -38,13 +37,12 @@ export default function Profile() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {fields.map(({ icon: Icon, label, value }) => (
+          {fields.map(({ label, value }) => (
             <div
               key={label}
               className="flex items-center gap-3 p-4 rounded-xl"
               style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}
             >
-              <Icon className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--color-accent)' }} />
               <div className="min-w-0">
                 <p className="text-xs uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>{label}</p>
                 <p className="font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{value ?? '-'}</p>

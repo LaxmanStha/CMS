@@ -1,5 +1,5 @@
 ﻿import { useState, useMemo, useEffect } from 'react';
-import { Calendar, CheckCircle, XCircle, Clock, Plus, BarChart3, Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -140,50 +140,25 @@ const Attendance = () => {
     <div className="space-y-6">
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(22, 163, 74, 0.1)', color: 'var(--color-success)' }}>
-            <CheckCircle className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.present}</p>
-            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Present</p>
-          </div>
+        <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+          <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.present}</p>
+          <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Present</p>
         </div>
-        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', color: 'var(--color-danger)' }}>
-            <XCircle className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.absent}</p>
-            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Absent</p>
-          </div>
+        <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+          <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.absent}</p>
+          <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Absent</p>
         </div>
-        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(202, 138, 4, 0.1)', color: 'var(--color-warning)' }}>
-            <Clock className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.late}</p>
-            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Late</p>
-          </div>
+        <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+          <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.late}</p>
+          <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Late</p>
         </div>
-        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(56, 189, 248, 0.1)', color: 'var(--color-info)' }}>
-            <Calendar className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.excused}</p>
-            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Excused</p>
-          </div>
+        <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+          <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.excused}</p>
+          <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Excused</p>
         </div>
-        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(102, 252, 241, 0.1)', color: 'var(--color-accent)' }}>
-            <BarChart3 className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.rate}%</p>
-            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Rate</p>
-          </div>
+        <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+          <p className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.rate}%</p>
+          <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Rate</p>
         </div>
       </div>
 

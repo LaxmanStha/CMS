@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarCheck, Award, Wallet } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import { Card } from '@/components/ui/Card';
 import { useMe, useStudentDashboard } from '@/hooks/useDashboard';
@@ -86,8 +85,6 @@ const StudentDashboard = () => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Attendance"
-          icon={CalendarCheck}
-          iconClass="bg-[var(--color-accent-muted)] text-[var(--color-accent)]"
           description={attendancePct > 0 ? `Your attendance percentage is ${Math.round(attendancePct)}%.` : 'No attendance records yet.'}
           action={
             <Link to="/student/attendance" className="btn btn-primary btn-sm">
@@ -100,8 +97,6 @@ const StudentDashboard = () => {
         />
         <StatCard
           title="Grades"
-          icon={Award}
-          iconClass="bg-[var(--color-info)]/10 text-[var(--color-info)]"
           description={recentGrades.length > 0 ? `You have ${recentGrades.length} grade record(s).` : 'No grades recorded yet.'}
           action={
             <Link to="/student/grades" className="btn btn-primary btn-sm">
@@ -113,8 +108,6 @@ const StudentDashboard = () => {
         />
         <StatCard
           title="Fees"
-          icon={Wallet}
-          iconClass="bg-[var(--color-warning)]/10 text-[var(--color-warning)]"
           description={pendingFees > 0 ? `You have a pending fee of $${pendingFees.toFixed(2)}.` : 'No pending fees.'}
           action={
             <Link to="/fees" className="btn btn-primary btn-sm">

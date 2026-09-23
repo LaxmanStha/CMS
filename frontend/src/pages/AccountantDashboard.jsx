@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { Wallet, Clock, FileText, CheckCircle2 } from 'lucide-react';
 import api from '@/services/api';
 import { useAccountDashboard } from '@/hooks/useDashboard';
 import StatCard from '@/components/ui/StatCard';
@@ -63,10 +62,10 @@ const AccountantDashboard = () => {
 
   const cards = useMemo(
     () => [
-      { title: 'Fee Collection', value: collected, format: fmt, icon: Wallet, iconClass: 'bg-[var(--color-accent-muted)] text-[var(--color-accent)]' },
-      { title: 'Pending Fees', value: pending, format: fmt, icon: Clock, iconClass: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' },
-      { title: 'Total Invoices', value: totalInvoices, icon: FileText, iconClass: 'bg-[var(--color-info)]/10 text-[var(--color-info)]' },
-      { title: 'Paid Invoices', value: paidInvoices, icon: CheckCircle2, iconClass: 'bg-[var(--color-success)]/10 text-[var(--color-success)]' },
+      { title: 'Fee Collection', value: collected, format: fmt },
+      { title: 'Pending Fees', value: pending, format: fmt },
+      { title: 'Total Invoices', value: totalInvoices },
+      { title: 'Paid Invoices', value: paidInvoices },
     ],
     [collected, pending, totalInvoices, paidInvoices, fmt]
   );
@@ -115,8 +114,6 @@ const AccountantDashboard = () => {
             title={card.title}
             value={card.value}
             loading={loading}
-            icon={card.icon}
-            iconClass={card.iconClass}
             format={card.format}
           />
         ))}
