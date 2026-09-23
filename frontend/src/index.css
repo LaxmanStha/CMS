@@ -576,4 +576,25 @@ input, select, textarea {
   .bg-gradient-radial {
     background: radial-gradient(ellipse at center, var(--color-bg-secondary) 0%, var(--color-bg-primary) 70%);
   }
+
+  /* Compact table for side-by-side layouts */
+  .compact-table .table-container {
+    @apply rounded-none border-none;
+    background: transparent;
+  }
+  .compact-table .table th {
+    @apply px-3 py-2 text-[11px];
+  }
+  .compact-table .table td {
+    @apply px-3 py-2 text-[13px];
+  }
+  .compact-table .table tbody tr:hover {
+    background-color: var(--color-bg-secondary);
+  }
+  .compact-table .pagination {
+    @apply p-3 text-xs;
+  }
+  .compact-table .pagination button {
+    @apply w-8 h-8;
+  }
 }

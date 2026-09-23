@@ -286,24 +286,28 @@ const Teachers = () => {
                 className="input pl-10"
               />
             </div>
-            <Dropdown
-              value={deptFilter}
-              onChange={setDeptFilter}
-              options={departmentOptions}
-              placeholder="All Departments"
-            />
-            <Dropdown
-              value={courseFilter}
-              onChange={setCourseFilter}
-              options={courseOptions}
-              placeholder="All Courses"
-            />
-            <StatusDropdown
-              value={statusFilter}
-              onChange={setStatusFilter}
-              options={STATUSES.map(s => ({ value: s, label: statusLabel(s) }))}
-              placeholder="All Status"
-            />
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Dropdown
+                value={deptFilter}
+                onChange={setDeptFilter}
+                options={departmentOptions}
+                placeholder="All Departments"
+              />
+              <Dropdown
+                value={courseFilter}
+                onChange={setCourseFilter}
+                options={courseOptions}
+                placeholder="All Courses"
+              />
+              <StatusDropdown
+                value={statusFilter}
+                onChange={setStatusFilter}
+                options={STATUSES.map(s => ({ value: s, label: statusLabel(s) }))}
+                placeholder="All Status"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
           </div>
         </Card.Header>
         <Card.Content>

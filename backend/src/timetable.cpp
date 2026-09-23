@@ -1,5 +1,4 @@
 #include<iostream>
-#include<fstream>
 #include <vector>
 #include <string>
 #include <iomanip>
@@ -11,100 +10,6 @@
 #include <cstdint>
 
 using namespace std;
-
-class Student{
-    public:
-        string name;
-        int roll;
-        string email;
-        string course;
-        int semester;
-
-
-        void SetDetails(){
-            cout << "Enter the name of Student:\t";
-            getline(cin, name);
-            cout << "\nEnter the roll number:\t";
-            cin >> roll;
-            cin.ignore(); 
-            cout << "\nEnter the email:\t";
-            getline(cin, email);
-            cout << "\nEnter the course:\t";
-            getline(cin, course);
-            cout << "\nEnter the semester:\t";
-            cin >> semester;
-            cin.ignore(); 
-        }
-};
-
-class Employee{
-    public:
-        string name;
-        int id;
-        int salary;
-        string position;
-        
-
-        void SetDetails(){
-            cout << "Enter the name of Employee:\t";
-            getline(cin, name);
-            cout << "\nEnter the ID:\t";
-            cin >> id;
-            cin.ignore(); 
-            cout << "\nEnter the salary:\t";
-            cin >> salary;
-            cin.ignore(); //
-            cout << "\nEnter the position:\t";
-            getline(cin, position);
-        }
-
-      
-};
-
-class Teacher : public Employee{
-    public:
-        string subject;
-
-        void SetDetails(){
-            Employee::SetDetails();
-            cout << "\nEnter the subject:\t";
-            getline(cin, subject);
-        }
-
-};
-
-
-void AddStudent(){
-    Student s1;
-    s1.SetDetails();
-    fstream Studentfile("Student.txt",ios::app);
-    Studentfile << "Name: " << s1.name
-         << "\tRoll: " << s1.roll
-         << "\t Email: " << s1.email
-         << "\tCourse: " << s1.course
-         << "\tSemester: " << s1.semester << endl;
-}
-
-void AddEmployee(){
-    Employee e1;
-    e1.SetDetails();
-    fstream Employeefile("Employee.txt",ios::app);
-    Employeefile << "Name: " << e1.name
-         << "\tID: " << e1.id
-         << "\tSalary: " << e1.salary
-         << "\tPosition: " << e1.position<< endl;
-}
-
-void AddTeacher(){
-    Teacher t1;
-    t1.SetDetails();
-    fstream Teacherfile("Teacher.txt",ios::app);
-    Teacherfile << "Name: " << t1.name
-         << "\tID: " << t1.id
-         << "\tSalary: " << t1.salary
-         << "\tPosition: " << t1.position
-         << "\tSubject: " << t1.subject << endl;
-}
 
 // ===== GLOBAL TEACHER STRUCTURE =====
 // Stores information about each teacher (name + subjects they teach)
@@ -710,92 +615,21 @@ void TimeTable(){
     }
 }
 
-void ShowStudentDetails(){
-    ifstream Studentfile("Student.txt");
-    string line;
-    cout << "\n--- Student Details ---\n";
-    while (getline(Studentfile, line)) {
-        cout << line << endl;
-    }
-    Studentfile.close();
-}
-
-void showEmployeeDetails(){
-    ifstream Employeefile("Employee.txt");
-    string line;
-    cout << "\n--- Employee Details ---\n";
-    while (getline(Employeefile, line)) {
-        cout << line << endl;
-    }
-    Employeefile.close();
-}
-
-void showTeacherDetails(){
-    ifstream Teacherfile("Teacher.txt");
-    string line;
-    cout << "\n--- Teacher Details ---\n";
-    while (getline(Teacherfile, line)) {
-        cout << line << endl;
-    }
-    Teacherfile.close();
-}
-
-void AddStudentMarks(){
-    cout << "Functionality to add student marks is not yet implemented.\n";
-}
-
 int main(){
-    cout<<"------Welcome to College Management System------\n";
-    int choice =0;
+    cout << "------Timetable Generator------\n";
+    int choice = 0;
 
-    while (choice !=7){
-        cout<<"1. Add Student\n";
-        cout<<"2. Add Employee\n";
-        cout<<"3. Add Teacher\n";
-        cout<<"4. Display Student/Employee/Teacher\n\n";
-        cout<<"5. Add Student Marks\n";
-        cout<<"6. Timetable Generator\n";
-        cout<<"7. Exit\n";
-        cout<<"Enter your choice:\t";
+    while (choice != 2){
+        cout << "\n1. Timetable Generator\n";
+        cout << "2. Exit\n";
+        cout << "Enter your choice: ";
         cin >> choice;
-
-
 
         switch (choice){
             case 1:
-                AddStudent();
-                break;
-            case 2:
-                AddEmployee();
-                break;
-            case 3:
-                AddTeacher();
-                break;
-            case 4:
-                cout<<"Enter The Catagory which you want to Display:\n1. Student\n2. Employee\n3. Teacher\n";
-                int x;
-                cin>>x;
-                switch(x){
-                    case 1:
-                        ShowStudentDetails();
-                        break;
-                    case 2:
-                        showEmployeeDetails();
-                        break;
-                    case 3:
-                        showTeacherDetails();
-                        break;
-                    default:
-                        cout<<"Invalid choice."<<endl;
-                }
-                break;
-            case 5:
-                AddStudentMarks();
-                break;
-            case 6:
                 TimeTable();
                 break;
-            case 7:
+            case 2:
                 cout << "Exiting the program." << endl;
                 break;
             default:

@@ -128,50 +128,56 @@ const AdminClassrooms = () => {
         )}
       </div>
 
-      {/* Stats Summary */}
-      <div className="grid grid-cols-1 gap-4">
-        <Card className="p-4 flex items-center gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(22, 163, 74, 0.1)', color: 'var(--color-success)' }}>
-            <Building2 className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.total}</p>
-            <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Total Classrooms</p>
-          </div>
-        </Card>
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Stats Summary - Side */}
+        <div className="lg:col-span-1">
+          <Card className="p-4 flex items-center gap-4 sticky top-24" style={{ height: 'fit-content' }}>
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ backgroundColor: 'rgba(22, 163, 74, 0.1)', color: 'var(--color-success)' }}>
+              <Building2 className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.total}</p>
+              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Total Classrooms</p>
+            </div>
+          </Card>
+        </div>
 
-      <Card>
-        <Card.Header className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--color-text-muted)' }} />
-            <input
-              type="text"
-              placeholder="Search classrooms..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input pl-10"
-            />
-          </div>
-        </Card.Header>
-        <Card.Content>
-          <Table
-            columns={columns}
-            data={filteredClassrooms}
-            keyField="id"
-            searchable={false}
-            filterable={false}
-            paginated
-            pageSize={10}
-            loading={loading}
-            rowActions={isAdmin ? [
-              { label: "Edit", icon: <Edit className="w-4 h-4" />, onClick: handleOpenModal, variant: "ghost" },
-              { label: "Delete", icon: <Trash2 className="w-4 h-4" />, onClick: handleDelete, variant: "danger" },
-            ] : []}
-            emptyMessage={"No classrooms found"}
-          />
-        </Card.Content>
-      </Card>
+        {/* Table - Main */}
+        <div className="lg:col-span-3">
+          <Card>
+            <Card.Header className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--color-text-muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Search classrooms..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="input pl-10"
+                />
+              </div>
+            </Card.Header>
+            <Card.Content className="p-0">
+              <Table
+                columns={columns}
+                data={filteredClassrooms}
+                keyField="id"
+                searchable={false}
+                filterable={false}
+                paginated
+                pageSize={10}
+                loading={loading}
+                rowActions={isAdmin ? [
+                  { label: "Edit", icon: <Edit className="w-4 h-4" />, onClick: handleOpenModal, variant: "ghost" },
+                  { label: "Delete", icon: <Trash2 className="w-4 h-4" />, onClick: handleDelete, variant: "danger" },
+                ] : []}
+                emptyMessage={"No classrooms found"}
+                className="compact-table"
+              />
+            </Card.Content>
+          </Card>
+        </div>
+      </div>
 
       {/* Add/Edit Classroom Modal */}
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setEditingClassroom(null); setFormData({ room_number: "", name: "" }); }} title={editingClassroom ? "Edit Classroom" : "Add Classroom"} size="lg"
