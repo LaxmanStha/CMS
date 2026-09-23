@@ -150,19 +150,25 @@ const Fees = () => {
 
       {/* Table Card */}
       <Card>
-        <Card.Header className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--color-text-muted)' }} />
-            <input
-              type="text"
-              placeholder="Search invoices..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input pl-10"
-            />
+        <Card.Header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 flex-1">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--color-text-muted)' }} />
+              <input
+                type="text"
+                placeholder="Search invoices..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input pl-10"
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Dropdown value={semFilter} onChange={setSemFilter} options={semesters} placeholder="All Semesters" />
+              <StatusDropdown value={statusFilter} onChange={setStatusFilter} options={statuses.map((s) => ({ value: s, label: statusLabels[s] }))} />
+            </div>
           </div>
-          <Dropdown value={semFilter} onChange={setSemFilter} options={semesters} placeholder="All Semesters" />
-          <StatusDropdown value={statusFilter} onChange={setStatusFilter} options={statuses.map((s) => ({ value: s, label: statusLabels[s] }))} />
+          <div className="flex items-center gap-2">
+          </div>
         </Card.Header>
         <Card.Content>
           {error && (
