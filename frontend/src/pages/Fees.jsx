@@ -206,15 +206,38 @@ const Fees = () => {
         {editingFee ? (
           <form className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <select className="select-themed" value={formData.studentId} onChange={(e) => {
-                const opt = fees.find(f => f.studentId === e.target.value);
-                setFormData({ ...formData, studentId: e.target.value, student: opt ? opt.student : '' });
-              }} required><option value="">Select Student</option>{fees.map(f => <option key={f.studentId} value={f.studentId}>{f.student} ({f.studentId})</option>)}</select>
-              <select className="select-themed" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option>{['CS101','MATH201','PHYS101','ENG110','OOP','CPROG','MICRO','DBMS','OS','CN','MATH101','MATH102','STAT','FM','BM','ECO','CHEM101','BIO101','IT','WEB'].map(c => <option key={c} value={c}>{c}</option>)}</select>
+              <Dropdown
+                value={formData.studentId}
+                onChange={(e) => {
+                  const opt = fees.find(f => f.studentId === e);
+                  setFormData({ ...formData, studentId: e, student: opt ? opt.student : '' });
+                }}
+                options={fees.map(f => ({ value: f.studentId, label: `${f.student} (${f.studentId})` }))}
+                placeholder="Select Student"
+                required
+              />
+              <Dropdown
+                value={formData.course}
+                onChange={(e) => setFormData({ ...formData, course: e })}
+                options={['CS101','MATH201','PHYS101','ENG110','OOP','CPROG','MICRO','DBMS','OS','CN','MATH101','MATH102','STAT','FM','BM','ECO','CHEM101','BIO101','IT','WEB'].map(c => ({ value: c, label: c }))}
+                placeholder="Select Course"
+                required
+              />
               <Input type="number" label="Amount" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required />
-              <select className="select-themed" value={formData.semester} onChange={(e) => setFormData({ ...formData, semester: e.target.value })} required><option value="">Semester</option>{semesters.map(s => <option key={s} value={s}>{s}</option>)}</select>
+              <Dropdown
+                value={formData.semester}
+                onChange={(e) => setFormData({ ...formData, semester: e })}
+                options={semesters.map(s => ({ value: s, label: s }))}
+                placeholder="Semester"
+                required
+              />
               <Input type="date" label="Due Date" value={formData.dueDate} onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })} required />
-              <select className="select-themed" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}><option value="">Status</option>{statuses.map(s => <option key={s} value={s}>{statusLabels[s]}</option>)}</select>
+              <StatusDropdown
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e })}
+                options={statuses.map(s => ({ value: s, label: statusLabels[s] }))}
+                placeholder="Status"
+              />
             </div>
           </form>
         ) : selectedInvoice ? (
@@ -238,15 +261,38 @@ const Fees = () => {
               </div>
             )}
             <Input type="number" label="Payment Amount" placeholder={`Max: ${formatCurrency(selectedInvoice.amount - selectedInvoice.paid)}`} />
-            <select className="select-themed"><option value="">Payment Method</option><option value="cash">Cash</option><option value="card">Card</option><option value="bank">Bank Transfer</option><option value="online">Online</option></select>
+            <Dropdown
+              value=""
+              onChange={() => {}}
+              options={['cash', 'card', 'bank', 'online'].map(m => ({ value: m, label: m.charAt(0).toUpperCase() + m.slice(1) }))}
+              placeholder="Payment Method"
+            />
           </div>
         ) : (
           <form className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <select className="select-themed" value={formData.studentId} onChange={(e) => setFormData({ ...formData, studentId: e.target.value })} required><option value="">Select Student</option>{fees.map(f => <option key={f.studentId} value={f.studentId}>{f.student} ({f.studentId})</option>)}</select>
-              <select className="select-themed" value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} required><option value="">Select Course</option>{['CS101','MATH201','PHYS101','ENG110','OOP','CPROG','MICRO','DBMS','OS','CN','MATH101','MATH102','STAT','FM','BM','ECO','CHEM101','BIO101','IT','WEB'].map(c => <option key={c} value={c}>{c}</option>)}</select>
+              <Dropdown
+                value={formData.studentId}
+                onChange={(e) => setFormData({ ...formData, studentId: e })}
+                options={fees.map(f => ({ value: f.studentId, label: `${f.student} (${f.studentId})` }))}
+                placeholder="Select Student"
+                required
+              />
+              <Dropdown
+                value={formData.course}
+                onChange={(e) => setFormData({ ...formData, course: e })}
+                options={['CS101','MATH201','PHYS101','ENG110','OOP','CPROG','MICRO','DBMS','OS','CN','MATH101','MATH102','STAT','FM','BM','ECO','CHEM101','BIO101','IT','WEB'].map(c => ({ value: c, label: c }))}
+                placeholder="Select Course"
+                required
+              />
               <Input type="number" label="Amount" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} placeholder="2500" required />
-              <select className="select-themed" value={formData.semester} onChange={(e) => setFormData({ ...formData, semester: e.target.value })} required><option value="">Semester</option>{semesters.map(s => <option key={s} value={s}>{s}</option>)}</select>
+              <Dropdown
+                value={formData.semester}
+                onChange={(e) => setFormData({ ...formData, semester: e })}
+                options={semesters.map(s => ({ value: s, label: s }))}
+                placeholder="Semester"
+                required
+              />
               <Input type="date" label="Due Date" value={formData.dueDate} onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })} required />
             </div>
           </form>

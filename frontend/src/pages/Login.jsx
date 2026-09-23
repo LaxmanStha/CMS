@@ -9,6 +9,7 @@ import { useToast } from "@/context/ToastContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import Dropdown from "@/components/ui/Dropdown";
 
 const floatingShapes = [
   { x: 5, y: 10, size: 80, delay: 0 },
@@ -159,22 +160,18 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>Select role</label>
-              <select
+              <Dropdown
                 value={selectedRole}
-                onChange={(e) => {
-                  const newRole = e.target.value;
+                onChange={(newRole) => {
                   setSelectedRole(newRole);
                   const roleEmail = newRole === "teacher" ? "faculty@college.edu" : `${newRole}@college.edu`;
                   setEmail(roleEmail);
                   setPassword("password123");
                 }}
-                className="select-themed"
+                options={roleOptions}
+                placeholder="Select role"
                 disabled={loading}
-              >
-                {roleOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
+              />
             </div>
 
             <div className="rounded-xl border p-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-accent-muted)' }}>

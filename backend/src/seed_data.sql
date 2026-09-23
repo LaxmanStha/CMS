@@ -187,16 +187,63 @@ INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, a
 -- Classrooms (linked to teachers)
 -- ============================================================
 INSERT OR IGNORE INTO Classroom (id, room_number, name)
-  VALUES (1, 'Room 201', 'Room 201');
+  VALUES (1, '201', 'Classroom 201');
 INSERT OR IGNORE INTO Classroom (id, room_number, name)
-  VALUES (2, 'Room 301', 'Room 301');
+  VALUES (2, '101', 'Classroom 101');
 INSERT OR IGNORE INTO Classroom (id, room_number, name)
-  VALUES (3, 'Room 401', 'Room 401');
+  VALUES (3, '301', 'Classroom 301');
 
--- Link students 3, 5, 6 to teacher 2's classroom (CS-A)
+-- Update existing classroom rows if they exist with old room_number
+UPDATE Classroom SET room_number = '201', name = 'Classroom 201' WHERE id = 1 AND (room_number != '201' OR name != 'Classroom 201');
+UPDATE Classroom SET room_number = '101', name = 'Classroom 101' WHERE id = 2 AND (room_number != '101' OR name != 'Classroom 101');
+UPDATE Classroom SET room_number = '301', name = 'Classroom 301' WHERE id = 3 AND (room_number != '301' OR name != 'Classroom 301');
+
+-- Link students 3, 5, 6 to teacher 2's classroom (201)
 INSERT OR IGNORE INTO ClassroomStudent (classroom_id, student_id) VALUES (1, 3);
 INSERT OR IGNORE INTO ClassroomStudent (classroom_id, student_id) VALUES (1, 5);
 INSERT OR IGNORE INTO ClassroomStudent (classroom_id, student_id) VALUES (1, 6);
+
+-- ============================================================
+-- TeacherClassroom junction table (many-to-many)
+-- All teachers assigned to all three classrooms (101, 201, 301)
+-- This ensures at least one classroom has more than 5 teachers
+-- ============================================================
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (2, 1);   -- Prof. James Anderson -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (2, 2);   -- Prof. James Anderson -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (2, 3);   -- Prof. James Anderson -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (11, 1);  -- Dr. Robert Chen -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (11, 2);  -- Dr. Robert Chen -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (11, 3);  -- Dr. Robert Chen -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (12, 1);  -- Dr. Lisa Park -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (12, 2);  -- Dr. Lisa Park -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (12, 3);  -- Dr. Lisa Park -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (18, 1);  -- Dr. Aaron Kim -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (18, 2);  -- Dr. Aaron Kim -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (18, 3);  -- Dr. Aaron Kim -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (21, 1);  -- Dr. Sarah Williams -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (21, 2);  -- Dr. Sarah Williams -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (21, 3);  -- Dr. Sarah Williams -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (22, 1);  -- Prof. Michael Brown -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (22, 2);  -- Prof. Michael Brown -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (22, 3);  -- Prof. Michael Brown -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (23, 1);  -- Dr. Jennifer Davis -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (23, 2);  -- Dr. Jennifer Davis -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (23, 3);  -- Dr. Jennifer Davis -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (24, 1);  -- Prof. David Miller -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (24, 2);  -- Prof. David Miller -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (24, 3);  -- Prof. David Miller -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (25, 1);  -- Dr. Amanda Wilson -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (25, 2);  -- Dr. Amanda Wilson -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (25, 3);  -- Dr. Amanda Wilson -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (50, 1);  -- Dr. Priya Sharma -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (50, 2);  -- Dr. Priya Sharma -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (50, 3);  -- Dr. Priya Sharma -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (51, 1);  -- Prof. Daniel Lee -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (51, 2);  -- Prof. Daniel Lee -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (51, 3);  -- Prof. Daniel Lee -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (52, 1);  -- Dr. Grace Thompson -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (52, 2);  -- Dr. Grace Thompson -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (52, 3);  -- Dr. Grace Thompson -> 301
 
 -- ============================================================
 -- Accountant Profile

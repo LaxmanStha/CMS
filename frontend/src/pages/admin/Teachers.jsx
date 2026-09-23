@@ -338,21 +338,19 @@ const Teachers = () => {
             <Input label="Email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="prof@college.edu" required />
             <Input label="Password" type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="Set initial password" />
             <Input label="Phone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="+1-555-0000" />
+<Dropdown
+              value={formData.department}
+              onChange={(e) => setFormData({...formData, department: e})}
+              options={departmentOptions}
+              placeholder="Select Department"
+              required
+            />
             <Dropdown
-            className="select-themed"
-            value={formData.department}
-            onChange={(e) => setFormData({...formData, department: e})}
-            options={departmentOptions}
-            placeholder="Select Department"
-            required
-          />
-            <Dropdown
-            className="select-themed"
-            value={formData.assignedCourse}
-            onChange={(e) => setFormData({...formData, assignedCourse: e})}
-            options={courseOptions}
-            placeholder="Select Course"
-          />
+              value={formData.assignedCourse}
+              onChange={(e) => setFormData({...formData, assignedCourse: e})}
+              options={courseOptions}
+              placeholder="Select Course"
+            />
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Assigned Classrooms</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl p-3" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
@@ -377,7 +375,6 @@ const Teachers = () => {
               </div>
             </div>
             <StatusDropdown
-            className="select-themed"
             value={formData.status}
             onChange={(e) => setFormData({...formData, status: e})}
             options={STATUSES.map(s => ({ value: s, label: statusLabel(s) }))}

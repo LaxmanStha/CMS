@@ -209,6 +209,12 @@ CREATE TABLE IF NOT EXISTS ClassroomStudent (
   PRIMARY KEY (classroom_id, student_id)
 );
 
+CREATE TABLE IF NOT EXISTS TeacherClassroom (
+  teacher_id INTEGER NOT NULL REFERENCES Teacher(id) ON DELETE CASCADE,
+  classroom_id INTEGER NOT NULL REFERENCES Classroom(id) ON DELETE CASCADE,
+  PRIMARY KEY (teacher_id, classroom_id)
+);
+
 -- Timetable schedule
 CREATE TABLE IF NOT EXISTS TimetableSchedule (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

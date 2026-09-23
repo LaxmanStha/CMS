@@ -36,6 +36,11 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
     hoverTimeoutRef.current = setTimeout(() => setOpen(false), 100);
   };
 
+  const handleClick = () => {
+    if (disabled) return;
+    setOpen(prev => !prev);
+  };
+
   return (
     <div
       className={cn('relative inline-block w-full', className)}
@@ -46,6 +51,7 @@ const Dropdown = ({ options = [], value, onChange, placeholder = 'Select...', cl
       <button
         type="button"
         disabled={disabled}
+        onClick={handleClick}
         className={cn(
           'w-full min-w-[140px] flex items-center gap-2 cursor-pointer select-none px-4 py-3 bg-[var(--color-bg-secondary)] rounded-lg',
           'border border-[var(--color-border)] text-[var(--color-text-primary)]',

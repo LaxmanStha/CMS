@@ -3,6 +3,7 @@ import { ChevronUp, ChevronDown, Search, Filter, MoreHorizontal, ChevronLeft, Ch
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { cn, formatNumber } from '@/lib/utils';
 import { Badge } from './Badge';
+import Dropdown from './Dropdown';
 
 const Table = memo(({
   columns = [],
@@ -409,15 +410,13 @@ const Table = memo(({
               <span className="font-semibold">{Math.min(currentPage * pageSizeState, filteredData.length)}</span> of{' '}
               <span className="font-semibold">{filteredData.length}</span> results
             </span>
-            <select
+            <Dropdown
+              options={pageSizes.map(size => ({ value: size, label: `${size} per page` }))}
               value={pageSizeState}
-              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              className="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
-            >
-              {pageSizes.map(size => (
-                <option key={size} value={size}>{size} per page</option>
-              ))}
-            </select>
+              onChange={handlePageSizeChange}
+              placeholder="Page size"
+              className="min-w-[130px]"
+            />
           </div>
           <div className="flex items-center gap-1.5">
             <button
