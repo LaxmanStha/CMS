@@ -198,10 +198,12 @@ UPDATE Classroom SET room_number = '201', name = 'Classroom 201' WHERE id = 1 AN
 UPDATE Classroom SET room_number = '101', name = 'Classroom 101' WHERE id = 2 AND (room_number != '101' OR name != 'Classroom 101');
 UPDATE Classroom SET room_number = '301', name = 'Classroom 301' WHERE id = 3 AND (room_number != '301' OR name != 'Classroom 301');
 
--- Link students 3, 5, 6 to teacher 2's classroom (201)
-INSERT OR IGNORE INTO ClassroomStudent (classroom_id, student_id) VALUES (1, 3);
-INSERT OR IGNORE INTO ClassroomStudent (classroom_id, student_id) VALUES (1, 5);
-INSERT OR IGNORE INTO ClassroomStudent (classroom_id, student_id) VALUES (1, 6);
+-- Sync all students to ClassroomStudent based on their classroom field
+INSERT OR IGNORE INTO ClassroomStudent (classroom_id, student_id)
+SELECT c.id, s.id
+FROM Classroom c
+JOIN Student s ON s.classroom = c.room_number
+WHERE s.classroom IS NOT NULL AND s.classroom != '';
 
 -- ============================================================
 -- TeacherClassroom junction table (many-to-many)
