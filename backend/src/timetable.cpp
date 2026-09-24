@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <string>
 #include <iomanip>
@@ -12,8 +13,88 @@
 #include <set>
 #include <utility>
 #include <numeric>
+#include <filesystem>
 
 using namespace std;
+
+namespace fs = std::filesystem;
+
+string FindDatabasePath() {
+    vector<string> candidates = {
+        "../../build/bin/college.db",   // from backend/src/output
+        "../build/bin/college.db",      // from backend/src
+        "backend/build/bin/college.db", // from project root
+        "build/bin/college.db",         // from project root
+        "college.db"
+    };
+    
+    for (const string& path : candidates) {
+        if (fs::exists(path)) {
+            return fs::absolute(path).string();
+        }
+    }
+    
+    // Fallback: create in current directory
+    return "college.db";
+}
+
+bool InitializeSchema(sqlite3* db) {
+    const char* checkSQL = "SELECT 1 FROM sqlite_master WHERE type='table' AND name='Teacher' LIMIT 1;";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, checkSQL, -1, &stmt, nullptr) == SQLITE_OK) {
+        bool hasTable = (sqlite3_step(stmt) == SQLITE_ROW);
+        sqlite3_finalize(stmt);
+        if (hasTable) return true;
+    }
+    
+    string schemaPath = fs::exists("schema.sql") ? "schema.sql" : 
+                        fs::exists("../schema.sql") ? "../schema.sql" :
+                        fs::exists("../../src/schema.sql") ? "../../src/schema.sql" :
+                        fs::exists("backend/src/schema.sql") ? "backend/src/schema.sql" : "";
+    
+    if (!schemaPath.empty()) {
+        ifstream f(schemaPath);
+        if (f) {
+            stringstream ss;
+            ss << f.rdbuf();
+            char* errMsg = nullptr;
+            int rc = sqlite3_exec(db, ss.str().c_str(), nullptr, nullptr, &errMsg);
+            if (rc != SQLITE_OK) {
+                cerr << "Schema initialization failed: " << (errMsg ? errMsg : "unknown error") << endl;
+                if (errMsg) sqlite3_free(errMsg);
+                return false;
+            }
+            cout << "Schema initialized from " << schemaPath << "\n";
+        }
+    } else {
+        cerr << "Schema file not found\n";
+        return false;
+    }
+    
+    // Load seed data if available
+    string seedPath = fs::exists("seed_data.sql") ? "seed_data.sql" : 
+                      fs::exists("../seed_data.sql") ? "../seed_data.sql" :
+                      fs::exists("../../src/seed_data.sql") ? "../../src/seed_data.sql" :
+                      fs::exists("backend/src/seed_data.sql") ? "backend/src/seed_data.sql" : "";
+    
+    if (!seedPath.empty()) {
+        ifstream f(seedPath);
+        if (f) {
+            stringstream ss;
+            ss << f.rdbuf();
+            char* errMsg = nullptr;
+            int rc = sqlite3_exec(db, ss.str().c_str(), nullptr, nullptr, &errMsg);
+            if (rc != SQLITE_OK) {
+                cerr << "Seed data load failed: " << (errMsg ? errMsg : "unknown error") << endl;
+                if (errMsg) sqlite3_free(errMsg);
+            } else {
+                cout << "Seed data loaded from " << seedPath << "\n";
+            }
+        }
+    }
+    
+    return true;
+}
 
 struct Teacher {
     int64_t id;
@@ -22,18 +103,17 @@ struct Teacher {
     map<pair<int, int>, int64_t> allocation;
 };
 
-struct Room {
-    int64_t id;
-    string name;
-    int capacity;
-    bool isLab;
-};
-
 struct Course {
     int64_t id;
     string name;
     string code;
     int credits;
+};
+
+struct Classroom {
+    int64_t id;
+    string roomNumber;
+    string name;
 };
 
 struct Section {
@@ -72,7 +152,7 @@ struct TimeTableData {
 
 struct AllocationSetup {
     vector<Teacher> teachers;
-    vector<Room> rooms;
+    vector<Classroom> classrooms;
     vector<Course> courses;
     vector<Section> sections;
     vector<TimeSlotConfig> timeSlots;
@@ -110,30 +190,6 @@ bool LoadTeachersFromDatabase(sqlite3* db, AllocationSetup& setup) {
     return !setup.teachers.empty();
 }
 
-bool LoadRoomsFromDatabase(sqlite3* db, AllocationSetup& setup) {
-    const char* sql = "SELECT id, name, capacity, is_lab FROM Room;";
-    
-    sqlite3_stmt* stmt;
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        cerr << "Query failed: " << sqlite3_errmsg(db) << endl;
-        return false;
-    }
-    
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        Room r;
-        r.id = sqlite3_column_int64(stmt, 0);
-        const unsigned char* nameText = sqlite3_column_text(stmt, 1);
-        r.name = nameText ? (const char*)nameText : "";
-        r.capacity = sqlite3_column_int(stmt, 2);
-        r.isLab = sqlite3_column_int(stmt, 3);
-        setup.rooms.push_back(r);
-    }
-    
-    sqlite3_finalize(stmt);
-    cout << "Loaded " << setup.rooms.size() << " rooms\n";
-    return !setup.rooms.empty();
-}
-
 bool LoadCoursesFromDatabase(sqlite3* db, AllocationSetup& setup) {
     const char* sql = "SELECT id, name, code, credits, department, instructorId, semester, status "
                       "FROM Course WHERE status = 'active';";
@@ -158,6 +214,30 @@ bool LoadCoursesFromDatabase(sqlite3* db, AllocationSetup& setup) {
     sqlite3_finalize(stmt);
     cout << "Loaded " << setup.courses.size() << " courses\n";
     return !setup.courses.empty();
+}
+
+bool LoadClassroomsFromDatabase(sqlite3* db, AllocationSetup& setup) {
+    const char* sql = "SELECT id, room_number, name FROM Classroom;";
+    
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "Query failed: " << sqlite3_errmsg(db) << endl;
+        return false;
+    }
+    
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        Classroom cr;
+        cr.id = sqlite3_column_int64(stmt, 0);
+        const unsigned char* roomNumText = sqlite3_column_text(stmt, 1);
+        cr.roomNumber = roomNumText ? (const char*)roomNumText : "";
+        const unsigned char* nameText = sqlite3_column_text(stmt, 2);
+        cr.name = nameText ? (const char*)nameText : "";
+        setup.classrooms.push_back(cr);
+    }
+    
+    sqlite3_finalize(stmt);
+    cout << "Loaded " << setup.classrooms.size() << " classrooms\n";
+    return true; // Classrooms are optional
 }
 
 bool LoadSectionsFromDatabase(sqlite3* db, AllocationSetup& setup) {
@@ -246,11 +326,6 @@ bool ValidateDatabaseData(const AllocationSetup& setup) {
         valid = false;
     }
     
-    if (setup.rooms.empty()) {
-        cerr << "No rooms found\n";
-        valid = false;
-    }
-    
     if (setup.courses.empty()) {
         cerr << "No active courses found\n";
         valid = false;
@@ -278,7 +353,7 @@ bool ValidateDatabaseData(const AllocationSetup& setup) {
     if (valid) {
         cout << "All validation passed\n";
         cout << "  Teachers: " << setup.teachers.size() << "\n";
-        cout << "  Rooms: " << setup.rooms.size() << "\n";
+        cout << "  Classrooms: " << setup.classrooms.size() << "\n";
         cout << "  Courses: " << setup.courses.size() << "\n";
         cout << "  Sections: " << setup.sections.size() << "\n";
         cout << "  Time Slots: " << setup.timeSlots.size() << " (" << setup.days 
@@ -292,46 +367,9 @@ bool TeacherCanTeachSection(const Teacher& teacher, const Section& section) {
     return teacher.id == section.teacherId;
 }
 
-int FindBestRoom(const AllocationSetup& setup, const Section& section, int dayIdx, int periodNum, 
-                const map<pair<int, int>, int64_t>& roomAllocation) {
-    int bestRoomIdx = -1;
-    int bestFit = INT_MAX;
-    
-    for (size_t i = 0; i < setup.rooms.size(); ++i) {
-        const Room& r = setup.rooms[i];
-        auto key = make_pair(dayIdx, periodNum);
-        if (roomAllocation.find(key) != roomAllocation.end() && roomAllocation.at(key) == r.id) {
-            continue;
-        }
-        
-        if (r.capacity >= section.studentCount) {
-            if (r.capacity < bestFit) {
-                bestFit = r.capacity;
-                bestRoomIdx = static_cast<int>(i);
-            }
-        } else if (bestFit == INT_MAX && r.capacity > bestFit) {
-            bestFit = r.capacity;
-            bestRoomIdx = static_cast<int>(i);
-        }
-    }
-    
-    if (bestRoomIdx == -1) {
-        for (size_t i = 0; i < setup.rooms.size(); ++i) {
-            auto key = make_pair(dayIdx, periodNum);
-            if (roomAllocation.find(key) != roomAllocation.end() && roomAllocation.at(key) == setup.rooms[i].id) {
-                continue;
-            }
-            bestRoomIdx = static_cast<int>(i);
-            break;
-        }
-    }
-    
-    return bestRoomIdx;
-}
-
 vector<TimeTableData> GenerateAllTimetables(AllocationSetup& setup) {
     vector<TimeTableData> allEntries;
-    map<pair<int, int>, int64_t> roomAllocation;
+    map<pair<int, int>, int64_t> classroomAllocation;
     
     for (auto& teacher : setup.teachers) {
         teacher.allocation.clear();
@@ -372,7 +410,16 @@ vector<TimeTableData> GenerateAllTimetables(AllocationSetup& setup) {
                 }
             }
             
-            int roomIdx = FindBestRoom(setup, section, dayIdx, slot.periodNumber, roomAllocation);
+            // Find available classroom
+            int bestClassroomIdx = -1;
+            for (size_t i = 0; i < setup.classrooms.size(); ++i) {
+                auto key = make_pair(dayIdx, slot.periodNumber);
+                if (classroomAllocation.find(key) != classroomAllocation.end() && classroomAllocation.at(key) == setup.classrooms[i].id) {
+                    continue;
+                }
+                bestClassroomIdx = static_cast<int>(i);
+                break;
+            }
             
             TimeTableData entry;
             entry.sectionId = section.id;
@@ -385,17 +432,17 @@ vector<TimeTableData> GenerateAllTimetables(AllocationSetup& setup) {
             entry.endTime = slot.endTime;
             entry.slotId = slot.id;
             
-            if (bestTeacherIdx != -1 && roomIdx != -1) {
+            if (bestTeacherIdx != -1 && bestClassroomIdx != -1) {
                 Teacher& teacher = setup.teachers[bestTeacherIdx];
                 entry.teacherId = teacher.id;
                 entry.teacherName = teacher.name;
-                entry.roomId = setup.rooms[roomIdx].id;
-                entry.roomName = setup.rooms[roomIdx].name;
+                entry.roomId = setup.classrooms[bestClassroomIdx].id;
+                entry.roomName = setup.classrooms[bestClassroomIdx].name;
                 
                 auto key = make_pair(dayIdx, slot.periodNumber);
                 teacher.allocation[key] = section.id;
                 teacher.totalLoad++;
-                roomAllocation[key] = setup.rooms[roomIdx].id;
+                classroomAllocation[key] = setup.classrooms[bestClassroomIdx].id;
             } else {
                 entry.teacherId = 0;
                 entry.teacherName = "";
@@ -412,19 +459,20 @@ vector<TimeTableData> GenerateAllTimetables(AllocationSetup& setup) {
 }
 
 void DisplayTimetables(const vector<TimeTableData>& entries, const AllocationSetup& setup) {
-    map<string, map<int, vector<TimeTableData>>> bySection;
+    // Group by course (courseCode)
+    map<string, map<int, vector<TimeTableData>>> byCourse;
     for (const auto& e : entries) {
-        bySection[e.sectionName][e.periodNumber].push_back(e);
+        byCourse[e.courseCode][e.periodNumber].push_back(e);
     }
     
     vector<string> dayOrder = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     
-    for (const auto& secPair : bySection) {
-        const string& sectionName = secPair.first;
-        const auto& periodsMap = secPair.second;
+    for (const auto& coursePair : byCourse) {
+        const string& courseName = coursePair.first;
+        const auto& periodsMap = coursePair.second;
         
         cout << "\n================================================================================\n";
-        cout << "TIMETABLE - SECTION: " << sectionName << "\n";
+        cout << "TIMETABLE - COURSE: " << courseName << "\n";
         cout << "================================================================================\n\n";
         
         cout << left << setw(10) << "Day";
@@ -442,9 +490,9 @@ void DisplayTimetables(const vector<TimeTableData>& entries, const AllocationSet
             
             for (int p = 1; p <= setup.periodsPerDay; ++p) {
                 string cell = "Free";
-                for (const auto& e : periodsMap) {
-                    for (const auto& entry : e.second) {
-                        if (entry.day == day && entry.periodNumber == p) {
+                if (periodsMap.find(p) != periodsMap.end()) {
+                    for (const auto& entry : periodsMap.at(p)) {
+                        if (entry.day == day) {
                             if (entry.teacherId > 0 && entry.roomId > 0) {
                                 cell = entry.teacherName.substr(0, 12) + "/" + entry.roomName.substr(0, 10);
                             } else if (entry.teacherId == 0 && entry.roomId == 0) {
@@ -454,6 +502,7 @@ void DisplayTimetables(const vector<TimeTableData>& entries, const AllocationSet
                             } else if (entry.roomId == 0) {
                                 cell = "NO ROOM";
                             }
+                            break;
                         }
                     }
                 }
@@ -470,6 +519,80 @@ void DisplayTimetables(const vector<TimeTableData>& entries, const AllocationSet
     cout << string(35, '-') << "\n";
     for (const auto& t : setup.teachers) {
         cout << left << setw(25) << t.name << setw(10) << t.totalLoad << "\n";
+    }
+    cout << "\n";
+}
+
+void DisplayTimetablesByClassroom(const vector<TimeTableData>& entries, const AllocationSetup& setup) {
+    map<string, map<int, vector<TimeTableData>>> byClassroom;
+    for (const auto& e : entries) {
+        if (e.roomId > 0) {
+            byClassroom[e.roomName][e.periodNumber].push_back(e);
+        }
+    }
+    
+    vector<string> dayOrder = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    
+    cout << "\n================================================================================\n";
+    cout << "TIMETABLE BY CLASSROOM\n";
+    cout << "================================================================================\n";
+    
+    for (const auto& classroomPair : byClassroom) {
+        const string& classroomName = classroomPair.first;
+        const auto& periodsMap = classroomPair.second;
+        
+        cout << "\n================================================================================\n";
+        cout << "CLASSROOM: " << classroomName << "\n";
+        cout << "================================================================================\n\n";
+        
+        cout << left << setw(10) << "Day";
+        for (int p = 1; p <= setup.periodsPerDay; ++p) {
+            cout << left << setw(30) << ("P" + to_string(p));
+        }
+        cout << "\n";
+        cout << string(10 + setup.periodsPerDay * 30, '-') << "\n";
+        
+        for (const string& day : dayOrder) {
+            cout << left << setw(10) << day;
+            
+            for (int p = 1; p <= setup.periodsPerDay; ++p) {
+                string cell = "Free";
+                if (periodsMap.find(p) != periodsMap.end()) {
+                    for (const auto& entry : periodsMap.at(p)) {
+                        if (entry.day == day) {
+                            if (entry.teacherId > 0) {
+                                cell = entry.teacherName.substr(0, 15) + " - " + entry.sectionName.substr(0, 15);
+                            } else {
+                                cell = "Unassigned";
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (cell.length() > 29) cell = cell.substr(0, 26) + "...";
+                cout << left << setw(30) << cell;
+            }
+            cout << "\n";
+        }
+        cout << "\n";
+    }
+    
+    cout << "\n========== CLASSROOM UTILIZATION SUMMARY ==========\n";
+    cout << left << setw(20) << "Classroom" << setw(10) << "Slots Used" << setw(10) << "Total Slots" << setw(10) << "Util %" << "\n";
+    cout << string(50, '-') << "\n";
+    
+    int totalSlots = setup.days * setup.periodsPerDay;
+    for (const auto& classroom : setup.classrooms) {
+        int used = 0;
+        if (byClassroom.find(classroom.name) != byClassroom.end()) {
+            for (const auto& periodPair : byClassroom.at(classroom.name)) {
+                for (const auto& entry : periodPair.second) {
+                    if (entry.teacherId > 0) used++;
+                }
+            }
+        }
+        double util = totalSlots > 0 ? (100.0 * used / totalSlots) : 0;
+        cout << left << setw(20) << classroom.name << setw(10) << used << setw(10) << totalSlots << setw(10) << fixed << setprecision(1) << util << "\n";
     }
     cout << "\n";
 }
@@ -494,7 +617,7 @@ void SaveTimetableToDatabase(const vector<TimeTableData>& timetables,
     int64_t generationId = sqlite3_last_insert_rowid(db);
     sqlite3_finalize(genStmt);
     
-    const char* entrySQL = "INSERT INTO TimetableEntries (section_id, room_id, slot_id, generation_id, locked) "
+    const char* entrySQL = "INSERT INTO TimetableEntries (section_id, classroom_id, slot_id, generation_id, locked) "
                            "VALUES (?, ?, ?, ?, 0);";
     sqlite3_stmt* entryStmt;
     if (sqlite3_prepare_v2(db, entrySQL, -1, &entryStmt, nullptr) != SQLITE_OK) {
@@ -539,8 +662,11 @@ void TimeTable() {
     cout << "INTELLIGENT TIMETABLE GENERATOR (Database-Driven)\n";
     cout << string(80, '=') << "\n";
     
+    string dbPath = FindDatabasePath();
+    cout << "Using database: " << dbPath << "\n";
+    
     sqlite3* db;
-    int rc = sqlite3_open("college.db", &db);
+    int rc = sqlite3_open(dbPath.c_str(), &db);
     if (rc != SQLITE_OK) {
         cerr << "Cannot open database: " << sqlite3_errmsg(db) << endl;
         sqlite3_close(db);
@@ -549,11 +675,17 @@ void TimeTable() {
     
     sqlite3_exec(db, "PRAGMA foreign_keys = ON;", nullptr, nullptr, nullptr);
     
+    if (!InitializeSchema(db)) {
+        cerr << "Database schema initialization failed\n";
+        sqlite3_close(db);
+        return;
+    }
+    
     AllocationSetup setup;
     
     if (!LoadTeachersFromDatabase(db, setup) ||
-        !LoadRoomsFromDatabase(db, setup) ||
         !LoadCoursesFromDatabase(db, setup) ||
+        !LoadClassroomsFromDatabase(db, setup) ||
         !LoadSectionsFromDatabase(db, setup) ||
         !LoadTimeSlotsFromDatabase(db, setup)) {
         cerr << "Failed to load database data\n";
@@ -572,6 +704,9 @@ void TimeTable() {
     
     cout << "\n========== GENERATED TIMETABLE ==========\n";
     DisplayTimetables(generatedTimetable, setup);
+    
+    cout << "\n========== TIMETABLE BY CLASSROOM ==========\n";
+    DisplayTimetablesByClassroom(generatedTimetable, setup);
     
     cout << "\n========== SAVING TO DATABASE ==========\n";
     SaveTimetableToDatabase(generatedTimetable, setup, db);

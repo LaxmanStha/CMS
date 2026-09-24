@@ -1312,7 +1312,6 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
 struct TTSlot { long id; int dayIdx; int period; std::string day; std::string start; };
 struct TTCourse { long id; std::string code; std::string name; int lecture_count; int lab_count; long instructorId; };
 struct TTTeacher { long id; std::string name; int maxHours; std::vector<bool> unavail; std::vector<bool> canTeach; };
-struct TTRoom { long id; std::string name; bool lab; };
 
 static int dayIndex(const std::string& d) {
     const char* days[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -1348,14 +1347,6 @@ static HttpResponse generateTimetable(Database& db, bool isAdjust, long focusTea
         return sendResponse(400, e);
     }
     int nSlots = (int)slots.size();
-
-    // Load rooms
-    std::vector<TTRoom> rooms;
-    db.queryArray("SELECT id, name, is_lab FROM Room",
-        [&](sqlite3_stmt* st) {
-            TTRoom r; r.id = readInt(st, 0); r.name = readText(st, 1); r.lab = (readInt(st, 2) != 0);
-            rooms.push_back(r); return JsonVal();
-        });
 
     // Load courses with required sessions
     std::vector<TTCourse> courses;
@@ -1423,16 +1414,11 @@ static HttpResponse generateTimetable(Database& db, bool isAdjust, long focusTea
 
     // Eligible teachers per course per slot
     std::vector<std::vector<std::vector<int>>> teacherEligible(nCourses, std::vector<std::vector<int>>(nSlots));
-    std::vector<std::vector<std::vector<std::vector<int>>>> roomEligible(nCourses, std::vector<std::vector<std::vector<int>>>(2, std::vector<std::vector<int>>(nSlots)));
     for (int ci = 0; ci < nCourses; ++ci) {
         for (int si = 0; si < nSlots; ++si) {
             for (int ti = 0; ti < nTeachers; ++ti)
                 if (teachers[ti].canTeach[ci] && !teachers[ti].unavail[si])
                     teacherEligible[ci][si].push_back(ti);
-            for (int ri = 0; ri < (int)rooms.size(); ++ri) {
-                if (!rooms[ri].lab) roomEligible[ci][0][si].push_back(ri);
-                if (rooms[ri].lab) roomEligible[ci][1][si].push_back(ri);
-            }
         }
     }
 
@@ -1452,27 +1438,23 @@ static HttpResponse generateTimetable(Database& db, bool isAdjust, long focusTea
 
     // State for backtracking
     std::vector<std::vector<bool>> teacherSlot(nTeachers, std::vector<bool>(nSlots, false));
-    std::vector<std::vector<bool>> roomSlot(rooms.size(), std::vector<bool>(nSlots, false));
     std::vector<std::vector<bool>> courseSlot(nCourses, std::vector<bool>(nSlots, false));
     std::vector<int> teacherLoad(nTeachers, 0);
 
     // Lock existing entries
     std::vector<JsonVal> lockedEntries;
-    db.queryArray("SELECT te.section_id, te.room_id, te.slot_id, c.code, r.name, p.name FROM TimetableEntries te "
+    db.queryArray("SELECT te.section_id, te.slot_id, c.code, p.name FROM TimetableEntries te "
         "JOIN Sections s ON s.id = te.section_id "
         "JOIN Course c ON c.id = s.course_id "
-        "LEFT JOIN Room r ON r.id = te.room_id "
         "LEFT JOIN Faculty f ON f.id = s.teacher_id "
         "LEFT JOIN Person p ON p.id = f.id "
         "WHERE te.generation_id = (SELECT MAX(id) FROM Generations) AND te.locked = 1",
         [&](sqlite3_stmt* st) {
             JsonVal e; e.type = JsonVal::Obj;
             e.obj.push_back({"section_id", JsonVal(readInt(st, 0))});
-            e.obj.push_back({"room_id", JsonVal(readInt(st, 1))});
-            e.obj.push_back({"slot_id", JsonVal(readInt(st, 2))});
-            e.obj.push_back({"course_code", JsonVal(readText(st, 3))});
-            e.obj.push_back({"room_name", JsonVal(readText(st, 4))});
-            e.obj.push_back({"teacher_name", JsonVal(readText(st, 5))});
+            e.obj.push_back({"slot_id", JsonVal(readInt(st, 1))});
+            e.obj.push_back({"course_code", JsonVal(readText(st, 2))});
+            e.obj.push_back({"teacher_name", JsonVal(readText(st, 3))});
             return e;
         });
 

@@ -21,15 +21,15 @@ ALTER TABLE TimetableEntries RENAME TO TimetableEntries_old;
 CREATE TABLE TimetableEntries (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   section_id INTEGER NOT NULL REFERENCES Sections(id) ON DELETE CASCADE,
-  room_id INTEGER REFERENCES Room(id) ON DELETE SET NULL,
+  classroom_id INTEGER REFERENCES Classroom(id) ON DELETE SET NULL,
   slot_id INTEGER NOT NULL REFERENCES TimeSlot(id) ON DELETE CASCADE,
   generation_id INTEGER NOT NULL,
   locked BOOLEAN DEFAULT 0,
   UNIQUE(generation_id, section_id, slot_id)
 );
 
-INSERT INTO TimetableEntries (id, section_id, room_id, slot_id, generation_id, locked)
-  SELECT id, section_id, room_id, slot_id, generation_id, locked FROM TimetableEntries_old;
+INSERT INTO TimetableEntries (id, section_id, classroom_id, slot_id, generation_id, locked)
+  SELECT id, section_id, classroom_id, slot_id, generation_id, locked FROM TimetableEntries_old;
 
 DROP TABLE TimetableEntries_old;
 
