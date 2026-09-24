@@ -137,16 +137,15 @@ CREATE INDEX IF NOT EXISTS idx_ttentries_gen_slot ON TimetableEntries(generation
 CREATE INDEX IF NOT EXISTS idx_ttentries_gen_section ON TimetableEntries(generation_id, section_id);
 CREATE INDEX IF NOT EXISTS idx_sections_teacher ON Sections(teacher_id);
 
--- Reference data for the generator: a fixed Mon-Sat x 3-period weekly grid
--- (18 slots, 60 min each, 08:00-11:00).
+-- Reference data for the generator: a fixed Mon-Fri x 3-period weekly grid
+-- (15 slots, 60 min each, 08:00-11:00).
 -- INSERT OR IGNORE + the UNIQUE constraints above make this safe on every boot.
 INSERT OR IGNORE INTO TimeSlot (day, period_number, start_time, end_time) VALUES
 ('Mon', 1, '08:00', '09:00'), ('Mon', 2, '09:00', '10:00'), ('Mon', 3, '10:00', '11:00'),
 ('Tue', 1, '08:00', '09:00'), ('Tue', 2, '09:00', '10:00'), ('Tue', 3, '10:00', '11:00'),
 ('Wed', 1, '08:00', '09:00'), ('Wed', 2, '09:00', '10:00'), ('Wed', 3, '10:00', '11:00'),
 ('Thu', 1, '08:00', '09:00'), ('Thu', 2, '09:00', '10:00'), ('Thu', 3, '10:00', '11:00'),
-('Fri', 1, '08:00', '09:00'), ('Fri', 2, '09:00', '10:00'), ('Fri', 3, '10:00', '11:00'),
-('Sat', 1, '08:00', '09:00'), ('Sat', 2, '09:00', '10:00'), ('Sat', 3, '10:00', '11:00');
+('Fri', 1, '08:00', '09:00'), ('Fri', 2, '09:00', '10:00'), ('Fri', 3, '10:00', '11:00');
 
 
 

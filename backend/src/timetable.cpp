@@ -161,8 +161,8 @@ struct AllocationSetup {
 };
 
 int dayIndex(const string& d) {
-    const char* days[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-    for (int i = 0; i < 6; ++i) if (d == days[i]) return i;
+    const char* days[] = {"Mon", "Tue", "Wed", "Thu", "Fri"};
+    for (int i = 0; i < 5; ++i) if (d == days[i]) return i;
     return -1;
 }
 
@@ -212,7 +212,6 @@ bool LoadCoursesFromDatabase(sqlite3* db, AllocationSetup& setup) {
     }
     
     sqlite3_finalize(stmt);
-    cout << "Loaded " << setup.courses.size() << " courses\n";
     return !setup.courses.empty();
 }
 
@@ -275,7 +274,6 @@ bool LoadSectionsFromDatabase(sqlite3* db, AllocationSetup& setup) {
     }
     
     sqlite3_finalize(stmt);
-    cout << "Loaded " << setup.sections.size() << " sections\n";
     return !setup.sections.empty();
 }
 
@@ -310,9 +308,6 @@ bool LoadTimeSlotsFromDatabase(sqlite3* db, AllocationSetup& setup) {
     sqlite3_finalize(stmt);
     setup.days = uniqueDays.size();
     setup.periodsPerDay = maxPeriod;
-    
-    cout << "Loaded " << setup.timeSlots.size() << " time slots (" << setup.days 
-         << " days, " << setup.periodsPerDay << " periods/day)\n";
     return !setup.timeSlots.empty();
 }
 
@@ -531,7 +526,7 @@ void DisplayTimetablesByClassroom(const vector<TimeTableData>& entries, const Al
         }
     }
     
-    vector<string> dayOrder = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    vector<string> dayOrder = {"Mon", "Tue", "Wed", "Thu", "Fri"};
     
     cout << "\n================================================================================\n";
     cout << "TIMETABLE BY CLASSROOM\n";
@@ -701,9 +696,6 @@ void TimeTable() {
     
     cout << "\n========== GENERATING TIMETABLE ==========\n";
     vector<TimeTableData> generatedTimetable = GenerateAllTimetables(setup);
-    
-    cout << "\n========== GENERATED TIMETABLE ==========\n";
-    DisplayTimetables(generatedTimetable, setup);
     
     cout << "\n========== TIMETABLE BY CLASSROOM ==========\n";
     DisplayTimetablesByClassroom(generatedTimetable, setup);
