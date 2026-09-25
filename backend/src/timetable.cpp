@@ -7,6 +7,7 @@
 #include <set>
 #include <cstdint>
 #include <filesystem>
+#include <random>
 #include <sqlite3.h>
 
 using namespace std;
@@ -177,25 +178,41 @@ void generateTimeSlots(TimeTableData& data) {
 }
 
 bool generateTimeTable(TimeTableData& data) {
+    mt19937 rng(random_device{}());
+    
+    vector<TimeSlot> shuffledSlots = data.timeSlots;
+    shuffle(shuffledSlots.begin(), shuffledSlots.end(), rng);
+    
     map<pair<int, int>, int64_t> classroomSchedule;
+    map<pair<int, int>, int64_t> teacherSchedule;
     
     for (auto& teacher : data.teachers) {
         teacher.occupied.clear();
     }
     
+    vector<Teacher*> availableTeachers;
     for (auto& teacher : data.teachers) {
-        if (teacher.totalClasses == 0) continue;
-        
+        if (teacher.totalClasses > 0) {
+            availableTeachers.push_back(&teacher);
+        }
+    }
+    shuffle(availableTeachers.begin(), availableTeachers.end(), rng);
+    
+    for (Teacher* teacher : availableTeachers) {
         int assigned = 0;
+        int maxAttempts = data.timeSlots.size() * 2;
+        int attempts = 0;
         
-        for (const auto& slot : data.timeSlots) {
-            if (assigned >= teacher.totalClasses) break;
+        while (assigned < teacher->totalClasses && attempts < maxAttempts) {
+            uniform_int_distribution<size_t> dist(0, shuffledSlots.size() - 1);
+            const TimeSlot& slot = shuffledSlots[dist(rng)];
+            attempts++;
             
             auto teacherKey = make_pair(slot.dayIndex, slot.periodNumber);
-            if (teacher.occupied.find(teacherKey) != teacher.occupied.end()) continue;
+            if (teacher->occupied.find(teacherKey) != teacher->occupied.end()) continue;
             
             bool hasClassOnDay = false;
-            for (const auto& occ : teacher.occupied) {
+            for (const auto& occ : teacher->occupied) {
                 if (occ.first.first == slot.dayIndex) {
                     hasClassOnDay = true;
                     break;
@@ -203,35 +220,34 @@ bool generateTimeTable(TimeTableData& data) {
             }
             if (hasClassOnDay) continue;
             
-            int64_t classroomId = 0;
-            string classroomName = "";
-            
-            for (const auto& classroom : data.classrooms) {
+            vector<Classroom*> availableRooms;
+            for (auto& classroom : data.classrooms) {
                 auto classKey = make_pair(slot.dayIndex, slot.periodNumber);
-                if (classroomSchedule.find(classKey) != classroomSchedule.end() &&
-                    classroomSchedule[classKey] == classroom.id) {
-                    continue;
+                auto it = classroomSchedule.find(classKey);
+                if (it == classroomSchedule.end() || it->second != classroom.id) {
+                    availableRooms.push_back(&classroom);
                 }
-                classroomId = classroom.id;
-                classroomName = classroom.name;
-                break;
             }
             
-            if (classroomId == 0) continue;
+            if (availableRooms.empty()) continue;
+            
+            uniform_int_distribution<size_t> roomDist(0, availableRooms.size() - 1);
+            Classroom* classroom = availableRooms[roomDist(rng)];
             
             Assignment a;
-            a.teacherId = teacher.id;
-            a.teacherName = teacher.name;
-            a.department = teacher.department;
-            a.classroomId = classroomId;
-            a.classroomName = classroomName;
+            a.teacherId = teacher->id;
+            a.teacherName = teacher->name;
+            a.department = teacher->department;
+            a.classroomId = classroom->id;
+            a.classroomName = classroom->name;
             a.dayIndex = slot.dayIndex;
             a.periodNumber = slot.periodNumber;
             a.startTime = slot.startTime;
             a.endTime = slot.endTime;
             
-            teacher.occupied[teacherKey] = true;
-            classroomSchedule[teacherKey] = classroomId;
+            teacher->occupied[teacherKey] = true;
+            teacherSchedule[teacherKey] = teacher->id;
+            classroomSchedule[teacherKey] = classroom->id;
             assigned++;
             
             data.assignments.push_back(a);
