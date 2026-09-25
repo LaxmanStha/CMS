@@ -80,17 +80,9 @@ INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, a
 INSERT OR IGNORE INTO Course (id, code, name, credits, department, maxCapacity, instructorId, semester, status)
   VALUES (21, 'AI201', 'Artificial Intelligence Fundamentals', 3, 'CSIT', 40, 18, 'Fall 2024', 'active');
 
--- Random Section
-INSERT OR IGNORE INTO Sections (id, course_id, section_label, teacher_id, student_count)
-  VALUES (21, 21, 'A', 18, 35);
-
 -- Random Fee Record
 INSERT OR IGNORE INTO Fee (studentId, student, course, amount, paid, dueDate, paidDate, semester, status)
   VALUES (17, 'Mia Chen', 'AI201', 1200, 600, '2026-09-15', '2026-09-10', 'Fall 2024', 'partial');
-
--- Random Exam
-INSERT OR IGNORE INTO Exam (name, course, date, startTime, endTime, type, location, status, students)
-  VALUES ('Midterm', 'AI201', date('now','+7 days'), '10:00', '11:30', 'midterm', 'Room 202', 'scheduled', 1);
 
 -- Accountant
 INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
@@ -281,32 +273,6 @@ INSERT OR IGNORE INTO Accountant (id) VALUES (4);
 
 
 -- ============================================================
--- Sections (course sections with assigned teachers)
--- ============================================================
-INSERT OR IGNORE INTO Sections (id, course_id, section_label, teacher_id, student_count) VALUES
-  (1, 1, 'A', 2, 60),   -- CS101 section A, Prof. James Anderson
-  (2, 2, 'A', 2, 50),   -- MATH201 section A, Prof. James Anderson
-  (3, 5, 'A', 2, 60),   -- OOP section A, Prof. James Anderson
-  (4, 6, 'A', 2, 60),   -- CPROG section A, Prof. James Anderson
-  (5, 7, 'A', 2, 50),   -- MICRO section A, Prof. James Anderson
-  (6, 8, 'A', 2, 60),   -- DBMS section A, Prof. James Anderson
-  (7, 9, 'A', 2, 50),   -- OS section A, Prof. James Anderson
-  (8, 10, 'A', 2, 60),  -- CN section A, Prof. James Anderson
-  (9, 3, 'A', 12, 40),  -- PHYS101 section A, Dr. Lisa Park
-  (10, 4, 'A', 11, 30), -- ENG110 section A, Dr. Robert Chen
-  (11, 11, 'A', 11, 60), -- MATH101 section A, Dr. Robert Chen
-  (12, 12, 'A', 11, 60), -- MATH102 section A, Dr. Robert Chen
-  (13, 13, 'A', 11, 60), -- STAT section A, Dr. Robert Chen
-  (14, 14, 'A', 11, 50), -- FM section A, Dr. Robert Chen
-  (15, 15, 'A', 11, 50), -- BM section A, Dr. Robert Chen
-  (16, 16, 'A', 11, 60), -- ECO section A, Dr. Robert Chen
-  (17, 17, 'A', 12, 40), -- CHEM101 section A, Dr. Lisa Park
-  (18, 18, 'A', 12, 40), -- BIO101 section A, Dr. Lisa Park
-  (19, 19, 'A', 12, 50), -- IT section A, Dr. Lisa Park
-  (20, 20, 'A', 12, 50); -- WEB section A, Dr. Lisa Park
-
-
--- ============================================================
 -- Fee records
 -- ============================================================
 INSERT OR IGNORE INTO Fee (studentId, student, course, amount, paid, dueDate, paidDate, semester, status)
@@ -323,15 +289,6 @@ INSERT OR IGNORE INTO Fee (studentId, student, course, amount, paid, dueDate, se
   VALUES (7, 'Liam Wilson', 'PHYS101', 1200, 400, '2026-08-19', 'Fall 2024', 'partial');
 INSERT OR IGNORE INTO Fee (studentId, student, course, amount, paid, dueDate, semester, status)
   VALUES (8, 'Olivia Brown', 'ENG110', 1200, 1200, '2026-01-12', 'Fall 2024', 'paid');
--- ============================================================
--- Exams
--- ============================================================
-INSERT OR IGNORE INTO Exam (name, course, date, startTime, endTime, type, location, status, students)
-  VALUES ('Midterm', 'CS101', date('now','+10 days'), '09:00', '10:30', 'midterm', 'Room 101', 'scheduled', 1);
-INSERT OR IGNORE INTO Exam (name, course, date, startTime, endTime, type, location, status, students)
-  VALUES ('Quiz 2', 'MATH201', date('now','+12 days'), '11:00', '11:45', 'quiz', 'Room 102', 'scheduled', 1);
-INSERT OR IGNORE INTO Exam (name, course, date, startTime, endTime, type, location, status, students)
-  VALUES ('Lab Final', 'PHYS101', date('now','+15 days'), '13:00', '15:00', 'final', 'Room 103', 'scheduled', 1);
 
 
 -- ============================================================

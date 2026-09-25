@@ -286,10 +286,8 @@ CREATE TABLE IF NOT EXISTS Course (
   FOREIGN KEY (instructorId) REFERENCES Teacher(id) ON DELETE SET NULL
 );
 CREATE TABLE IF NOT EXISTS Accountant (id INTEGER PRIMARY KEY, FOREIGN KEY(id) REFERENCES Person(id) ON DELETE CASCADE);
-CREATE TABLE IF NOT EXISTS Exam (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, course TEXT NOT NULL, date TEXT, startTime TEXT, endTime TEXT, type TEXT DEFAULT 'midterm', location TEXT, totalMarks REAL DEFAULT 100, status TEXT DEFAULT 'scheduled', students INTEGER DEFAULT 0);
 CREATE TABLE IF NOT EXISTS Attendance (id INTEGER PRIMARY KEY AUTOINCREMENT, studentId TEXT, student TEXT, course TEXT, date TEXT, status TEXT DEFAULT 'present', time TEXT, notes TEXT DEFAULT '');
 CREATE TABLE IF NOT EXISTS Fee (id INTEGER PRIMARY KEY AUTOINCREMENT, studentId TEXT, student TEXT, course TEXT, amount REAL DEFAULT 0, paid REAL DEFAULT 0, dueDate TEXT, paidDate TEXT, semester TEXT, status TEXT DEFAULT 'pending');
-CREATE TABLE IF NOT EXISTS Timetable (id INTEGER PRIMARY KEY AUTOINCREMENT, course TEXT NOT NULL, day TEXT NOT NULL, time TEXT NOT NULL, room TEXT, instructor TEXT, type TEXT DEFAULT 'lecture');
 CREATE TABLE IF NOT EXISTS Users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL UNIQUE, password TEXT NOT NULL, role TEXT NOT NULL, name TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS Department (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);
 )SQL";
@@ -379,9 +377,6 @@ static HttpResponse sendResponse(int code, JsonVal value) {
     response.json(value);
     return response;
 }
-
-static HttpResponse generateTimetable(Database& db, bool isAdjust, long focusTeacher);
-static HttpResponse toggleLock(Database& db, HttpRequest& req);
 
 static string readText(sqlite3_stmt* st, int i) {
     const unsigned char* t = sqlite3_column_text(st, i);
@@ -546,10 +541,6 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
                     return send(200, rows);
                 } else if (rest.substr(slash) == "/timetable" && req.method == "GET") {
                     JsonVal rows; rows.type = JsonVal::Arr;
-                    return send(200, rows);
-                } else if (rest.substr(slash) == "/exams/upcoming" && req.method == "GET") {
-                    JsonVal rows = db.queryArray("SELECT id, name, course, date, startTime FROM Exam WHERE status='scheduled' ORDER BY date LIMIT 5",
-                        [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"name",JsonVal(readText(st,1))});o.obj.push_back({"course",JsonVal(readText(st,2))});o.obj.push_back({"date",JsonVal(readText(st,3))});o.obj.push_back({"startTime",JsonVal(readText(st,4))});return o;});
                     return send(200, rows);
                 }
             } catch (...) {}
@@ -900,53 +891,6 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
         }
     }
 
-    // ---- exams ----
-    if (p == "/api/exams" && req.method == "GET") {
-        JsonVal rows = db.queryArray(
-            "SELECT id, name, course, date, startTime, endTime, type, location, totalMarks, status, students FROM Exam ORDER BY id",
-            [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"name",JsonVal(readText(st,1))});o.obj.push_back({"course",JsonVal(readText(st,2))});o.obj.push_back({"date",JsonVal(readText(st,3))});o.obj.push_back({"startTime",JsonVal(readText(st,4))});o.obj.push_back({"endTime",JsonVal(readText(st,5))});o.obj.push_back({"type",JsonVal(readText(st,6))});o.obj.push_back({"location",JsonVal(readText(st,7))});o.obj.push_back({"totalMarks",JsonVal(readDbl(st,8))});o.obj.push_back({"status",JsonVal(readText(st,9))});o.obj.push_back({"students",JsonVal(readInt(st,10))});return o;});
-        return send(200, rows);
-    }
-    if (p == "/api/exams" && req.method == "POST") {
-        JsonVal b = JsonParser().parse(req.body);
-        db.execParam("INSERT INTO Exam (name,course,date,startTime,endTime,type,location,totalMarks,status,students) VALUES (?,?,?,?,?,?,?,?,?,?)",
-            {{1,b.strVal("name")},{2,b.strVal("course")},{3,b.strVal("date")},{4,b.strVal("startTime")},{5,b.strVal("endTime")},
-             {6,b.strVal("type","midterm")},{7,b.strVal("location")},{8,std::to_string(b.numVal("totalMarks",100))},
-             {9,b.strVal("status","scheduled")},{10,std::to_string((long)b.numVal("students",0))}});
-        JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(db.lastInsertId())});
-        return send(201,o);
-    }
-    {
-        size_t pos = p.rfind("/api/exams/");
-        if (pos == 0 && p.length() > 11) {
-            string rest = p.substr(11);
-            size_t slash = rest.find('/');
-            try {
-                long id = std::stol(slash == string::npos ? rest : rest.substr(0, slash));
-                if (slash == string::npos) {
-                    if (req.method == "PUT") {
-                        JsonVal b = JsonParser().parse(req.body);
-                        db.execParam("UPDATE Exam SET name=?, course=?, date=?, startTime=?, endTime=?, type=?, location=?, totalMarks=?, status=?, students=? WHERE id=?",
-                            {{1,b.strVal("name")},{2,b.strVal("course")},{3,b.strVal("date")},{4,b.strVal("startTime")},{5,b.strVal("endTime")},
-                             {6,b.strVal("type","midterm")},{7,b.strVal("location")},{8,std::to_string(b.numVal("totalMarks",100))},
-                             {9,b.strVal("status","scheduled")},{10,std::to_string((long)b.numVal("students",0))},{11,std::to_string(id)}});
-                        JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(id)});
-                        return send(200,o);
-                    }
-                    if (req.method == "DELETE") {
-                        db.execParam("DELETE FROM Exam WHERE id=?", {{1,std::to_string(id)}});
-                        JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"message",JsonVal("Deleted")});
-                        return send(200,o);
-                    }
-                } else if (rest.substr(slash) == "/upcoming" && req.method == "GET") {
-                    JsonVal rows = db.queryArray("SELECT id, name, course, date FROM Exam WHERE status='scheduled' ORDER BY date LIMIT 5",
-                        [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"name",JsonVal(readText(st,1))});o.obj.push_back({"course",JsonVal(readText(st,2))});o.obj.push_back({"date",JsonVal(readText(st,3))});return o;});
-                    return send(200, rows);
-                }
-            } catch (...) {}
-        }
-    }
-
     // ---- fees ----
     if (p == "/api/fees" && req.method == "GET") {
         JsonVal rows = db.queryArray(
@@ -1265,225 +1209,8 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
         }
     }
 
-    // ---- timetable extras ----
-    if (req.method == "GET" && p.rfind("/api/timetable/validate/", 0) == 0) {
-        long gid = 0;
-        try {
-            gid = std::stol(p.substr(24));
-        } catch (...) {
-            JsonVal e; e.type = JsonVal::Obj;
-            e.obj.push_back({"message", JsonVal("Invalid generation id")});
-            return send(400, e);
-        }
-        JsonVal o; o.type = JsonVal::Obj;
-        o.obj.push_back({"generation_id", JsonVal(gid)});
-        o.obj.push_back({"generation_exists", JsonVal(false)});
-        o.obj.push_back({"kind", JsonVal("")});
-        o.obj.push_back({"entry_count", JsonVal(0)});
-        o.obj.push_back({"valid", JsonVal(true)});
-        o.obj.push_back({"complete", JsonVal(true)});
-        o.obj.push_back({"violations", JsonVal()});
-        o.obj.push_back({"shortfalls", JsonVal()});
-        return send(200, o);
-    }
-    if (p == "/api/timetable/conflicts" && req.method == "GET") {
-        return generateTimetable(db, false, 0);
-    }
-    if (p == "/api/timetable/generate" && req.method == "POST") {
-        return generateTimetable(db, false, 0);
-    }
-    if (p == "/api/timetable/adjust" && req.method == "POST") {
-        return generateTimetable(db, true, 0);
-    }
-    if (p == "/api/timetable/lock" && req.method == "POST") {
-        return toggleLock(db, req);
-    }
-
     JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"message",JsonVal("Not found")});
     return send(404, o);
-}
-
-// ---------------------------------------------------------------------------
-// HTTP server loop (Winsock, one thread, keep it simple & robust)
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-// Timetable CSP Solver
-// ---------------------------------------------------------------------------
-struct TTSlot { long id; int dayIdx; int period; std::string day; std::string start; };
-struct TTCourse { long id; std::string code; std::string name; int lecture_count; int lab_count; long instructorId; };
-struct TTTeacher { long id; std::string name; int maxHours; std::vector<bool> unavail; std::vector<bool> canTeach; };
-
-static int dayIndex(const std::string& d) {
-    const char* days[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-    for (int i = 0; i < 6; ++i) if (d == days[i]) return i;
-    return -1;
-}
-
-static int getOrCreateGeneration(Database& db, const std::string& kind) {
-    db.execParam("INSERT INTO Generations (kind) VALUES (?)", {{1, kind}});
-    long id = sqlite3_last_insert_rowid(db.raw());
-    return (int)id;
-}
-
-static void clearGenerationEntries(Database& db, int genId, bool keepLocked) {
-    if (keepLocked) {
-        db.execParam("DELETE FROM TimetableEntries WHERE generation_id = ? AND locked = 0", {{1, std::to_string(genId)}});
-    } else {
-        db.execParam("DELETE FROM TimetableEntries WHERE generation_id = ?", {{1, std::to_string(genId)}});
-    }
-}
-
-static HttpResponse generateTimetable(Database& db, bool isAdjust, long focusTeacher) {
-    // Load time slots
-    std::vector<TTSlot> slots;
-    db.queryArray("SELECT id, day, period_number, start_time FROM TimeSlot ORDER BY period_number, day",
-        [&](sqlite3_stmt* st) {
-            TTSlot s; s.id = readInt(st, 0); s.day = readText(st, 1); s.period = readInt(st, 2); s.start = readText(st, 3);
-            s.dayIdx = dayIndex(s.day);
-            slots.push_back(s); return JsonVal();
-        });
-    if (slots.empty()) {
-        JsonVal e; e.type = JsonVal::Obj; e.obj.push_back({"message", JsonVal("No time slots configured")});
-        return sendResponse(400, e);
-    }
-    int nSlots = (int)slots.size();
-
-    // Load courses with required sessions
-    std::vector<TTCourse> courses;
-    db.queryArray("SELECT id, code, name, COALESCE(weekly_lecture_count, credits), COALESCE(weekly_lab_count, 0), COALESCE(instructorId, 0) FROM Course WHERE status='active'",
-        [&](sqlite3_stmt* st) {
-            TTCourse c; c.id = readInt(st, 0); c.code = readText(st, 1); c.name = readText(st, 2);
-            c.lecture_count = readInt(st, 3); c.lab_count = readInt(st, 4); c.instructorId = readInt(st, 5);
-            courses.push_back(c); return JsonVal();
-        });
-    if (courses.empty()) {
-        JsonVal e; e.type = JsonVal::Obj; e.obj.push_back({"message", JsonVal("No active courses found")});
-        return sendResponse(400, e);
-    }
-    int nCourses = (int)courses.size();
-
-    // Load teachers
-    std::vector<TTTeacher> teachers;
-    db.queryArray("SELECT f.id, p.name, f.max_hours_per_week, f.unavailable_slots FROM Faculty f JOIN Person p ON p.id=f.id WHERE f.status='active'",
-        [&](sqlite3_stmt* st) {
-            TTTeacher t; t.id = readInt(st, 0); t.name = readText(st, 1); t.maxHours = readInt(st, 2);
-            t.unavail.assign(nSlots, false); t.canTeach.assign(courses.size(), false);
-            std::string raw = readText(st, 3);
-            std::stringstream ss(raw); std::string tok;
-            while (std::getline(ss, tok, ',')) {
-                size_t a = tok.find_first_not_of(" \t"); size_t b = tok.find_last_not_of(" \t");
-                if (a == std::string::npos) continue;
-                tok = tok.substr(a, b - a + 1);
-                size_t dash = tok.find('-');
-                if (dash == std::string::npos) continue;
-                std::string d = tok.substr(0, dash);
-                int p = 0; try { p = std::stoi(tok.substr(dash + 1)); } catch (...) { continue; }
-                int di = dayIndex(d);
-                for (int si = 0; si < nSlots; ++si)
-                    if (slots[si].dayIdx == di && slots[si].period == p) t.unavail[si] = true;
-            }
-            teachers.push_back(t); return JsonVal();
-        });
-    int nTeachers = (int)teachers.size();
-
-    // Maps for indices
-    std::unordered_map<long, int> teacherIdx, courseIdx, slotIdx;
-    std::unordered_map<std::string, int> courseCodeIdx;
-    for (int i = 0; i < nTeachers; ++i) teacherIdx[teachers[i].id] = i;
-    for (int i = 0; i < nCourses; ++i) {
-        courseIdx[courses[i].id] = i;
-        courseCodeIdx[courses[i].code] = i;
-    }
-    for (int i = 0; i < nSlots; ++i) slotIdx[slots[i].id] = i;
-
-    // Teacher-course eligibility from TeacherSubjectMap
-    db.queryArray("SELECT faculty_id, course_id FROM TeacherSubjectMap",
-        [&](sqlite3_stmt* st) {
-            long fid = readInt(st, 0), cid = readInt(st, 1);
-            if (teacherIdx.count(fid) && courseIdx.count(cid))
-                teachers[teacherIdx[fid]].canTeach[courseIdx[cid]] = true;
-            return JsonVal();
-        });
-
-    // Build session variables
-    std::vector<std::pair<int, bool>> sessions;
-    for (int ci = 0; ci < nCourses; ++ci) {
-        for (int s = 0; s < courses[ci].lecture_count; ++s) sessions.emplace_back(ci, false);
-        for (int s = 0; s < courses[ci].lab_count; ++s) sessions.emplace_back(ci, true);
-    }
-
-    // Eligible teachers per course per slot
-    std::vector<std::vector<std::vector<int>>> teacherEligible(nCourses, std::vector<std::vector<int>>(nSlots));
-    for (int ci = 0; ci < nCourses; ++ci) {
-        for (int si = 0; si < nSlots; ++si) {
-            for (int ti = 0; ti < nTeachers; ++ti)
-                if (teachers[ti].canTeach[ci] && !teachers[ti].unavail[si])
-                    teacherEligible[ci][si].push_back(ti);
-        }
-    }
-
-    // Sort sessions by constraint tightness
-    std::vector<int> eligibleTeacherCount(nCourses, 0);
-    for (int ci = 0; ci < nCourses; ++ci)
-        for (int ti = 0; ti < nTeachers; ++ti)
-            if (teachers[ti].canTeach[ci]) eligibleTeacherCount[ci]++;
-    std::sort(sessions.begin(), sessions.end(),
-        [&](const std::pair<int, bool>& a, const std::pair<int, bool>& b) {
-            int ea = eligibleTeacherCount[a.first];
-            int eb = eligibleTeacherCount[b.first];
-            if (ea != eb) return ea < eb;
-            if (a.first != b.first) return a.first < b.first;
-            return a.second && !b.second;
-        });
-
-    // State for backtracking
-    std::vector<std::vector<bool>> teacherSlot(nTeachers, std::vector<bool>(nSlots, false));
-    std::vector<std::vector<bool>> courseSlot(nCourses, std::vector<bool>(nSlots, false));
-    std::vector<int> teacherLoad(nTeachers, 0);
-
-    // Lock existing entries
-    std::vector<JsonVal> lockedEntries;
-    db.queryArray("SELECT te.section_id, te.slot_id, c.code, p.name FROM TimetableEntries te "
-        "JOIN Sections s ON s.id = te.section_id "
-        "JOIN Course c ON c.id = s.course_id "
-        "LEFT JOIN Faculty f ON f.id = s.teacher_id "
-        "LEFT JOIN Person p ON p.id = f.id "
-        "WHERE te.generation_id = (SELECT MAX(id) FROM Generations) AND te.locked = 1",
-        [&](sqlite3_stmt* st) {
-            JsonVal e; e.type = JsonVal::Obj;
-            e.obj.push_back({"section_id", JsonVal(readInt(st, 0))});
-            e.obj.push_back({"slot_id", JsonVal(readInt(st, 1))});
-            e.obj.push_back({"course_code", JsonVal(readText(st, 2))});
-            e.obj.push_back({"teacher_name", JsonVal(readText(st, 3))});
-            return e;
-        });
-
-    // Apply locked entries (simplified)
-
-    // Simplified solver - return a mock response for now
-    JsonVal out; out.type = JsonVal::Obj;
-    out.obj.push_back({"status", JsonVal("generated")});
-    
-    JsonVal changedArr; changedArr.type = JsonVal::Arr;
-    out.obj.push_back({"changed_assignments", changedArr});
-    
-    JsonVal unfilledArr; unfilledArr.type = JsonVal::Arr;
-    out.obj.push_back({"unfilled_slots", unfilledArr});
-    
-    out.obj.push_back({"unchanged_count", JsonVal(0)});
-    out.obj.push_back({"total_sessions", JsonVal(0)});
-    out.obj.push_back({"placed", JsonVal(0)});
-    out.obj.push_back({"generation_id", JsonVal(1)});
-    return sendResponse(200, out);
-}
-
-static HttpResponse toggleLock(Database& db, HttpRequest& req) {
-    JsonVal body = JsonParser().parse(req.body);
-    long id = (long)body.numVal("id", 0);
-    int locked = (int)body.numVal("locked", 0);
-    if (!id) return sendResponse(400, JsonVal());
-    db.execParam("UPDATE TimetableEntries SET locked = ? WHERE id = ?", {{1, std::to_string(locked)}, {2, std::to_string(id)}});
-    JsonVal o; o.type = JsonVal::Obj; o.obj.push_back({"success", JsonVal(true)}); return sendResponse(200, o);
 }
 
 static std::string httpDate() {

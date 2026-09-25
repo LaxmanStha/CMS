@@ -80,17 +80,9 @@ INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, a
 INSERT OR IGNORE INTO Course (id, code, name, credits, department, maxCapacity, instructorId, semester, status)
   VALUES (21, 'AI201', 'Artificial Intelligence Fundamentals', 3, 'CSIT', 40, 18, 'Fall 2024', 'active');
 
--- Random Section
-INSERT OR IGNORE INTO Sections (id, course_id, section_label, teacher_id, student_count)
-  VALUES (21, 21, 'A', 18, 35);
-
 -- Random Fee Record
 INSERT OR IGNORE INTO Fee (studentId, student, course, amount, paid, dueDate, paidDate, semester, status)
   VALUES (17, 'Mia Chen', 'AI201', 1200, 600, '2026-09-15', '2026-09-10', 'Fall 2024', 'partial');
-
--- Random Exam
-INSERT OR IGNORE INTO Exam (name, course, date, startTime, endTime, type, location, status, students)
-  VALUES ('Midterm', 'AI201', date('now','+7 days'), '10:00', '11:30', 'midterm', 'Room 202', 'scheduled', 1);
 
 -- Accountant
 INSERT OR IGNORE INTO Person (id, name, contactInfo, discriminator, tempId)
@@ -187,16 +179,65 @@ INSERT OR IGNORE INTO Teacher (id, department, phone, email, hireDate, status, a
 -- Classrooms (linked to teachers)
 -- ============================================================
 INSERT OR IGNORE INTO Classroom (id, room_number, name)
-  VALUES (1, 'Room 201', 'Room 201');
+  VALUES (1, '201', 'Classroom 201');
 INSERT OR IGNORE INTO Classroom (id, room_number, name)
-  VALUES (2, 'Room 301', 'Room 301');
+  VALUES (2, '101', 'Classroom 101');
 INSERT OR IGNORE INTO Classroom (id, room_number, name)
-  VALUES (3, 'Room 401', 'Room 401');
+  VALUES (3, '301', 'Classroom 301');
 
--- Link students 3, 5, 6 to teacher 2's classroom (CS-A)
-INSERT OR IGNORE INTO ClassroomStudent (classroom_id, student_id) VALUES (1, 3);
-INSERT OR IGNORE INTO ClassroomStudent (classroom_id, student_id) VALUES (1, 5);
-INSERT OR IGNORE INTO ClassroomStudent (classroom_id, student_id) VALUES (1, 6);
+-- Update existing classroom rows if they exist with old room_number
+UPDATE Classroom SET room_number = '201', name = 'Classroom 201' WHERE id = 1 AND (room_number != '201' OR name != 'Classroom 201');
+UPDATE Classroom SET room_number = '101', name = 'Classroom 101' WHERE id = 2 AND (room_number != '101' OR name != 'Classroom 101');
+UPDATE Classroom SET room_number = '301', name = 'Classroom 301' WHERE id = 3 AND (room_number != '301' OR name != 'Classroom 301');
+
+-- Sync all students to ClassroomStudent based on their classroom field
+INSERT OR IGNORE INTO ClassroomStudent (classroom_id, student_id)
+SELECT c.id, s.id
+FROM Classroom c
+JOIN Student s ON s.classroom = c.room_number
+WHERE s.classroom IS NOT NULL AND s.classroom != '';
+
+-- ============================================================
+-- TeacherClassroom junction table (many-to-many)
+-- All teachers assigned to all three classrooms (101, 201, 301)
+-- This ensures at least one classroom has more than 5 teachers
+-- ============================================================
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (2, 1);   -- Prof. James Anderson -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (2, 2);   -- Prof. James Anderson -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (2, 3);   -- Prof. James Anderson -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (11, 1);  -- Dr. Robert Chen -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (11, 2);  -- Dr. Robert Chen -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (11, 3);  -- Dr. Robert Chen -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (12, 1);  -- Dr. Lisa Park -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (12, 2);  -- Dr. Lisa Park -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (12, 3);  -- Dr. Lisa Park -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (18, 1);  -- Dr. Aaron Kim -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (18, 2);  -- Dr. Aaron Kim -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (18, 3);  -- Dr. Aaron Kim -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (21, 1);  -- Dr. Sarah Williams -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (21, 2);  -- Dr. Sarah Williams -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (21, 3);  -- Dr. Sarah Williams -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (22, 1);  -- Prof. Michael Brown -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (22, 2);  -- Prof. Michael Brown -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (22, 3);  -- Prof. Michael Brown -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (23, 1);  -- Dr. Jennifer Davis -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (23, 2);  -- Dr. Jennifer Davis -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (23, 3);  -- Dr. Jennifer Davis -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (24, 1);  -- Prof. David Miller -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (24, 2);  -- Prof. David Miller -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (24, 3);  -- Prof. David Miller -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (25, 1);  -- Dr. Amanda Wilson -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (25, 2);  -- Dr. Amanda Wilson -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (25, 3);  -- Dr. Amanda Wilson -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (50, 1);  -- Dr. Priya Sharma -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (50, 2);  -- Dr. Priya Sharma -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (50, 3);  -- Dr. Priya Sharma -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (51, 1);  -- Prof. Daniel Lee -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (51, 2);  -- Prof. Daniel Lee -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (51, 3);  -- Prof. Daniel Lee -> 301
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (52, 1);  -- Dr. Grace Thompson -> 201
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (52, 2);  -- Dr. Grace Thompson -> 101
+INSERT OR IGNORE INTO TeacherClassroom (teacher_id, classroom_id) VALUES (52, 3);  -- Dr. Grace Thompson -> 301
 
 -- ============================================================
 -- Accountant Profile
@@ -232,32 +273,6 @@ INSERT OR IGNORE INTO Accountant (id) VALUES (4);
 
 
 -- ============================================================
--- Sections (course sections with assigned teachers)
--- ============================================================
-INSERT OR IGNORE INTO Sections (id, course_id, section_label, teacher_id, student_count) VALUES
-  (1, 1, 'A', 2, 60),   -- CS101 section A, Prof. James Anderson
-  (2, 2, 'A', 2, 50),   -- MATH201 section A, Prof. James Anderson
-  (3, 5, 'A', 2, 60),   -- OOP section A, Prof. James Anderson
-  (4, 6, 'A', 2, 60),   -- CPROG section A, Prof. James Anderson
-  (5, 7, 'A', 2, 50),   -- MICRO section A, Prof. James Anderson
-  (6, 8, 'A', 2, 60),   -- DBMS section A, Prof. James Anderson
-  (7, 9, 'A', 2, 50),   -- OS section A, Prof. James Anderson
-  (8, 10, 'A', 2, 60),  -- CN section A, Prof. James Anderson
-  (9, 3, 'A', 12, 40),  -- PHYS101 section A, Dr. Lisa Park
-  (10, 4, 'A', 11, 30), -- ENG110 section A, Dr. Robert Chen
-  (11, 11, 'A', 11, 60), -- MATH101 section A, Dr. Robert Chen
-  (12, 12, 'A', 11, 60), -- MATH102 section A, Dr. Robert Chen
-  (13, 13, 'A', 11, 60), -- STAT section A, Dr. Robert Chen
-  (14, 14, 'A', 11, 50), -- FM section A, Dr. Robert Chen
-  (15, 15, 'A', 11, 50), -- BM section A, Dr. Robert Chen
-  (16, 16, 'A', 11, 60), -- ECO section A, Dr. Robert Chen
-  (17, 17, 'A', 12, 40), -- CHEM101 section A, Dr. Lisa Park
-  (18, 18, 'A', 12, 40), -- BIO101 section A, Dr. Lisa Park
-  (19, 19, 'A', 12, 50), -- IT section A, Dr. Lisa Park
-  (20, 20, 'A', 12, 50); -- WEB section A, Dr. Lisa Park
-
-
--- ============================================================
 -- Fee records
 -- ============================================================
 INSERT OR IGNORE INTO Fee (studentId, student, course, amount, paid, dueDate, paidDate, semester, status)
@@ -274,15 +289,6 @@ INSERT OR IGNORE INTO Fee (studentId, student, course, amount, paid, dueDate, se
   VALUES (7, 'Liam Wilson', 'PHYS101', 1200, 400, '2026-08-19', 'Fall 2024', 'partial');
 INSERT OR IGNORE INTO Fee (studentId, student, course, amount, paid, dueDate, semester, status)
   VALUES (8, 'Olivia Brown', 'ENG110', 1200, 1200, '2026-01-12', 'Fall 2024', 'paid');
--- ============================================================
--- Exams
--- ============================================================
-INSERT OR IGNORE INTO Exam (name, course, date, startTime, endTime, type, location, status, students)
-  VALUES ('Midterm', 'CS101', date('now','+10 days'), '09:00', '10:30', 'midterm', 'Room 101', 'scheduled', 1);
-INSERT OR IGNORE INTO Exam (name, course, date, startTime, endTime, type, location, status, students)
-  VALUES ('Quiz 2', 'MATH201', date('now','+12 days'), '11:00', '11:45', 'quiz', 'Room 102', 'scheduled', 1);
-INSERT OR IGNORE INTO Exam (name, course, date, startTime, endTime, type, location, status, students)
-  VALUES ('Lab Final', 'PHYS101', date('now','+15 days'), '13:00', '15:00', 'final', 'Room 103', 'scheduled', 1);
 
 
 -- ============================================================
