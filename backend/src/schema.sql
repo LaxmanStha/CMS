@@ -59,14 +59,23 @@ CREATE TABLE IF NOT EXISTS Accountant (
 
 CREATE TABLE IF NOT EXISTS Attendance (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  studentId TEXT,
-  student TEXT,
-  course TEXT,
-  date TEXT,
-  status TEXT DEFAULT 'present',
+  studentId TEXT NOT NULL,
+  student TEXT NOT NULL,
+  course TEXT NOT NULL,
+  classroomId INTEGER,
+  teacherId INTEGER,
+  date TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'present',
   time TEXT,
-  notes TEXT DEFAULT ''
+  notes TEXT NOT NULL DEFAULT '',
+  createdAt TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  FOREIGN KEY (studentId) REFERENCES Student(id) ON DELETE CASCADE,
+  FOREIGN KEY (classroomId) REFERENCES Classroom(id) ON DELETE SET NULL,
+  FOREIGN KEY (teacherId) REFERENCES Teacher(id) ON DELETE SET NULL
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_attendance_student_course_date
+  ON Attendance(studentId, course, date);
 
 CREATE TABLE IF NOT EXISTS Fee (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

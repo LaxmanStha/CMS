@@ -14,6 +14,7 @@ export const ROLE_NAV = {
     { to: "/admin/teachers", label: "Teachers" },
     { to: "/attendance", label: "Attendance" },
     { to: "/timetable", label: "Timetable" },
+    { to: "/teacher-classroom-timetable", label: "Teacher-Classroom Timetable" },
     { to: "/fees", label: "Fees" },
     { to: "/reports", label: "Reports" },
     { to: "/settings", label: "Settings" },

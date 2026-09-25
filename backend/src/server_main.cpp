@@ -243,6 +243,60 @@ public:
     Database(const Database&) = delete;
     Database& operator=(const Database&) = delete;
 
+    bool hasTable(const string& name) {
+        sqlite3_stmt* stmt = nullptr;
+        const string sql = "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?";
+        if (sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) return false;
+        sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_TRANSIENT);
+        bool exists = sqlite3_step(stmt) == SQLITE_ROW;
+        sqlite3_finalize(stmt);
+        return exists;
+    }
+
+    bool hasColumn(const string& table, const string& column) {
+        sqlite3_stmt* stmt = nullptr;
+        const string sql = "PRAGMA table_info(" + table + ")";
+        if (sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) return false;
+        bool exists = false;
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            const unsigned char* value = sqlite3_column_text(stmt, 1);
+            if (value && column == reinterpret_cast<const char*>(value)) {
+                exists = true;
+                break;
+            }
+        }
+        sqlite3_finalize(stmt);
+        return exists;
+    }
+
+    void addColumnIfMissing(const string& table, const string& column, const string& definition) {
+        if (!hasColumn(table, column)) exec("ALTER TABLE " + table + " ADD COLUMN " + column + " " + definition);
+    }
+
+    void ensureAttendanceSchema() {
+        exec("CREATE TABLE IF NOT EXISTS Attendance ("
+             "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+             "studentId TEXT NOT NULL,"
+             "student TEXT NOT NULL,"
+             "course TEXT NOT NULL,"
+             "classroomId INTEGER,"
+             "teacherId INTEGER,"
+             "date TEXT NOT NULL,"
+             "status TEXT NOT NULL DEFAULT 'present',"
+             "time TEXT,"
+             "notes TEXT NOT NULL DEFAULT '',"
+             "createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+             "FOREIGN KEY (studentId) REFERENCES Student(id) ON DELETE CASCADE,"
+             "FOREIGN KEY (classroomId) REFERENCES Classroom(id) ON DELETE SET NULL,"
+             "FOREIGN KEY (teacherId) REFERENCES Teacher(id) ON DELETE SET NULL"
+             ")");
+        addColumnIfMissing("Attendance", "classroomId", "INTEGER");
+        addColumnIfMissing("Attendance", "teacherId", "INTEGER");
+        addColumnIfMissing("Attendance", "createdAt", "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP");
+        exec("DELETE FROM Attendance WHERE studentId IS NOT NULL AND studentId != '' AND course IS NOT NULL AND course != '' AND date IS NOT NULL AND date != '' AND id NOT IN (SELECT MAX(id) FROM Attendance WHERE studentId IS NOT NULL AND studentId != '' AND course IS NOT NULL AND course != '' AND date IS NOT NULL AND date != '' GROUP BY studentId, course, date)");
+        exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_attendance_student_course_date ON Attendance(studentId, course, date)");
+    }
+
     void initSchema() {
         sqlite3_stmt* check = nullptr;
         bool hasSchema = false;
@@ -250,7 +304,10 @@ public:
             hasSchema = sqlite3_step(check) == SQLITE_ROW;
             sqlite3_finalize(check);
         }
-        if (hasSchema) return;
+        if (hasSchema) {
+            ensureAttendanceSchema();
+            return;
+        }
 
         std::ifstream f("schema.sql");
         if (f) {
@@ -259,6 +316,7 @@ public:
         } else {
             execInline();
         }
+        ensureAttendanceSchema();
         seedDefaultUsers();
         std::ifstream seed("seed_data.sql");
         if (!seed) seed.open("../../src/seed_data.sql");
@@ -977,6 +1035,14 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
                 }
             } catch (...) {}
         }
+}
+
+// ---- teacher classroom timetable ----
+    if (p == "/api/teacher-classroom-timetable" && req.method == "GET") {
+        JsonVal rows = db.queryArray(
+            "SELECT id, teacher_id, teacher_name, department, classroom_id, classroom_name, day, period_number, start_time, end_time FROM TeacherClassroomTimetable ORDER BY day, period_number",
+            [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"teacherId",JsonVal(readInt(st,1))});o.obj.push_back({"teacherName",JsonVal(readText(st,2))});o.obj.push_back({"department",JsonVal(readText(st,3))});o.obj.push_back({"classroomId",JsonVal(readInt(st,4))});o.obj.push_back({"classroomName",JsonVal(readText(st,5))});o.obj.push_back({"day",JsonVal(readText(st,6))});o.obj.push_back({"period",JsonVal(readInt(st,7))});o.obj.push_back({"startTime",JsonVal(readText(st,8))});o.obj.push_back({"endTime",JsonVal(readText(st,9))});return o;});
+        return send(200, rows);
     }
 
     // ---- accountant ----
@@ -1235,14 +1301,20 @@ int main() {
         addr.sin_addr.s_addr = INADDR_ANY;
         addr.sin_port = htons(8080);
         if (bind(server, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
-            std::cerr << "bind failed\n"; system("pause"); return 1;
+            std::cerr << "bind failed: " << WSAGetLastError() << "\n"; system("pause"); return 1;
         }
-        listen(server, SOMAXCONN);
+        if (listen(server, SOMAXCONN) == SOCKET_ERROR) {
+            std::cerr << "listen failed: " << WSAGetLastError() << "\n"; system("pause"); return 1;
+        }
         std::cerr << "Starting server on port 8080...\n";
+        std::cerr << "Server socket: " << server << "\n";
 
         while (true) {
+            std::cerr << "Waiting for connection...\n";
             SOCKET client = accept(server, nullptr, nullptr);
             if (client == INVALID_SOCKET) continue;
+
+            std::cerr << "Client connected: " << client << "\n";
 
             char buf[65536];
             int total = 0;
@@ -1251,7 +1323,10 @@ int main() {
             string raw;
             while (total < (int)sizeof(buf) - 1) {
                 int n = recv(client, buf + total, sizeof(buf) - 1 - total, 0);
-                if (n <= 0) break;
+                if (n <= 0) {
+                    std::cerr << "recv returned: " << n << " error: " << WSAGetLastError() << "\n";
+                    break;
+                }
                 total += n;
                 buf[total] = 0;
                 string sofar(buf);
@@ -1267,6 +1342,8 @@ int main() {
             }
             buf[total] = 0;
             string reqStr(buf);
+            
+            std::cerr << "Request received (" << total << " bytes): " << reqStr.substr(0, 200) << "\n";
 
             HttpRequest req;
             size_t lineEnd = reqStr.find("\r\n");
@@ -1294,6 +1371,7 @@ int main() {
             resp += "Content-Length: " + std::to_string(bodyStr.size()) + "\r\n\r\n";
             resp += bodyStr;
 
+            std::cerr << "Sending response: " << res.code << " (" << resp.size() << " bytes)\n";
             send(client, resp.c_str(), (int)resp.size(), 0);
             closesocket(client);
         }

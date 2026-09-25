@@ -180,8 +180,8 @@ void generateTimeSlots(TimeTableData& data) {
 bool generateTimeTable(TimeTableData& data) {
     mt19937 rng(random_device{}());
     
-    vector<TimeSlot> shuffledSlots = data.timeSlots;
-    shuffle(shuffledSlots.begin(), shuffledSlots.end(), rng);
+    vector<TimeSlot> slots = data.timeSlots;
+    shuffle(slots.begin(), slots.end(), rng);
     
     map<pair<int, int>, int64_t> classroomSchedule;
     map<pair<int, int>, int64_t> teacherSchedule;
@@ -192,69 +192,95 @@ bool generateTimeTable(TimeTableData& data) {
     
     vector<Teacher*> availableTeachers;
     for (auto& teacher : data.teachers) {
-        if (teacher.totalClasses > 0) {
-            availableTeachers.push_back(&teacher);
-        }
-    }
-    shuffle(availableTeachers.begin(), availableTeachers.end(), rng);
-    
-    for (Teacher* teacher : availableTeachers) {
-        int assigned = 0;
-        int maxAttempts = data.timeSlots.size() * 2;
-        int attempts = 0;
-        
-        while (assigned < teacher->totalClasses && attempts < maxAttempts) {
-            uniform_int_distribution<size_t> dist(0, shuffledSlots.size() - 1);
-            const TimeSlot& slot = shuffledSlots[dist(rng)];
-            attempts++;
-            
-            auto teacherKey = make_pair(slot.dayIndex, slot.periodNumber);
-            if (teacher->occupied.find(teacherKey) != teacher->occupied.end()) continue;
-            
-            bool hasClassOnDay = false;
-            for (const auto& occ : teacher->occupied) {
-                if (occ.first.first == slot.dayIndex) {
-                    hasClassOnDay = true;
-                    break;
-                }
-            }
-            if (hasClassOnDay) continue;
-            
-            vector<Classroom*> availableRooms;
-            for (auto& classroom : data.classrooms) {
-                auto classKey = make_pair(slot.dayIndex, slot.periodNumber);
-                auto it = classroomSchedule.find(classKey);
-                if (it == classroomSchedule.end() || it->second != classroom.id) {
-                    availableRooms.push_back(&classroom);
-                }
-            }
-            
-            if (availableRooms.empty()) continue;
-            
-            uniform_int_distribution<size_t> roomDist(0, availableRooms.size() - 1);
-            Classroom* classroom = availableRooms[roomDist(rng)];
-            
-            Assignment a;
-            a.teacherId = teacher->id;
-            a.teacherName = teacher->name;
-            a.department = teacher->department;
-            a.classroomId = classroom->id;
-            a.classroomName = classroom->name;
-            a.dayIndex = slot.dayIndex;
-            a.periodNumber = slot.periodNumber;
-            a.startTime = slot.startTime;
-            a.endTime = slot.endTime;
-            
-            teacher->occupied[teacherKey] = true;
-            teacherSchedule[teacherKey] = teacher->id;
-            classroomSchedule[teacherKey] = classroom->id;
-            assigned++;
-            
-            data.assignments.push_back(a);
-        }
+        availableTeachers.push_back(&teacher);
     }
     
-    cout << "Timetable generated: " << data.assignments.size() << " assignments\n";
+    int totalSlots = data.classrooms.size() * data.timeSlots.size();
+    cout << "Target: fill " << totalSlots << " slots (" 
+         << data.classrooms.size() << " classrooms x " << data.timeSlots.size() << " slots)\n";
+    
+    int filled = 0;
+    size_t teacherIdx = 0;
+    
+    for (const auto& slot : slots) {
+        for (auto& classroom : data.classrooms) {
+            auto classKey = make_pair(slot.dayIndex, slot.periodNumber);
+            if (classroomSchedule.find(classKey) != classroomSchedule.end() &&
+                classroomSchedule[classKey] == classroom.id) {
+                continue;
+            }
+            
+            Teacher* assignedTeacher = nullptr;
+            size_t attempts = 0;
+            
+            while (assignedTeacher == nullptr && attempts < availableTeachers.size()) {
+                Teacher* teacher = availableTeachers[teacherIdx % availableTeachers.size()];
+                teacherIdx++;
+                
+                auto teacherKey = make_pair(slot.dayIndex, slot.periodNumber);
+                if (teacher->occupied.find(teacherKey) != teacher->occupied.end()) {
+                    attempts++;
+                    continue;
+                }
+                
+                bool hasClassOnDay = false;
+                for (const auto& occ : teacher->occupied) {
+                    if (occ.first.first == slot.dayIndex) {
+                        hasClassOnDay = true;
+                        break;
+                    }
+                }
+                if (hasClassOnDay) {
+                    attempts++;
+                    continue;
+                }
+                
+                assignedTeacher = teacher;
+            }
+            
+            if (assignedTeacher == nullptr) {
+                for (auto& teacher : data.teachers) {
+                    auto teacherKey = make_pair(slot.dayIndex, slot.periodNumber);
+                    if (teacher.occupied.find(teacherKey) == teacher.occupied.end()) {
+                        bool hasClassOnDay = false;
+                        for (const auto& occ : teacher.occupied) {
+                            if (occ.first.first == slot.dayIndex) {
+                                hasClassOnDay = true;
+                                break;
+                            }
+                        }
+                        if (!hasClassOnDay) {
+                            assignedTeacher = &teacher;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (assignedTeacher != nullptr) {
+                Assignment a;
+                a.teacherId = assignedTeacher->id;
+                a.teacherName = assignedTeacher->name;
+                a.department = assignedTeacher->department;
+                a.classroomId = classroom.id;
+                a.classroomName = classroom.name;
+                a.dayIndex = slot.dayIndex;
+                a.periodNumber = slot.periodNumber;
+                a.startTime = slot.startTime;
+                a.endTime = slot.endTime;
+                
+                assignedTeacher->occupied[make_pair(slot.dayIndex, slot.periodNumber)] = true;
+                teacherSchedule[make_pair(slot.dayIndex, slot.periodNumber)] = assignedTeacher->id;
+                classroomSchedule[make_pair(slot.dayIndex, slot.periodNumber)] = classroom.id;
+                filled++;
+                
+                data.assignments.push_back(a);
+            }
+        }
+    }
+    
+    cout << "Timetable generated: " << data.assignments.size() << " assignments (filled " 
+         << filled << "/" << totalSlots << " slots)\n";
     return true;
 }
 
