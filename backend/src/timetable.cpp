@@ -16,6 +16,7 @@ namespace fs = std::filesystem;
 
 string FindDatabasePath() {
     vector<string> candidates = {
+        "C:/Users/Chintu/Documents/Code/langs/C++ project/backend/server_college.db",
         "C:/Users/Chintu/Documents/Code/langs/C++ project/backend/build/bin/college.db"
     };
     
@@ -516,7 +517,13 @@ void runTimetableGenerator() {
     sqlite3_close(db);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    // Non-interactive mode: timetable.exe --generate
+    if (argc > 1 && string(argv[1]) == "--generate") {
+        runTimetableGenerator();
+        return 0;
+    }
+    
     cout << "------ Timetable Generator ------\n";
     int choice = 0;
     
