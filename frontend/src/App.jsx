@@ -2,27 +2,26 @@ import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import Layout from '@/components/layout/Layout';
-import Login from '@/pages/Login';
 import LoadingState from '@/components/ui/LoadingState';
 import { PrivateRoute } from '@/components/PrivateRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { NotificationsProvider } from '@/context/NotificationsContext';
 import { ROLE_HOME } from '@/config/navigation';
 
-const AdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
+const AdminDashboard = lazy(() => import('@/pages/admin/Dashboard'));
 const StudentDashboard = lazy(() => import('@/pages/student/Dashboard'));
 const FacultyDashboard = lazy(() => import('@/pages/faculty/Dashboard'));
-const AccountantDashboard = lazy(() => import('@/pages/AccountantDashboard'));
-const Notifications = lazy(() => import('@/pages/Notifications'));
-const Profile = lazy(() => import('@/pages/Profile'));
-const Settings = lazy(() => import('@/pages/Settings'));
-const Logout = lazy(() => import('@/pages/Logout'));
-const Timetable = lazy(() => import('@/pages/Timetable'));
-const Fees = lazy(() => import('@/pages/Fees'));
-const MyFees = lazy(() => import('@/pages/MyFees'));
-const Reports = lazy(() => import('@/pages/Reports'));
-const Attendance = lazy(() => import('@/pages/Attendance'));
-const InventoryDashboard = lazy(() => import('@/pages/InventoryDashboard'));
+const AccountantDashboard = lazy(() => import('@/pages/accountant/Dashboard'));
+const Notifications = lazy(() => import('@/pages/shared/Notifications'));
+const Profile = lazy(() => import('@/pages/shared/Profile'));
+const Settings = lazy(() => import('@/pages/shared/Settings'));
+const Logout = lazy(() => import('@/pages/shared/Logout'));
+const Login = lazy(() => import('@/pages/shared/Login'));
+const Timetable = lazy(() => import('@/pages/shared/Timetable'));
+const Fees = lazy(() => import('@/pages/shared/Fees'));
+const Reports = lazy(() => import('@/pages/shared/Reports'));
+const Attendance = lazy(() => import('@/pages/shared/Attendance'));
+const Inventory = lazy(() => import('@/pages/faculty/Inventory'));
 const StoreInventory = lazy(() => import('@/components/StoreInventory'));
 const AdminStudents = lazy(() => import('@/pages/admin/Students'));
 const AdminTeachers = lazy(() => import('@/pages/admin/Teachers'));
@@ -30,6 +29,7 @@ const AdminClassrooms = lazy(() => import('@/pages/admin/Classrooms'));
 const StudentAttendance = lazy(() => import('@/pages/student/Attendance'));
 const StudentGrades = lazy(() => import('@/pages/student/Grades'));
 const StudentTimetable = lazy(() => import('@/pages/student/Timetable'));
+const StudentFees = lazy(() => import('@/pages/student/Fees'));
 const FacultyAttendance = lazy(() => import('@/pages/faculty/Attendance'));
 const AccountantDues = lazy(() => import('@/pages/accountant/Dues'));
 const AccountantInvoices = lazy(() => import('@/pages/accountant/Invoices'));
@@ -56,7 +56,7 @@ function App() {
       <Suspense fallback={fallback}>
         <Routes>
           <Route path="/login" element={withBoundary(<Login />)} />
-          <Route path="/inventory" element={withBoundary(<InventoryDashboard />)} />
+          <Route path="/inventory" element={withBoundary(<Inventory />)} />
           <Route path="/store-inventory" element={withBoundary(<StoreInventory />)} />
 
           <Route element={<PrivateRoute />}>
@@ -68,7 +68,7 @@ function App() {
               <Route path="/logout" element={withBoundary(<Logout />)} />
 <Route path="/timetable" element={withBoundary(<Timetable />)} />
               <Route path="/fees" element={withBoundary(<Fees />)} />
-              <Route path="/my-fees" element={withBoundary(<MyFees />)} />
+              <Route path="/my-fees" element={withBoundary(<StudentFees />)} />
               <Route path="/reports" element={withBoundary(<Reports />)} />
 
 <Route element={<PrivateRoute allowedRoles={["admin"]} />}>
