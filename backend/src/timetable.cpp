@@ -195,87 +195,88 @@ bool generateTimeTable(TimeTableData& data) {
         availableTeachers.push_back(&teacher);
     }
     
+    // Shuffle teachers to start with different order each run
+    shuffle(availableTeachers.begin(), availableTeachers.end(), rng);
+    
     int totalSlots = data.classrooms.size() * data.timeSlots.size();
     cout << "Target: fill " << totalSlots << " slots (" 
          << data.classrooms.size() << " classrooms x " << data.timeSlots.size() << " slots)\n";
     
     int filled = 0;
-    size_t teacherIdx = 0;
     
+    // For each time slot, assign teachers to classrooms
     for (const auto& slot : slots) {
+        // Create list of classrooms that need teachers for this slot
+        vector<Classroom*> freeClassrooms;
         for (auto& classroom : data.classrooms) {
             auto classKey = make_pair(slot.dayIndex, slot.periodNumber);
-            if (classroomSchedule.find(classKey) != classroomSchedule.end() &&
-                classroomSchedule[classKey] == classroom.id) {
-                continue;
+            if (classroomSchedule.find(classKey) == classroomSchedule.end() ||
+                classroomSchedule[classKey] != classroom.id) {
+                freeClassrooms.push_back(&classroom);
             }
-            
-            Teacher* assignedTeacher = nullptr;
-            size_t attempts = 0;
-            
-            while (assignedTeacher == nullptr && attempts < availableTeachers.size()) {
-                Teacher* teacher = availableTeachers[teacherIdx % availableTeachers.size()];
-                teacherIdx++;
-                
+        }
+        
+        // Shuffle classrooms for this slot
+        shuffle(freeClassrooms.begin(), freeClassrooms.end(), rng);
+        
+        for (auto* classroom : freeClassrooms) {
+            // Find available teachers for this slot
+            vector<Teacher*> candidates;
+            for (auto* teacher : availableTeachers) {
                 auto teacherKey = make_pair(slot.dayIndex, slot.periodNumber);
                 if (teacher->occupied.find(teacherKey) != teacher->occupied.end()) {
-                    attempts++;
-                    continue;
+                    continue; // Teacher already has class at this time
                 }
                 
-                bool hasClassOnDay = false;
+                // Count how many classes this teacher has on this day
+                int classesOnDay = 0;
                 for (const auto& occ : teacher->occupied) {
                     if (occ.first.first == slot.dayIndex) {
-                        hasClassOnDay = true;
-                        break;
+                        classesOnDay++;
                     }
                 }
-                if (hasClassOnDay) {
-                    attempts++;
+                
+                // Limit to max 2 classes per day per teacher (or total periods available)
+                if (classesOnDay >= min(2, PERIODS_PER_DAY)) {
                     continue;
                 }
                 
-                assignedTeacher = teacher;
+                candidates.push_back(teacher);
             }
             
-            if (assignedTeacher == nullptr) {
-                for (auto& teacher : data.teachers) {
-                    auto teacherKey = make_pair(slot.dayIndex, slot.periodNumber);
-                    if (teacher.occupied.find(teacherKey) == teacher.occupied.end()) {
-                        bool hasClassOnDay = false;
-                        for (const auto& occ : teacher.occupied) {
-                            if (occ.first.first == slot.dayIndex) {
-                                hasClassOnDay = true;
-                                break;
-                            }
-                        }
-                        if (!hasClassOnDay) {
-                            assignedTeacher = &teacher;
-                            break;
-                        }
-                    }
+            if (candidates.empty()) {
+                continue; // No available teacher for this classroom at this time
+            }
+            
+            // Pick teacher with fewest total assignments (load balancing)
+            Teacher* bestTeacher = candidates[0];
+            int minAssignments = INT_MAX;
+            for (auto* t : candidates) {
+                int assigned = t->occupied.size();
+                if (assigned < minAssignments) {
+                    minAssignments = assigned;
+                    bestTeacher = t;
                 }
             }
             
-            if (assignedTeacher != nullptr) {
-                Assignment a;
-                a.teacherId = assignedTeacher->id;
-                a.teacherName = assignedTeacher->name;
-                a.department = assignedTeacher->department;
-                a.classroomId = classroom.id;
-                a.classroomName = classroom.name;
-                a.dayIndex = slot.dayIndex;
-                a.periodNumber = slot.periodNumber;
-                a.startTime = slot.startTime;
-                a.endTime = slot.endTime;
-                
-                assignedTeacher->occupied[make_pair(slot.dayIndex, slot.periodNumber)] = true;
-                teacherSchedule[make_pair(slot.dayIndex, slot.periodNumber)] = assignedTeacher->id;
-                classroomSchedule[make_pair(slot.dayIndex, slot.periodNumber)] = classroom.id;
-                filled++;
-                
-                data.assignments.push_back(a);
-            }
+            // Assign
+            Assignment a;
+            a.teacherId = bestTeacher->id;
+            a.teacherName = bestTeacher->name;
+            a.department = bestTeacher->department;
+            a.classroomId = classroom->id;
+            a.classroomName = classroom->name;
+            a.dayIndex = slot.dayIndex;
+            a.periodNumber = slot.periodNumber;
+            a.startTime = slot.startTime;
+            a.endTime = slot.endTime;
+            
+            bestTeacher->occupied[make_pair(slot.dayIndex, slot.periodNumber)] = true;
+            teacherSchedule[make_pair(slot.dayIndex, slot.periodNumber)] = bestTeacher->id;
+            classroomSchedule[make_pair(slot.dayIndex, slot.periodNumber)] = classroom->id;
+            filled++;
+            
+            data.assignments.push_back(a);
         }
     }
     
