@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, FileText, Receipt, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, FileText, Receipt, Loader2, CreditCard } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';

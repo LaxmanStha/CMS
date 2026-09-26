@@ -292,7 +292,7 @@ public:
              ")");
         addColumnIfMissing("Attendance", "classroomId", "INTEGER");
         addColumnIfMissing("Attendance", "teacherId", "INTEGER");
-        addColumnIfMissing("Attendance", "createdAt", "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP");
+        addColumnIfMissing("Attendance", "createdAt", "TEXT");
         exec("DELETE FROM Attendance WHERE studentId IS NOT NULL AND studentId != '' AND course IS NOT NULL AND course != '' AND date IS NOT NULL AND date != '' AND id NOT IN (SELECT MAX(id) FROM Attendance WHERE studentId IS NOT NULL AND studentId != '' AND course IS NOT NULL AND course != '' AND date IS NOT NULL AND date != '' GROUP BY studentId, course, date)");
         exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_attendance_student_course_date ON Attendance(studentId, course, date)");
     }
@@ -1045,7 +1045,17 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
         return send(200, rows);
     }
 
-    // ---- accountant ----
+    // ---- generated timetable ----
+if (p.rfind("/api/timetable/generated", 0) == 0 && req.method == "GET") {
+        std::cerr << "DEBUG: p=" << p << ", query=" << req.query << "\n";
+        
+        // Simple test first
+        JsonVal rows = db.queryArray(
+            "SELECT t.id, t.teacher_id, t.teacher_name, t.department, t.classroom_id, t.classroom_name, t.day, t.period_number, t.start_time, t.end_time FROM TeacherClassroomTimetable t WHERE t.classroom_id = 5 ORDER BY t.day, t.period_number",
+            [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"teacherId",JsonVal(readInt(st,1))});o.obj.push_back({"teacherName",JsonVal(readText(st,2))});o.obj.push_back({"department",JsonVal(readText(st,3))});o.obj.push_back({"classroomId",JsonVal(readInt(st,4))});o.obj.push_back({"classroomName",JsonVal(readText(st,5))});o.obj.push_back({"day",JsonVal(readText(st,6))});o.obj.push_back({"period",JsonVal(readInt(st,7))});o.obj.push_back({"startTime",JsonVal(readText(st,8))});o.obj.push_back({"endTime",JsonVal(readText(st,9))});return o;});
+        return send(200, rows);
+    }
+    // ---- timetable ----
     if (p == "/api/accountant/dues" && req.method == "GET") {
         JsonVal rows = db.queryArray("SELECT id, student, studentId, course, amount, paid, dueDate, status FROM Fee WHERE status IN ('pending','partial','overdue') ORDER BY dueDate",
             [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"student",JsonVal(readText(st,1))});o.obj.push_back({"studentId",JsonVal(readInt(st,2))});o.obj.push_back({"course",JsonVal(readText(st,3))});o.obj.push_back({"totalFees",JsonVal(readDbl(st,4))});o.obj.push_back({"paid",JsonVal(readDbl(st,5))});o.obj.push_back({"due",JsonVal(readDbl(st,4) - readDbl(st,5))});o.obj.push_back({"status",JsonVal(readText(st,7))});return o;});
@@ -1284,7 +1294,7 @@ static std::string httpDate() {
 
 int main() {
     try {
-        Database db("college.db");
+        Database db("C:/Users/Chintu/Documents/Code/langs/C++ project/backend/server_college.db");
         std::cerr << "Database initialized successfully\n";
 
         WSADATA wsa;

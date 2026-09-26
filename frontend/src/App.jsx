@@ -30,7 +30,6 @@ const AdminClassrooms = lazy(() => import('@/pages/admin/Classrooms'));
 const StudentAttendance = lazy(() => import('@/pages/student/Attendance'));
 const StudentGrades = lazy(() => import('@/pages/student/Grades'));
 const StudentTimetable = lazy(() => import('@/pages/student/Timetable'));
-const TeacherClassroomTimetable = lazy(() => import('@/pages/TeacherClassroomTimetable'));
 const FacultyAttendance = lazy(() => import('@/pages/faculty/Attendance'));
 const AccountantDues = lazy(() => import('@/pages/accountant/Dues'));
 const AccountantInvoices = lazy(() => import('@/pages/accountant/Invoices'));
@@ -80,7 +79,6 @@ function App() {
                 <Route path="/students" element={withBoundary(<AdminStudents />)} />
                 <Route path="/teachers" element={withBoundary(<AdminTeachers />)} />
                 <Route path="/attendance" element={withBoundary(<Attendance />)} />
-                <Route path="/teacher-classroom-timetable" element={withBoundary(<TeacherClassroomTimetable />)} />
               </Route>
 
               <Route element={<PrivateRoute allowedRoles={["faculty", "teacher"]} />}>

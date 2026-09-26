@@ -45,8 +45,7 @@ const FacultyDashboard = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="My Courses"
-          description={courses.length > 0 ? `You are teaching ${courses.length} course(s) this semester.` : 'No courses assigned yet.'}
+          title="Courses"
           action={
             <Link to="/faculty/attendance" className="btn btn-primary btn-sm">
               Take Attendance
@@ -57,7 +56,6 @@ const FacultyDashboard = () => {
         />
         <StatCard
           title="Total Students"
-          description={totalStudents > 0 ? `${totalStudents} students across your courses.` : 'No students enrolled.'}
           action={
             <Link to="/faculty/attendance" className="btn btn-primary btn-sm">
               View Students
@@ -68,7 +66,6 @@ const FacultyDashboard = () => {
         />
         <StatCard
           title="Attendance Entry"
-          description={todayAttendance.total > 0 ? `Today: ${todayAttendance.present}/${todayAttendance.total} present.` : 'No attendance recorded today.'}
           action={
             <Link to="/faculty/attendance" className="btn btn-primary btn-sm">
               Take Attendance
@@ -80,7 +77,6 @@ const FacultyDashboard = () => {
         />
         <StatCard
           title="Schedule"
-          description={upcomingClasses.length > 0 ? `You have ${upcomingClasses.length} upcoming class(es).` : 'No upcoming classes.'}
           action={
             <Link to="/timetable" className="btn btn-primary btn-sm">
               View Schedule

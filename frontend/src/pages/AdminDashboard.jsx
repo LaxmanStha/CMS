@@ -171,7 +171,6 @@ const AdminDashboard = () => {
             value={loading ? 0 : stats.students}
             loading={loading}
             format={formatNumber}
-            trend="+12%"
             trendUp={true}
           />
           <StatCard
@@ -179,7 +178,6 @@ const AdminDashboard = () => {
             value={loading ? 0 : stats.faculty}
             loading={loading}
             format={formatNumber}
-            trend="+5%"
             trendUp={true}
           />
           <StatCard
@@ -187,7 +185,6 @@ const AdminDashboard = () => {
             value={loading ? 0 : stats.pending}
             loading={loading}
             format={formatNumber}
-            trend="-8%"
             trendUp={false}
           />
         </div>
