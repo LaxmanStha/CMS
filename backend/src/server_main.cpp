@@ -1045,16 +1045,44 @@ static HttpResponse handle(Database& db, HttpRequest& req) {
         return send(200, rows);
     }
 
-    // ---- generated timetable ----
+// ---- generated timetable ----
 if (p.rfind("/api/timetable/generated", 0) == 0 && req.method == "GET") {
-        std::cerr << "DEBUG: p=" << p << ", query=" << req.query << "\n";
-        
-        // Simple test first
-        JsonVal rows = db.queryArray(
-            "SELECT t.id, t.teacher_id, t.teacher_name, t.department, t.classroom_id, t.classroom_name, t.day, t.period_number, t.start_time, t.end_time FROM TeacherClassroomTimetable t WHERE t.classroom_id = 5 ORDER BY t.day, t.period_number",
-            [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"teacherId",JsonVal(readInt(st,1))});o.obj.push_back({"teacherName",JsonVal(readText(st,2))});o.obj.push_back({"department",JsonVal(readText(st,3))});o.obj.push_back({"classroomId",JsonVal(readInt(st,4))});o.obj.push_back({"classroomName",JsonVal(readText(st,5))});o.obj.push_back({"day",JsonVal(readText(st,6))});o.obj.push_back({"period",JsonVal(readInt(st,7))});o.obj.push_back({"startTime",JsonVal(readText(st,8))});o.obj.push_back({"endTime",JsonVal(readText(st,9))});return o;});
-        return send(200, rows);
+    std::cerr << "DEBUG: p=" << p << ", query=" << req.query << "\n";
+    
+    long classroomId = 0;
+    size_t cpos = req.query.find("classroom_id=");
+    if (cpos != string::npos) {
+        string idRaw = req.query.substr(cpos + 13);
+        size_t amp = idRaw.find('&');
+        if (amp != string::npos) idRaw = idRaw.substr(0, amp);
+        try { classroomId = std::stol(idRaw); } catch (...) { classroomId = 0; }
     }
+    size_t tpos = req.query.find("teacher_id=");
+    long teacherId = 0;
+    if (tpos != string::npos) {
+        string idRaw = req.query.substr(tpos + 11);
+        size_t amp = idRaw.find('&');
+        if (amp != string::npos) idRaw = idRaw.substr(0, amp);
+        try { teacherId = std::stol(idRaw); } catch (...) { teacherId = 0; }
+    }
+    
+    string sql = "SELECT t.id, t.teacher_id, t.teacher_name, t.department, t.classroom_id, t.classroom_name, t.day, t.period_number, t.start_time, t.end_time FROM TeacherClassroomTimetable t";
+    bool hasWhere = false;
+    if (classroomId > 0) {
+        sql += " WHERE t.classroom_id = " + std::to_string(classroomId);
+        hasWhere = true;
+    }
+    if (teacherId > 0) {
+        if (hasWhere) sql += " AND"; else sql += " WHERE";
+        sql += " t.teacher_id = " + std::to_string(teacherId);
+    }
+    sql += " ORDER BY t.day, t.period_number";
+    
+    JsonVal rows = db.queryArray(
+        sql,
+        [](sqlite3_stmt* st){JsonVal o;o.type=JsonVal::Obj;o.obj.push_back({"id",JsonVal(readInt(st,0))});o.obj.push_back({"teacherId",JsonVal(readInt(st,1))});o.obj.push_back({"teacherName",JsonVal(readText(st,2))});o.obj.push_back({"department",JsonVal(readText(st,3))});o.obj.push_back({"classroomId",JsonVal(readInt(st,4))});o.obj.push_back({"classroomName",JsonVal(readText(st,5))});o.obj.push_back({"day",JsonVal(readText(st,6))});o.obj.push_back({"period",JsonVal(readInt(st,7))});o.obj.push_back({"startTime",JsonVal(readText(st,8))});o.obj.push_back({"endTime",JsonVal(readText(st,9))});return o;});
+    return send(200, rows);
+}
     // ---- timetable ----
     if (p == "/api/accountant/dues" && req.method == "GET") {
         JsonVal rows = db.queryArray("SELECT id, student, studentId, course, amount, paid, dueDate, status FROM Fee WHERE status IN ('pending','partial','overdue') ORDER BY dueDate",

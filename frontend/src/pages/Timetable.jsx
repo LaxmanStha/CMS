@@ -226,11 +226,13 @@ export default function Timetable() {
                 </tr>
               </thead>
               <tbody>
-                {timetable.reduce((acc, t) => {
-                  if (!acc.has(t.teacherId)) acc.set(t.teacherId, { name: t.teacherName, department: t.department, assignments: [] });
-                  acc.get(t.teacherId).assignments.push(t);
-                  return acc;
-                }, new Map()).entries().map(([id, teacher]) => (
+                {Array.from(
+                  timetable.reduce((acc, t) => {
+                    if (!acc.has(t.teacherId)) acc.set(t.teacherId, { name: t.teacherName, department: t.department, assignments: [] });
+                    acc.get(t.teacherId).assignments.push(t);
+                    return acc;
+                  }, new Map()).entries()
+                ).map(([id, teacher]) => (
                   <tr key={id} style={{ borderBottom: '1px solid var(--color-border)' }}>
                     <td className="px-4 py-2 font-medium" style={{ color: 'var(--color-text-primary)', backgroundColor: 'var(--color-bg-secondary)', width: '200px' }}>
                       {teacher.name} <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>({teacher.department})</span>
